@@ -4,3 +4,4 @@ Project Advanced Software Engineering
 - Kevin Wagner
 - Luis Eckert
 - Cynthia Winkler
+- Kai Pistol
