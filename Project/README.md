@@ -79,6 +79,9 @@ After the application starts, navigate to `http://localhost:8000` in your web br
 <br/>
 After the application starts, navigate to `http://localhost:5555` in your web browser: PgAdmin
 
+## Login-Data PGAdmin and Database
+
+Go to .env
 
 ## Stop and Remove Containers
 
