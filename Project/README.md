@@ -1,59 +1,86 @@
-## Compose sample application
+## Compose Blokus Game Application
 
-### Use with Docker Development Environments
+### Use with Docker Environments
 
-You can open this sample in the Dev Environments feature of Docker Desktop version 4.12 or later.
+You can open this sample with Docker Desktop version 4.12 or later.
 
-[Open in Docker Dev Environments <img src="../open_in_new.svg" alt="Open in Docker Dev Environments" align="top"/>](https://open.docker.com/dashboard/dev-envs?url=https://github.com/docker/awesome-compose/tree/master/django)
 
-### Django application in dev mode
+### Django application Blokus Game in Development
 
 Project structure:
 ```
 .
-├── compose.yaml
+├── docker-compose.yaml
+├── .env 
 ├── app
     ├── Dockerfile
     ├── requirements.txt
-    └── manage.py
+    ├── manage.py
+    └── Blokus
+        ├── __init__.py
+        ├── settings.py
+        ├── urls.py
+        └── wsgi.py
+        
 
 ```
 
-[_compose.yaml_](compose.yaml)
+[_docker-compose.yaml_](docker-compose.yaml)
 ```
-services: 
+services:
   web: 
-    build: app 
+    build:
+      context: app
+      target: dev-envs
     ports: 
       - '8000:8000'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_db
+    
+  postgres_db:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        - POSTGRES_DB=${SQL_NAME}
+        - POSTGRES_USER=${SQL_USER}
+        - POSTGRES_PASSWORD=${SQL_PASSWORD}
+        
+      ports:
+        - '5432:80'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres_db
+    ports:
+      - 5555:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    restart: unless-stopped
+volumes:
+  postgres_data:
 ```
 
 ## Deploy with docker compose
 
 ```
 $ docker compose up -d
-Creating network "django_default" with the default driver
-Building web
-Step 1/6 : FROM python:3.7-alpine
-...
-...
-Status: Downloaded newer image for python:3.7-alpine
-Creating django_web_1 ... done
-
 ```
 
-## Expected result
+## Application URL
 
-Listing containers must show one container running and the port mapping as below:
-```
-$ docker ps
-CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                    NAMES
-3adaea94142d        django_web          "python3 manage.py r…"   About a minute ago   Up About a minute   0.0.0.0:8000->8000/tcp   django_web_1
-```
+After the application starts, navigate to `http://localhost:8000` in your web browser: Web-Application
+After the application starts, navigate to `http://localhost:5555` in your web browser: PgAdmin
 
-After the application starts, navigate to `http://localhost:8000` in your web browser:
 
-Stop and remove the containers
+## Stop and Remove Containers
+
 ```
 $ docker compose down
 ```
