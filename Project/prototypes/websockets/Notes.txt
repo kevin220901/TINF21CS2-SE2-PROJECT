@@ -1,0 +1,57 @@
+
+
+#Vorausgehende Annahmen und Überlegungen
+
+- Der Game-Server speichert den Zustand jedes aktiven Spiels (Game-State)
+- Der Game-Server verwaltet alle Zustandsänderungen am aktiven Spiel
+- Der Game-Server validiert alle eingehenden Zustandsänderungen und verwrift sie wenn sich als unzulässig eingestuft werden
+- Der Game-Server authentifiziert Spieler
+- Der Game-Server stellt sicher, dass nur die Spieler eines aktiven Spieles dieses auch beeinflussen können.
+- Der Game-Server pusht Spielaktualisierungan an die jeweiligen Spieler wenn sich etwas am Game-State ändert
+
+
+
+
+#Beschreibung des Game-States
+Der Game-State besteht aus Daten, die der Server zu jedem Spiel in einem Store ablegt und darauf zufückgreift, wenn erforderlich.
+Die Aufgabe des Game-States ist es, ein aktives Spiel vollständig representieren zu können.
+
+Für das Spiel Blokus wird der Game-State wie folgt definiert:
+
+- Eindeutige Identifikation des Spiels (Welche Instanz des Spiel wird gerade betrachtet?)
+- Eine Liste aller am Spiel beteiligter Spieler (Wer spielt mit?)
+- Je Spieler eine Liste mit verfügbaren Spielsteinen (Welche Spielsteine haben die Spieler noch?)
+- Der aktuell aktive Spieler (Wer ist am Zug?)
+- Die Reihenfolge der Spieler (Wer ist als nächstes drann?)
+- Das Spielfeld (Wo liegen die Spielsteine und wo sind noch freie Plätze?)
+
+#Handeling von Game-State Änderungen
+Alle Änderungen am Game-State müssen verifiziert werden.
+
+Dabei müssen sich folgende Fragen beantworten lassen:
+- Welches Spiel soll angapasst werden?
+- Wer ist der veranlasser der Änderungen?
+- Was für eine Handlung führt der Spieler durch?
+- Welche Daten übermittelt der Spieler?
+
+
+Die Validierung muss daraufhin mit folgenden Fragen fortgeführt werden.
+- Ist der Spieler tatsächlich Teil des angegebenen Spiels?
+- Ist der Spieler berechtigt die angegebene Handlung zu veranlassen? (z.B. ist er gerade am Zug?)
+- Ergibt die angegebene Handlung mit den gegebenen Daten sinn? (z.B. kann der Spieler den Stein wie gewünscht setzen?)
+
+
+
+
+#Server Komponenten
+
+##Request Handler
+Die Aufgabe der Request Handlers ist es eingehende Anfragen zu allgemein zu validieren und dann im System weiter zu verteilen.
+
+Der Ablauf ist dabei wie folgt beschrieben:
+- Der Request Handler nimmt alle eingehenden Anfragen an und prüft, im Playerstore, ob der Absender authentifiziert ist.
+- Der Request Handler prüft, ob der Absender Teil einer Lobby ist.
+- Der Request Handler leitet die Anfrage an den Lobby Handler weiter, falls es eine Lobby gibt. Ansonstne verarbeitet er die anfrage selber.
+
+#Lobby-Handler
+Der Lobby Handler nimmt Anfragen von Request Handler an
