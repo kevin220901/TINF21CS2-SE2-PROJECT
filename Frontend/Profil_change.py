@@ -1,6 +1,11 @@
 import PySimpleGUI as sg
-
 import Blokus_Menu
+
+# Define a custom font size
+custom_font = ('Helvetica', 16)
+
+# Define padding for buttons
+button_padding = (10, 10)
 
 def main():
     # Sample user data
@@ -13,12 +18,12 @@ def main():
     # Define the layout of the GUI
     layout = [
         [sg.Text('Dein Profil', font=('Helvetica', 20))],
-        [sg.Text('User Name'), sg.InputText(default_text=user_data['username'], key='username')],
-        [sg.Text('E-Mail'), sg.InputText(default_text=user_data['email'], key='email')],
-        [sg.Text('Password'), sg.InputText(password_char='*', key='password')],
-        [sg.Text('Repeate Password'), sg.InputText(password_char='*', key='repeat_password')],
-        [sg.Button('Änderungen speichern', key='save_changes'),
-         sg.Button('Abbrechen', key='cancel')]
+        [sg.Text('User Name', font=custom_font, size=(20, 1)), sg.InputText(default_text=user_data['username'], key='username', font=custom_font, size=(25, 1))],
+        [sg.Text('E-Mail', font=custom_font, size=(20, 1)), sg.InputText(default_text=user_data['email'], key='email', font=custom_font, size=(25, 1))],
+        [sg.Text('Passwort', font=custom_font, size=(20, 1)), sg.InputText(password_char='*', key='password', font=custom_font, size=(25, 1))],
+        [sg.Text('Passwort wiederholen', font=custom_font, size=(20, 1)), sg.InputText(password_char='*', key='repeat_password', font=custom_font, size=(25, 1))],
+        [sg.Button('Änderungen speichern', key='save_changes', font=custom_font, pad=button_padding),
+         sg.Button('Abbrechen', key='cancel', font=custom_font, pad=button_padding)]
     ]
 
     # Create the window
@@ -28,7 +33,7 @@ def main():
         event, values = window.read()
 
         # Exit the program if the window is closed
-        if event == sg.WINDOW_CLOSED or event == 'cancel':
+        if event == sg.WINDOW_CLOSED:
             break
 
         # Handle button events
@@ -45,14 +50,16 @@ def main():
                 user_data['email'] = new_email
                 user_data['password'] = new_password
 
-                sg.popup('Änderungen gespeichert!')
+                sg.popup('Änderungen gespeichert!', font=('Helvetica', 18))
                 Blokus_Menu.main()
             else:
                 sg.popup('Passwörter stimmen nicht überein. Bitte wiederholen.')
 
         elif event == 'cancel':
             Blokus_Menu.main()
-            sg.popup('Änderungen verworfen!')
+            sg.popup('Änderungen verworfen!', font=('Helvetica', 18))
             window.close()
+
     # Close the window
     window.close()
+
