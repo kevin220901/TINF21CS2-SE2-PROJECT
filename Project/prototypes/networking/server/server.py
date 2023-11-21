@@ -41,27 +41,33 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
 
     def threaded_client(context):
-        conn = context['conn']
+        conn:socket.socket = context['conn']
 
         conn.send(context['playerId'])
 
         state = 0
+        eventId = 0
+        eventDataLength = 0
 
         while True:
             try:
 
                 if state == 0:  
-                    recieved = conn.recv(NetworkConst.MAX_EVENT_ID_SIZE_BYTES)
+                    recieved = conn.recv(NetworkConst.MAX_EVENT_HEAD_SIZE_BYTES)
                     if not recieved:
                         continue
-                    eventId = int.from_bytes(recieved, 'big')
+                    recieved = int.from_bytes(recieved, 'little') 
+
+                    eventId = recieved & NetworkConst.EVENT_HEAD_ID_MASK
+                    eventDataLength = recieved & NetworkConst.EVENT_HEAD_DATA_LENGTH_MASK
+
                     state = 1
                 else:
-                    recieved = conn.recv(NetworkConst.MAX_EVENT_DATA_SIZE_BYTES)
+                    recieved = conn.recv(eventDataLength)
                     if not recieved:
                         continue
                     eventData = pickle.loads(recieved)
-                    eventhandler = events[eventId]
+                    eventhandler:ServerEventHandler = events[eventId]
                     eventhandler.handleEvent(context, eventData)
                     state = 0
             except:

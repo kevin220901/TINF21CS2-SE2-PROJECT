@@ -23,13 +23,20 @@ class NetworkClient:
     
 
     def sync(self, eventId:NetworkEvent, data):
-        self.client.sendall(eventId.value.to_bytes(1, 'big'))
-        self.client.sendall(pickle.dumps(data))
+        eventData = pickle.dumps(data)
+        eventHead = (len(eventData) << 8 + eventId.value).to_bytes(3, 'big')
 
-        recieved = self.client.recv(NetworkConst.MAX_EVENT_ID_SIZE_BYTES)
-        eventId = int.from_bytes(recieved, 'big')
+        self.client.sendall(eventHead)
+        self.client.sendall(eventData)
 
-        recieved = self.client.recv(NetworkConst.MAX_EVENT_DATA_SIZE_BYTES)
+
+        recieved = self.client.recv(NetworkConst.MAX_EVENT_HEAD_SIZE_BYTES)
+        recieved = int.from_bytes(recieved, 'big')
+
+        eventId = recieved & NetworkConst.EVENT_HEAD_ID_MASK
+        eventDataLength = (recieved & NetworkConst.EVENT_HEAD_DATA_LENGTH_MASK) >> 8
+
+        recieved = self.client.recv(eventDataLength)
         eventData = pickle.loads(recieved)
 
         #TODO: the events need to be handled accordingly
