@@ -2,11 +2,25 @@
 
 
 
+import queue
 from networking import NetworkClient, NetworkConst, NetworkEvent
 
 
-nc = NetworkClient(NetworkConst.HOST, NetworkConst.PORT)
+
+recieved = queue.Queue(maxsize=10)
+
+nc = NetworkClient(NetworkConst.HOST, NetworkConst.PORT, recieved)
+
+nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':'ELLOOOO'})
+nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':'ELLOOOO'})
+nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':'ELLOOOO'})
 
 
 while True:
-    nc.sync(NetworkEvent.LOBBY_CREATE, {'lobbyName':'ddt'})
+    
+    if recieved.empty():
+        continue
+
+    event = recieved.get()
+
+    print(event)

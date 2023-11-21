@@ -12,7 +12,12 @@ class ServerEventHandler:
     def handleEvent(self, context, eventData):
         print("handle event")
         conn: socket.socket = context['conn']
-        conn.sendall(NetworkEvent.MESSAGE.value.to_bytes(1, 'big'))
-        conn.sendall(pickle.dumps({'from':'server', 'message':'this event is being handled by the eventhandler'}))
+
+
+        body = pickle.dumps({'from':'server', 'message':'this event is being handled by the eventhandler'})
+        head = ((len(body) << 8) + NetworkEvent.MESSAGE.value).to_bytes(3, 'big')
+
+        conn.sendall(head)
+        conn.sendall(body)
         
 

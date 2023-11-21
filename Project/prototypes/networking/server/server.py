@@ -53,19 +53,19 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
 
                 if state == 0:  
-                    recieved = conn.recv(NetworkConst.MAX_EVENT_HEAD_SIZE_BYTES)
+                    recieved = conn.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
                     if not recieved:
                         continue
-                    recieved = int.from_bytes(recieved, 'little') 
-
-                    eventId = recieved & NetworkConst.EVENT_HEAD_ID_MASK
-                    eventDataLength = recieved & NetworkConst.EVENT_HEAD_DATA_LENGTH_MASK
+                   
+                    eventId = int.from_bytes(recieved[2:], 'big')
+                    eventDataLength = int.from_bytes(recieved[:2], 'big')
 
                     state = 1
                 else:
                     recieved = conn.recv(eventDataLength)
                     if not recieved:
                         continue
+
                     eventData = pickle.loads(recieved)
                     eventhandler:ServerEventHandler = events[eventId]
                     eventhandler.handleEvent(context, eventData)
