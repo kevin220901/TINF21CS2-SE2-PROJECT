@@ -5,7 +5,7 @@ from enum import Enum
 class NetworkEvent(Enum):
 
     LOBBY_JOIN = 1
-    LOBBY_CONFIG = 2
+    LOBBY_CREATE = 2
     LOBBY_LEAVE = 3
     LOBBY_READY = 4
     LOBBYS_GET = 5

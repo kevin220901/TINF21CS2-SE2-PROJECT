@@ -2,7 +2,7 @@ import pickle
 import socket
 from _thread import *
 
-from networking import NetworkEvent, NetworkConst, ServerEventHandler, ServerEventHandler_JoinLobby
+from networking import *
 
 
 
@@ -15,8 +15,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     lobbies = {}
 
     events = {
-        NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_JoinLobby(),             #data: playerId, lobbyId
-        NetworkEvent.LOBBY_CONFIG.value: ServerEventHandler(),                     #data: tbd ...
+        NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
+        NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
         NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler(),                      #data: playerId
         NetworkEvent.LOBBY_READY.value: ServerEventHandler(),                      #data: playerId
         NetworkEvent.LOBBYS_GET.value: ServerEventHandler(),                       #data: playerId
@@ -39,11 +39,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     
 
-    def threaded_client(conn:socket.socket, playerId:bytes, addr):
+    def threaded_client(context):
+        conn = context['conn']
 
-        conn.send(playerId)
-
-        context = None
+        conn.send(context['playerId'])
 
         state = 0
 
@@ -62,7 +61,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         continue
                     eventData = pickle.loads(recieved)
                     eventhandler = events[eventId]
-                    eventhandler.handleEvent(conn, eventData)
+                    eventhandler.handleEvent(context, eventData)
                     state = 0
             except:
                 break
@@ -79,5 +78,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         
         playerCounter += 1
 
-        start_new_thread(threaded_client, (conn, playerCounter.to_bytes(16, 'big'), addr))
+        context = {
+            'conn':conn, 
+            'addr':addr,
+            'lobbies':lobbies, 
+            'playerId':playerCounter.to_bytes(16, 'big')
+        }
+
+        start_new_thread(threaded_client, (context,))
 
