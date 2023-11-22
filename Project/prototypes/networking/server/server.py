@@ -2,6 +2,7 @@ import pickle
 import socket
 
 from _thread import *
+from Project.prototypes.networking.socketwrapper import SocketWrapper
 
 from networking import *
 
@@ -14,6 +15,7 @@ PORT = 5555
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     lobbies = {}
+    connected = {}
 
     events = {
         NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
@@ -41,9 +43,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
 
     def threaded_client(context):
-        conn:socket.socket = context['conn']
+        conn = SocketWrapper(context['conn']) 
 
-        conn.send(context['playerId'])
+        conn.socket_sendall(context['playerId'])
 
         state = 0
         eventId = 0

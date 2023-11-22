@@ -57,11 +57,11 @@ def ChatBotWithHistory():
     while True:
         event, value = window.read()
 
-        recieved = nc.getRecieved()
+        recieved = nc.read()
 
         if recieved:
             output.append(str(recieved))
-            window['output'].update(output)
+            window['output'].update('\n'.join(output))
 
         if event == 'SEND':
             query = value['query'].rstrip()

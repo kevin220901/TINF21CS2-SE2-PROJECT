@@ -55,7 +55,10 @@ class NetworkClient:
         return self.client.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
     
     
-    def getRecieved(self):
+    def read(self):
+        '''
+        returns the first element of the recieved queue
+        '''
         if self.__recvQueue.empty(): return None
         return self.__recvQueue.get()
     

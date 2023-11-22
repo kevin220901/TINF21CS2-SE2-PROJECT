@@ -2,6 +2,7 @@
 
 import pickle
 import socket
+from Project.prototypes.networking.socketwrapper import SocketWrapper
 from networking import ServerEventHandler, Lobby, NetworkEvent
 
 
@@ -13,12 +14,10 @@ class ServerEventHandler_LobbyCreate(ServerEventHandler):
 
         context['lobbies'][newLobby.getLobbyId()]
 
-        conn:socket.socket = context['conn']
+        conn:SocketWrapper = context['conn']
         
-        eventData = pickle.dumps({'eventData':'created'})
-        eventHead = (len(eventData) << 8 + NetworkEvent.LOBBY_CREATE.value ).to_bytes(3, 'big')
+        eventData = {'eventData':'created'}
 
-        conn.sendall()
-        conn.sendall()
+        conn.sendall(NetworkEvent.LOBBY_CREATE, eventData)
 
         print(f'Lobby created')
