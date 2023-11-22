@@ -27,7 +27,7 @@ class NetworkEventObject:
 
 class NetworkClient:
 
-    def __init__(self, host, port, recvQueue:queue.Queue) -> None:
+    def __init__(self, host, port) -> None:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.port = port
@@ -39,7 +39,7 @@ class NetworkClient:
         self.recieve_lock = threading.Lock()
 
         self.__sendQueue = queue.Queue(maxsize=10)
-        self.__recvQueue = recvQueue
+        self.__recvQueue = queue.Queue(maxsize=10)
 
         recieve_thread = threading.Thread(target=self.__recieve)
         send_thread = threading.Thread(target=self.__send)
@@ -53,6 +53,11 @@ class NetworkClient:
         #TODO: Error handling
         self.client.connect(self.address)
         return self.client.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
+    
+    
+    def getRecieved(self):
+        if self.__recvQueue.empty(): return None
+        return self.__recvQueue.get()
     
     
     def send(self, eventId:NetworkEvent, eventData):
