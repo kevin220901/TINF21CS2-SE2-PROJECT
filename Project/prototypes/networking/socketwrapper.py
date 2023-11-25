@@ -2,8 +2,8 @@
 
 import pickle
 import socket
-from Project.prototypes.networking.networkevent import NetworkEvent
-import constants
+from networking.networkevent import NetworkEvent
+from networking import constants
 
 
 
@@ -24,8 +24,7 @@ class SocketWrapper:
         self.__conn.sendall(head)
         self.__conn.sendall(body)
 
-
-    def rcv(self, __buffsize):
+    def recv(self, __buffsize):
         return self.__conn.recv(__buffsize)
 
 

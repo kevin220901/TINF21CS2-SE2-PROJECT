@@ -122,4 +122,28 @@ class NetworkClient:
                     self.client.close()
                     break
 
-                    
+    
+    def createLobby(self, lobbyId):
+        eventId = NetworkEvent.LOBBY_CREATE
+        eventData = {'lobbyId':lobbyId}
+        self.send(eventId, eventData)
+    
+    def joinLobby(self, lobbyId):
+        eventId = NetworkEvent.LOBBY_JOIN
+        eventData = {'lobbyId':lobbyId}
+        self.send(eventId, eventData)
+
+    def leaveLobby(self):
+        eventId = NetworkEvent.LOBBY_LEAVE
+        eventData = {'':''}
+        self.send(eventId, eventData)
+
+    def ready(self):
+        eventId = NetworkEvent.LOBBY_READY
+        eventData = {'':''}
+        self.send(eventId, eventData)
+
+    def sendMessage(self, message):
+        eventId = NetworkEvent.MESSAGE
+        eventData = {'message':message}
+        self.send(eventId, eventData)

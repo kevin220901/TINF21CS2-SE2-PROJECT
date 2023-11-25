@@ -2,10 +2,12 @@
 
 import secrets
 
+from networking.networkevent import NetworkEvent
+
 
 class Lobby:
-    def __init__(self) -> None:
-        self.__lobbyId = secrets.token_bytes(32)
+    def __init__(self, lobbyId) -> None:
+        self.__lobbyId = lobbyId#secrets.token_bytes(32)
         self.__players = set()
 
     def join(self, player):
@@ -19,4 +21,7 @@ class Lobby:
     
     def getLobbyId(self):
         return self.__lobbyId
-
+    
+    def sendMessage(self, player, message):
+        for p in self.__players:
+            p.sendall(NetworkEvent.MESSAGE, {'message':message})

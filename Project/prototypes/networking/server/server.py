@@ -2,7 +2,7 @@ import pickle
 import socket
 
 from _thread import *
-from Project.prototypes.networking.socketwrapper import SocketWrapper
+from networking.socketwrapper import SocketWrapper
 
 from networking import *
 
@@ -44,7 +44,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     def threaded_client(context):
         conn = SocketWrapper(context['conn']) 
-
+        context['conn'] = conn
+        
         conn.socket_sendall(context['playerId'])
 
         state = 0
@@ -72,7 +73,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     eventhandler:ServerEventHandler = events[eventId]
                     eventhandler.handleEvent(context, eventData)
                     state = 0
-            except:
+            except Exception as e:
                 break
             
         conn.close()

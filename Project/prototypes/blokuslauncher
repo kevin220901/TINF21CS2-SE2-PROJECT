@@ -30,13 +30,18 @@ def ChatBotWithHistory():
     # give our form a spiffy set of colors
     sg.theme('GreenTan')
 
-    layout = [[sg.Text('Your output will go here', size=(40, 1))],
-              [sg.Output(size=(127, 30), font=('Helvetica 10'), key='output')],
-              [sg.Text('Command History'),
-               sg.Text('', size=(20, 3), key='history')],
-              [sg.ML(size=(85, 5), enter_submits=True, key='query', do_not_clear=False),
-               sg.Button('SEND', button_color=(sg.YELLOWS[0], sg.BLUES[0]), bind_return_key=True),
-               sg.Button('EXIT', button_color=(sg.YELLOWS[0], sg.GREENS[0]))]]
+    layout =[
+                [sg.Text('Your output will go here', size=(40, 1))],
+                [sg.Output(size=(127, 30), font=('Helvetica 10'), key='output')],
+                [sg.Text('Command History'), sg.Text('', size=(20, 3), key='history')],
+                [sg.Button('CREATE')],
+                [sg.Button('JOIN')],
+                [
+                    sg.ML(size=(85, 5), enter_submits=True, key='query', do_not_clear=False),
+                    sg.Button('SEND', button_color=(sg.YELLOWS[0], sg.BLUES[0]), bind_return_key=True),
+                    sg.Button('EXIT', button_color=(sg.YELLOWS[0], sg.GREENS[0]))
+                ]
+            ]
 
     window = sg.Window('Chat window with history', layout,
                        default_element_size=(30, 2),
@@ -62,12 +67,16 @@ def ChatBotWithHistory():
         if recieved:
             output.append(str(recieved))
             window['output'].update('\n'.join(output))
-
-        if event == 'SEND':
+        if event == 'CREATE':
+            nc.createLobby('ddt')
+        elif event == 'JOIN':
+            nc.joinLobby('ddt')
+        elif event == 'SEND':
             query = value['query'].rstrip()
             # EXECUTE YOUR COMMAND HERE
             #print('The command you entered was {}'.format(query))
-            nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':query})
+            #nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':query})
+            nc.sendMessage(query)
             command_history.append(query)
             history_offset = len(command_history) - 1
             # manually clear input because keyboard events blocks clear
