@@ -1,6 +1,6 @@
 
 
-from Project.prototypes.networking.networkevent import NetworkEvent
+from networking.networkevent import NetworkEvent
 from networking.lobby import Lobby
 from networking.socketwrapper import SocketWrapper
 from networking import ServerEventHandler
@@ -14,10 +14,7 @@ class ServerEventHandler_LobbyJoin(ServerEventHandler):
         lobby.join(conn)
         context['lobby'] = lobby
 
-        eventData = {'sysmessage':f'lobby "{eventData["lobbyId"]}" created'}
-        conn.sendall(NetworkEvent.LOBBY_JOIN, eventData)
-
-        lobby.sendMessage()
+        lobby.sendSysMessage('player has joined the lobby')
 
         print(f'Lobby joined {lobbyId}')
         pass

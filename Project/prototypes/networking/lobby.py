@@ -25,3 +25,7 @@ class Lobby:
     def sendMessage(self, player, message):
         for p in self.__players:
             p.sendall(NetworkEvent.MESSAGE, {'message':message})
+
+    def sendSysMessage(self, sysmessage):
+        for p in self.__players:
+            p.sendall(NetworkEvent.SYSMESSAGE, {'sysmessage':sysmessage})

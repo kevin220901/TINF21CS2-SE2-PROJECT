@@ -16,6 +16,7 @@ class NetworkEvent(Enum):
     GAME_CHANGE_ACTIVE_PLAYER = 10
     GAME_FINISH = 11
     MESSAGE = 12
+    SYSMESSAGE = 13
 
 
     

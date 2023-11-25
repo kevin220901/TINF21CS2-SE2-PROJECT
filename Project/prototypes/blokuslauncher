@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 
-
-import queue
+import logging
 from networking import NetworkClient, NetworkConst, NetworkEvent
 
 #nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':'ELLOOOO'})
@@ -26,8 +25,9 @@ Special keyboard keys:
 
 
 def ChatBotWithHistory():
-    # -------  Make a new Window  ------- #
+    # -------  Make a new Window  ------- #s
     # give our form a spiffy set of colors
+
     sg.theme('GreenTan')
 
     layout =[
@@ -56,7 +56,8 @@ def ChatBotWithHistory():
 
     
     
-
+    
+    
     nc = NetworkClient(NetworkConst.HOST, NetworkConst.PORT)
 
     while True:

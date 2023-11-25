@@ -1,10 +1,17 @@
+import logging
 import pickle
 import socket
 
 from _thread import *
+from sys import stderr
+from networking.server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from networking.socketwrapper import SocketWrapper
 
 from networking import *
+
+logging.basicConfig(filename='dev_server.log', encoding='utf-8', level=logging.DEBUG)
+
+logging.info("starting server")
 
 
 
@@ -17,6 +24,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     lobbies = {}
     connected = {}
 
+    logging.info('>>Initializing ServerEventHandlers')
+
     events = {
         NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
         NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
@@ -25,10 +34,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         NetworkEvent.LOBBYS_GET.value: ServerEventHandler(),                       #data: playerId
         NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
         NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
-        NetworkEvent.MESSAGE.value: ServerEventHandler()                           #data: playerId, message 
+        NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               #data: playerId, message 
     }
 
-
+    logging.info('<<ServerEventHandlers Initialized')
     try:
         s.bind((HOST, PORT))
     except socket.error as e:
@@ -45,7 +54,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     def threaded_client(context):
         conn = SocketWrapper(context['conn']) 
         context['conn'] = conn
-        
+        context['lobby'] = None
         conn.socket_sendall(context['playerId'])
 
         state = 0
@@ -74,6 +83,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     eventhandler.handleEvent(context, eventData)
                     state = 0
             except Exception as e:
+                logging.debug(e.with_traceback())
+                stderr.write(f"'error':{e}")
                 break
             
         conn.close()
