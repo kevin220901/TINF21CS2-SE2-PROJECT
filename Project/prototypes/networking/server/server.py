@@ -10,9 +10,9 @@ from networking.socketwrapper import SocketWrapper
 
 from networking import *
 
-logging.basicConfig(filename='dev_server.log', encoding='utf-8', level=logging.DEBUG)
+LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 
-logging.info("starting server")
+
 
 
 
@@ -26,17 +26,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     connected = {}
 
     logging.info('>>Initializing ServerEventHandlers')
-
-    events = {
-        NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
-        NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
-        NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler(),                      #data: playerId
-        NetworkEvent.LOBBY_READY.value: ServerEventHandler(),                      #data: playerId
-        NetworkEvent.LOBBYS_GET.value: ServerEventHandler(),                       #data: playerId
-        NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
-        NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
-        NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               #data: playerId, message 
-    }
 
     logging.info('<<ServerEventHandlers Initialized')
     try:
@@ -53,20 +42,29 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
 
     def threaded_client(context):
+        
         #do i need to make this a critical section?
         #maby use contextvars? -> dont know jet how they are to be used
         sock:socket.socket = context['conn']
-        conn = SocketWrapper(sock) 
-        context['conn'] = conn
-        context['lobby'] = None
-        conn.socket_sendall(context['playerId'])
+        sock.sendall(context['playerId'])
 
+        playerName = context['playerName'],
+        
+        logging.basicConfig(filename=f'dev_server_conn{playerName}.log', encoding='utf-8', 
+            level=logging.DEBUG,
+            format= LOG_FORMAT,datefmt='%d/%m/%Y %H:%M:%S')
+
+        
         api = ClientApi(
             conn=sock,
             playerId=context['playerId'],
-            playerName=context['playerName'],
-            lobbies=lobbies
+            playerName=playerName,
+            lobbies=lobbies,
+            logger = logging.getLogger()
         )
+
+        
+        
 
         events = {
             NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
@@ -89,16 +87,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
 
                 if state == 0:  
-                    recieved = conn.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
+                    recieved = sock.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
                     if not recieved:
                         continue
-                   
+                    
                     eventId = int.from_bytes(recieved[2:], 'big')
                     eventDataLength = int.from_bytes(recieved[:2], 'big')
 
                     state = 1
                 else:
-                    recieved = conn.recv(eventDataLength)
+                    recieved = sock.recv(eventDataLength)
                     if not recieved:
                         continue
 
@@ -109,8 +107,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     state = 0
             except Exception as e:
                 running = False
+                api.logger.critical(e)
+
+                api.leaveLobby()
                 conn.close()
-                logging.debug(e)
                 stderr.write(f"'error':{e}")
                 
         

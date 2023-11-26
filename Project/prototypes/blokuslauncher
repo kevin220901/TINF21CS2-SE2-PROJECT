@@ -2,6 +2,7 @@
 
 
 import logging
+import threading
 from networking import NetworkClient, NetworkConst, NetworkEvent
 
 #nc.send(NetworkEvent.MESSAGE, {'from':'me', 'message':'ELLOOOO'})
@@ -22,7 +23,14 @@ Special keyboard keys:
     Control C - exit form
 '''
 
+def network_handler_thread(network:NetworkClient, window:sg.Window, networkStoppedEvent:threading.Event):
+    while not networkStoppedEvent.is_set():
+        recieved = network.read()
 
+        if recieved:
+            window.write_event_value('NETWORK', recieved)
+
+    pass
 
 def ChatBotWithHistory():
     # -------  Make a new Window  ------- #s
@@ -53,25 +61,26 @@ def ChatBotWithHistory():
     command_history = []
     history_offset = 0
     output = []
-
-    
-    
-    
     
     nc = NetworkClient(NetworkConst.HOST, NetworkConst.PORT)
 
+    networkStopEvent = threading.Event()
+    thread = threading.Thread(target=network_handler_thread, args=(nc, window, networkStopEvent))
+    thread.daemon = True
+    thread.start()
+    
+
+
     while True:
         event, value = window.read()
-
-        recieved = nc.read()
-
-        if recieved:
-            output.append(str(recieved))
-            window['output'].update('\n'.join(output))
+        
         if event == 'CREATE':
             nc.createLobby('ddt')
         elif event == 'JOIN':
             nc.joinLobby('ddt')
+        elif event == 'NETWORK':
+            output.append(str(value[event]))
+            window['output'].update('\n'.join(output))
         elif event == 'SEND':
             query = value['query'].rstrip()
             # EXECUTE YOUR COMMAND HERE
