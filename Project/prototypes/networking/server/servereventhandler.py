@@ -3,6 +3,7 @@
 
 import pickle
 import socket
+from networking.server.clientapi import ClientApi
 from networking.socketwrapper import SocketWrapper
 
 from networking.networkevent import NetworkEvent
@@ -10,12 +11,10 @@ from networking.networkevent import NetworkEvent
 
 class ServerEventHandler:
 
-    def handleEvent(self, context, eventData):
+    def handleEvent(self, client:ClientApi, eventData):
         print("handle event")
-        conn: SocketWrapper = context['conn']
 
-        eventData = {'sysmessage':'this event is being handled by the eventhandler'}
-       
-        conn.sendall(NetworkEvent.SYSMESSAGE, eventData)
+        client.sendSysMessage('this event is being handled by the eventhandler')
+        
         pass
     

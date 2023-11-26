@@ -1,3 +1,6 @@
 INFO:root:starting server
 INFO:root:>>Initializing ServerEventHandlers
 INFO:root:<<ServerEventHandlers Initialized
+INFO:root:starting server
+INFO:root:>>Initializing ServerEventHandlers
+INFO:root:<<ServerEventHandlers Initialized

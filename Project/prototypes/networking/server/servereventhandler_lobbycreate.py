@@ -9,14 +9,10 @@ from networking import ServerEventHandler, Lobby, NetworkEvent
 #maby use one set of ServerEventHandlers per connected client to prevent thread bleeding?
 class ServerEventHandler_LobbyCreate(ServerEventHandler):
     
-    def handleEvent(self, context, eventData):
-        newLobby = Lobby(eventData['lobbyId'])
-        conn:SocketWrapper = context['conn']
-
-        newLobby.join(conn)
-        context['lobby'] = newLobby
-        context['lobbies'][newLobby.getLobbyId()] = newLobby
+    def handleEvent(self, client, eventData):
+        if not eventData: client.sendSysMessage('server recieved invalid data')
+        if 'lobbyName' not in eventData: client.sendSysMessage('server recieved invalid lobby name')
         
-        newLobby.sendSysMessage(f'lobby "{newLobby.getLobbyId()}" created')
+        lobby = client.createLobby(eventData['lobbyName'])
 
-        print(f'Lobby created {newLobby.getLobbyId()}')
+        print(f'Lobby created {lobby.getLobbyId()}')

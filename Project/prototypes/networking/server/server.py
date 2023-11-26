@@ -4,6 +4,7 @@ import socket
 
 from _thread import *
 from sys import stderr
+from networking.server.clientapi import ClientApi
 from networking.server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from networking.socketwrapper import SocketWrapper
 
@@ -52,10 +53,30 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
 
     def threaded_client(context):
+
         conn = SocketWrapper(context['conn']) 
         context['conn'] = conn
         context['lobby'] = None
         conn.socket_sendall(context['playerId'])
+
+        api = ClientApi(
+            conn=context['conn'],
+            playerId=context['playerId'],
+            playerName=context['playerName'],
+            lobbies=lobbies
+        )
+
+        events = {
+            NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
+            NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
+            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler(),                      #data: playerId
+            NetworkEvent.LOBBY_READY.value: ServerEventHandler(),                      #data: playerId
+            NetworkEvent.LOBBYS_GET.value: ServerEventHandler(),                       #data: playerId
+            NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
+            NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
+            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               #data: playerId, message 
+        }
+        
 
         state = 0
         eventId = 0
@@ -80,7 +101,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
                     eventData = pickle.loads(recieved)
                     eventhandler:ServerEventHandler = events[eventId]
-                    eventhandler.handleEvent(context, eventData)
+                    eventhandler.handleEvent(api, eventData)
                     state = 0
             except Exception as e:
                 logging.debug(e.with_traceback())
