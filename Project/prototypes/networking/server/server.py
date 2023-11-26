@@ -4,6 +4,10 @@ import socket
 
 from _thread import *
 from sys import stderr
+from networking.server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
+from networking.server.serverhandler_gamestart import ServerEventHandler_GameStart
+from networking.server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
+from networking.server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
 from networking.server.clientapi import ClientApi
 from networking.server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from networking.socketwrapper import SocketWrapper
@@ -69,10 +73,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         events = {
             NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
             NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
-            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler(),                      #data: playerId
-            NetworkEvent.LOBBY_READY.value: ServerEventHandler(),                      #data: playerId
-            NetworkEvent.LOBBYS_GET.value: ServerEventHandler(),                       #data: playerId
+            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(),                      #data: playerId
+            NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(),                      #data: playerId
+            NetworkEvent.LOBBYS_GET.value: ServerEventHandler_LobbyBrowse(),                       #data: playerId
             NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
+            NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               #data: playerId, message 
         }

@@ -17,6 +17,7 @@ class NetworkEvent(Enum):
     GAME_FINISH = 11
     MESSAGE = 12
     SYSMESSAGE = 13
+    PICK_COLOR = 14
 
 
     

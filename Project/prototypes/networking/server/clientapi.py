@@ -11,7 +11,7 @@ class ClientApi:
         self.__currentLobby:Lobby = None
         self.__playerId:str = playerId
         self.__playerName:str = playerName
-        self.__lobbies:[str,Lobby] = lobbies
+        self.lobbies:[str,Lobby] = lobbies
         self.logger:Logger = logger
 
     def createLobby(self, lobbyName):
@@ -20,7 +20,7 @@ class ClientApi:
 
         #TODO:the LobbyName must replaced with an actual, UNIQUE lobby id
         self.logger.info(f'created lobby "{lobbyName}"')
-        newLobby = Lobby(lobbyName, self.__lobbies)
+        newLobby = Lobby(lobbyName, self.lobbies)
         self.__currentLobby = newLobby
         newLobby.join(self)
         return newLobby
@@ -29,7 +29,7 @@ class ClientApi:
         if self.__handleAllreadyInLobby(): return
         if self.__handleLobbyNotFound(lobbyId): return
         
-        selectedLobby:Lobby = self.__lobbies[lobbyId]
+        selectedLobby:Lobby = self.lobbies[lobbyId]
         
         if self.__handleLobbyNotJoinable(selectedLobby): return
 
@@ -42,18 +42,22 @@ class ClientApi:
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
         self.__currentLobby = None
+        self.sendSysMessage('you have left the lobby')
         pass
 
     def sendMessage(self, message):
         if self.__handleNotInLobby(): return
 
-        self.__currentLobby.chatMessage(self, message)
+        self.__currentLobby.broadcastMessage(self, message)
 
         pass
 
     def sendSysMessage(self, message):
         self.__conn.sendall(NetworkEvent.SYSMESSAGE, {'message':message})
         pass
+
+    def sendLobbyBrowsingResult(self, joinableLobbies):
+        self.__conn.sendall(NetworkEvent.LOBBYS_GET, joinableLobbies)
 
     def recvMessage(self, sender:str, message):
         self.__conn.sendall(NetworkEvent.MESSAGE, {'from':sender, 'messsage':message})
@@ -64,6 +68,11 @@ class ClientApi:
         self.__currentLobby.toggleReady(self)
         pass
 
+    def notifyGameStarted(self):
+        #TODO: transmitt who plays first
+        self.__conn.sendall(NetworkEvent.GAME_START, {'turn':'dummy info :P'})
+        pass
+    
 
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
@@ -72,13 +81,13 @@ class ClientApi:
         return False
     
     def __handleLobbyExists(self, lobbyName):
-        if lobbyName in self.__lobbies:
+        if lobbyName in self.lobbies:
             self.sendSysMessage('lobby allready exists')
             return True
         return False
     
     def __handleLobbyNotFound(self, lobbyName):
-        if lobbyName not in self.__lobbies:
+        if lobbyName not in self.lobbies:
             self.sendSysMessage('lobby not found')
             return True
         return False
@@ -109,6 +118,10 @@ class ClientApi:
         if not self.__currentLobby: return ''
         return self.__currentLobby.lobbyId
 
+    @property
+    def currentLobby(self):
+        return self.__currentLobby
+    
 from socket import socket
 from networking.lobby import Lobby
 from networking.server.clientsocketwrapper import ClientSocketWrapper

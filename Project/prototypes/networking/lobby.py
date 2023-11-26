@@ -38,9 +38,18 @@ class Lobby:
         self.__notifyAll(f"{player.playerName} is {'ready' if ready else 'not ready'}")
         pass
 
-    def chatMessage(self, sender:ClientApi, message):
+    def broadcastMessage(self, sender:ClientApi, message):
         for p in self.__players:
             p.recvMessage(sender.playerName, message)
+        pass
+
+    def startGame(self, player:ClientApi):
+        if self.__handlePlayerIsNotHost(self, player): return
+        if self.__handleLobbyIsNotReady(self): return
+        
+        p:ClientApi
+        for p in self.__players:
+            p.notifyGameStarted()
         pass
     
     
@@ -60,6 +69,11 @@ class Lobby:
         return False
 
     def __handleHostGone(self):
+        '''
+        returns
+             True: if there currently is no host
+            False: if the lobby has a host
+        '''
         if not self.__host:
             #pick first next player and assign as new host
             newHost:ClientApi = next(iter(self.__players))
@@ -68,19 +82,44 @@ class Lobby:
             self.__notifyAll(f"{newHost.playerName} is now host.")
             return True
         return False
+    
+    def __handlePlayerIsNotHost(self, player:ClientApi):
+        '''
+        returns
+             True: if the player is NOT the host
+            False: if the player is the host
+        '''
+        if self.__host == player: return False
 
+        player.sendSysMessage('only the host is permitted to start the game')
+        return True 
+
+    def __handleLobbyIsNotReady(self):
+        '''
+        returns
+             True: if any one player has not jet been set to ready
+            False: if all players are set to ready
+        '''
+        for p,ready in self.__ready:
+            if ready == False: return True
+
+        return False
 
 
     @property
     def lobbyId(self) -> str:
         return self.__lobbyId
+    
+    @property
+    def lobbyName(self) -> str:
+        return self.__lobbyName
 
     @property
     def canBeJoined(self) -> bool:
         return self.__canBeJoined
     
     @property
-    def cantBeJoined(self) -> bool:
+    def canNOTBeJoined(self) -> bool:
         return not self.__canBeJoined
     
     @property
