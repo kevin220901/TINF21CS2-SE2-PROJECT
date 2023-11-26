@@ -53,14 +53,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
 
     def threaded_client(context):
-
-        conn = SocketWrapper(context['conn']) 
+        #do i need to make this a critical section?
+        #maby use contextvars? -> dont know jet how they are to be used
+        sock:socket.socket = context['conn']
+        conn = SocketWrapper(sock) 
         context['conn'] = conn
         context['lobby'] = None
         conn.socket_sendall(context['playerId'])
 
         api = ClientApi(
-            conn=context['conn'],
+            conn=sock,
             playerId=context['playerId'],
             playerName=context['playerName'],
             lobbies=lobbies
@@ -81,8 +83,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         state = 0
         eventId = 0
         eventDataLength = 0
+        running = True
 
-        while True:
+        while running:
             try:
 
                 if state == 0:  
@@ -102,30 +105,33 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     eventData = pickle.loads(recieved)
                     eventhandler:ServerEventHandler = events[eventId]
                     eventhandler.handleEvent(api, eventData)
+
                     state = 0
             except Exception as e:
-                logging.debug(e.with_traceback())
+                running = False
+                conn.close()
+                logging.debug(e)
                 stderr.write(f"'error':{e}")
-                break
-            
-        conn.close()
+                
+        
         print(f"Disconnected from {addr}")
+        
 
 
     playerCounter = 0
-
+    
     while True:
         conn, addr = s.accept()
         print(f"Connected to {addr}")
-        
         playerCounter += 1
 
         context = {
             'conn':conn, 
             'addr':addr,
-            'lobbies':lobbies, 
-            'playerId':playerCounter.to_bytes(16, 'big')
+            'playerId':playerCounter.to_bytes(16, 'big'),
+            'playerName':f'player_{playerCounter}'
         }
 
         start_new_thread(threaded_client, (context,))
+
 

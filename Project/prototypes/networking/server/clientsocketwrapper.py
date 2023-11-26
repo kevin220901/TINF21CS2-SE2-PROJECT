@@ -6,9 +6,10 @@ import socket
 from networking.networkevent import NetworkEvent
 from networking.socketwrapper import SocketWrapper
 
+#TODO: do i need this class or can the funtionality be moved to lobby?
 
 class ClientSocketWrapper(SocketWrapper):
-    def __init__(self, conn: socket) -> None:
+    def __init__(self, conn: socket.socket) -> None:
         super().__init__(conn)
 
 
@@ -27,29 +28,3 @@ class ClientSocketWrapper(SocketWrapper):
             'message':message
         }
         self.sendall(eventId, eventData)
-
-
-    def notifyLobbyCreated(self, lobbyId, lobbyName):
-        self.sendSysMessage(f'Lobby {lobbyName}@{lobbyId} created')
-
-    def notifyPlyerJoined(self, player):
-        pass
-
-    def notifyPlayerLeft(self, player):
-        pass
-
-    def notifyReady(self, player):
-        pass
-
-    def notifyGameStarted(self):
-        pass
-    
-    def notifyGameEnded(self, winner:str):
-        pass
-
-    def notifyPlayerTurnChaged(self, currentPlayer):
-        pass
-
-    def notifyPlayerMove(self, player, piece):
-        pass
-    

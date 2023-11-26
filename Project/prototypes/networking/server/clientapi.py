@@ -1,10 +1,13 @@
 
 from __future__ import annotations
 
+
+
+
 class ClientApi:
     def __init__(self, conn:socket, playerId, playerName, lobbies) -> None:
-        self.__conn = ClientSocketWrapper(conn)
-        self.__lobby:Lobby = None
+        self.__conn = SocketWrapper(conn)
+        self.__currentLobby:Lobby = None
         self.__playerId:str = playerId
         self.__playerName:str = playerName
         self.__lobbies:[str,Lobby] = lobbies
@@ -14,7 +17,8 @@ class ClientApi:
         if self.__handleLobbyExists(lobbyName): return
 
         #TODO:the LobbyName must replaced with an actual, UNIQUE lobby id
-        newLobby = Lobby(lobbyName)
+        newLobby = Lobby(lobbyName, self.__lobbies)
+        self.__currentLobby = newLobby
         newLobby.join(self)
         return newLobby
 
@@ -26,65 +30,64 @@ class ClientApi:
         
         if self.__handleLobbyNotJoinable(selectedLobby): return
 
-        self.__lobby = selectedLobby
-        self.__lobby.join(self)
-        pass
+        self.__currentLobby = selectedLobby
+        self.__currentLobby.join(self)
+        return selectedLobby
 
     def leaveLobby(self):
         if self.__handleNotInLobby(): return
-        self.__lobby.leave(self)
-        self.__lobby = None
+        self.__currentLobby.leave(self)
+        self.__currentLobby = None
         pass
 
     def sendMessage(self, message):
         if self.__handleNotInLobby(): return
-        self.__lobby.sendMessage(self, message)
+        self.__currentLobby.chatMessage(self, message)
         pass
 
     def sendSysMessage(self, message):
-        self.__conn.sendSysMessage(message)
+        self.__conn.sendall(NetworkEvent.SYSMESSAGE, {'message':message})
         pass
 
-    def recvMessage(self, message):
-        if not self.__lobby: pass #player is currently not in a lobby -> abbort recv
+    def recvMessage(self, sender:str, message):
+        self.__conn.sendall(NetworkEvent.MESSAGE, {'from':sender, 'messsage':message})
         pass
 
     def toggleReady(self):
         if self.__handleNotInLobby(): return
-        self.__lobby.toggleReady(self)
+        self.__currentLobby.toggleReady(self)
         pass
 
 
     def __handleAllreadyInLobby(self) -> bool:
-        if self.__lobby:
-            self.__conn.sendSysMessage('can not create lobby')
+        if self.__currentLobby:
+            self.sendSysMessage('allready in a lobby')
             return True
         return False
     
     def __handleLobbyExists(self, lobbyName):
         if lobbyName in self.__lobbies:
-            self.__conn.sendSysMessage('lobby allready exists')
+            self.sendSysMessage('lobby allready exists')
             return True
         return False
     
     def __handleLobbyNotFound(self, lobbyName):
         if lobbyName not in self.__lobbies:
-            self.__conn.sendSysMessage('lobby not found')
+            self.sendSysMessage('lobby not found')
             return True
         return False
     
     def __handleLobbyNotJoinable(self, lobby:Lobby):
         if lobby.cantBeJoined:
-            self.__conn.sendSysMessage('lobby not joinable')
+            self.sendSysMessage('lobby not joinable')
             return True
         return False
     
     def __handleNotInLobby(self):
-        if not self.__lobby:
-            self.__conn.sendSysMessage('can not leave')
+        if not self.__currentLobby:
+            self.sendSysMessage('not in a lobby')
             return True
         return False
-    
 
 
     @property
@@ -95,8 +98,12 @@ class ClientApi:
     def playerId(self):
         return self.__playerId
     
+    @property
+    def currentLobbyId(self):
+        return self.__currentLobby.lobbyId
 
 from socket import socket
 from networking.lobby import Lobby
 from networking.server.clientsocketwrapper import ClientSocketWrapper
-
+from networking.socketwrapper import SocketWrapper
+from networking.networkevent import NetworkEvent

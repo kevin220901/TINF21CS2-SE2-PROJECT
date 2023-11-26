@@ -2,19 +2,23 @@ from __future__ import annotations
 
 
 class Lobby:
-    def __init__(self, lobbyId, lobbies) -> None:
+    def __init__(self, lobbyName, lobbies:dict) -> None:
         self.__lobbies = lobbies
-        self.__lobbyId = lobbyId#secrets.token_bytes(32)
-        self.__players = set()
+        self.__lobbyName = lobbyName 
+        self.__lobbyId = lobbyName #secrets.token_bytes(32)
+        self.__players = []
         self.__canBeJoined:bool = True
         self.__isPrivate: bool = False
         self.__ready = {}
         self.__host: ClientApi = None
 
+        #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
+        self.__lobbies[self.__lobbyId] = self
+
     def join(self, player:ClientApi):
-        self.__players.add(player)
+        self.__players.append(player)
         self.__ready[player] = False
-    
+        self.__notifyAll(f"new player {player.playerName} has joined the lobby.")
         self.__handleHostGone()
         pass
         
@@ -22,28 +26,31 @@ class Lobby:
         self.__players.remove(player)
         self.__ready.pop(player)
         if self.__handleLobbyAbbandoned(): return
+        
+        self.__notifyAll(f"{player.playerName} has left the lobby.")
         self.__handleHostGone()
         pass
 
     def toggleReady(self, player:ClientApi):
-        self.__ready[player] = ~self.__ready[player]
+        ready = ~self.__ready[player]
+        self.__ready[player] = ready
+        self.__notifyAll(f"{player.playerName} is {'ready' if ready else 'not ready'}")
         pass
 
-        
-
-    def getPlayers(self):
-        return self.__players.copy()
-    
-    def getLobbyId(self):
-        return self.__lobbyId
-    
-    def sendMessage(self, player:ClientApi, message):
+    def chatMessage(self, sender:ClientApi, message):
         for p in self.__players:
-            p.sendall(NetworkEvent.MESSAGE, {'message':message})
-
+            p.recvMessage(sender.playerName, message)
+        pass
+    
+    
+   
     def sendSysMessage(self, sysmessage):
         for p in self.__players:
-            p.sendall(NetworkEvent.SYSMESSAGE, {'sysmessage':sysmessage})
+            p.sendSysMessage(sysmessage)
+
+    def __notifyAll(self, message):
+        self.sendSysMessage(message)
+        pass
 
     def __handleLobbyAbbandoned(self):
         if self.playerCount == 0: 
@@ -54,14 +61,17 @@ class Lobby:
     def __handleHostGone(self):
         if not self.__host:
             #pick first next player and assign as new host
-            newHost = next(iter(self.__players))
+            newHost:ClientApi = next(iter(self.__players))
             self.__host = newHost
+            self.__notifyAll(f"{newHost.playerName} is now host.")
             return True
         return False
 
 
 
-
+    @property
+    def lobbyId(self) -> str:
+        return self.__lobbyId
 
     @property
     def canBeJoined(self) -> bool:

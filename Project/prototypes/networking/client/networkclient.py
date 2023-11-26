@@ -123,9 +123,9 @@ class NetworkClient:
                     break
 
     
-    def createLobby(self, lobbyId):
+    def createLobby(self, lobbyName):
         eventId = NetworkEvent.LOBBY_CREATE
-        eventData = {'lobbyId':lobbyId}
+        eventData = {'lobbyName':lobbyName}
         self.send(eventId, eventData)
     
     def joinLobby(self, lobbyId):

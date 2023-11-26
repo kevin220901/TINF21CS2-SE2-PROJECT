@@ -16,5 +16,6 @@ class ServerEventHandler:
 
         client.sendSysMessage('this event is being handled by the eventhandler')
         
+        print('event handled')
         pass
     

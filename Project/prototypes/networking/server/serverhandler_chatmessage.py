@@ -1,6 +1,7 @@
 
 
 
+from networking.server.clientapi import ClientApi
 from networking.networkevent import NetworkEvent
 from networking.lobby import Lobby
 from networking.socketwrapper import SocketWrapper
@@ -8,16 +9,13 @@ from networking import ServerEventHandler
 
 class ServerEventHandler_ChatMessage(ServerEventHandler):
     
-    def handleEvent(self, context, eventData):
-        conn:SocketWrapper = context['conn']
-        lobby:Lobby = context['lobby']
-
-        if not lobby:
-            conn.sendall(NetworkEvent.SYSMESSAGE, {'sysmessage':'you can only send messages if you are part of a lobby'})
-            return
+    def handleEvent(self, client:ClientApi, eventData):
+        if 'message' not in eventData: 
+            client.sendSysMessage('invalid message')
+            return 
         
-        lobby.sendMessage(conn, eventData['message'])
+        client.sendMessage(eventData['message'])
 
-        print(f'Message boradcasted {eventData["message"]}')
+        print(f'transmitted message {client.playerName}@{client.currentLobbyId}')
         pass
 

@@ -1,5 +1,6 @@
 
 
+from networking.server.clientapi import ClientApi
 from networking.networkevent import NetworkEvent
 from networking.lobby import Lobby
 from networking.socketwrapper import SocketWrapper
@@ -7,14 +8,12 @@ from networking import ServerEventHandler
 
 class ServerEventHandler_LobbyJoin(ServerEventHandler):
     
-    def handleEvent(self, context, eventData):
-        lobbyId = eventData['lobbyId']
-        conn:SocketWrapper = context['conn']
-        lobby:Lobby = context['lobbies'][lobbyId]
-        lobby.join(conn)
-        context['lobby'] = lobby
+    def handleEvent(self, client:ClientApi, eventData):
+        if 'lobbyId' not in eventData:
+            client.sendSysMessage('invalid eventData: missing lobby id')
+            return
 
-        lobby.sendSysMessage('player has joined the lobby')
+        lobby:Lobby = client.joinLobby(eventData['lobbyId']) 
 
-        print(f'Lobby joined {lobbyId}')
+        print(f'{client.playerName} joined {lobby.lobbyId}')
         pass

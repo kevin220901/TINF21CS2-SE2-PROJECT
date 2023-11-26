@@ -8,9 +8,13 @@ from networking import constants
 
 
 class SocketWrapper:
+    '''
+        deprecated (for now). 
+        maby of use later
+    '''
 
     def __init__(self, conn:socket.socket) -> None:
-        self.__conn = conn
+        self.__conn:socket.socket = conn
 
 
     def socket_sendall(self, data:bytes):
@@ -23,6 +27,7 @@ class SocketWrapper:
 
         self.__conn.sendall(head)
         self.__conn.sendall(body)
+        pass
 
     def recv(self, __buffsize):
         return self.__conn.recv(__buffsize)
