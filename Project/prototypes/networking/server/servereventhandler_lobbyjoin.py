@@ -13,7 +13,6 @@ class ServerEventHandler_LobbyJoin(ServerEventHandler):
             client.sendSysMessage('invalid eventData: missing lobby id')
             return
 
-        lobby:Lobby = client.joinLobby(eventData['lobbyId']) 
+        client.joinLobby(eventData['lobbyId']) 
 
-        print(f'{client.playerName} joined {lobby.lobbyId}')
         pass

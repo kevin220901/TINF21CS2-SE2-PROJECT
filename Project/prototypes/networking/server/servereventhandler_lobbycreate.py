@@ -19,8 +19,5 @@ class ServerEventHandler_LobbyCreate(ServerEventHandler):
             client.sendSysMessage('server recieved invalid lobby name')
             return
 
-        lobby = client.createLobby(eventData['lobbyName'])
-        #TODO:validate create successfull
-
-        print(f'Lobby created {lobby.lobbyId}')
+        client.createLobby(eventData['lobbyName'])
         pass

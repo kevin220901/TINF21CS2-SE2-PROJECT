@@ -15,7 +15,5 @@ class ServerEventHandler_ChatMessage(ServerEventHandler):
             return 
         
         client.sendMessage(eventData['message'])
-
-        print(f'transmitted message {client.playerName}@{client.currentLobbyId}')
         pass
 

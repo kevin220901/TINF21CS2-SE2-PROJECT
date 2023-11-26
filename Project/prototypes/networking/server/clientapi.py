@@ -35,6 +35,7 @@ class ClientApi:
 
         self.__currentLobby = selectedLobby
         self.__currentLobby.join(self)
+
         return selectedLobby
 
     def leaveLobby(self):
@@ -45,7 +46,9 @@ class ClientApi:
 
     def sendMessage(self, message):
         if self.__handleNotInLobby(): return
+
         self.__currentLobby.chatMessage(self, message)
+
         pass
 
     def sendSysMessage(self, message):
@@ -103,6 +106,7 @@ class ClientApi:
     
     @property
     def currentLobbyId(self):
+        if not self.__currentLobby: return ''
         return self.__currentLobby.lobbyId
 
 from socket import socket
