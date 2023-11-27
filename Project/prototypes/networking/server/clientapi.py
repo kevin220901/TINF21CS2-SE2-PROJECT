@@ -56,7 +56,7 @@ class ClientApi:
         pass
 
     def sendLobbyBrowsingResult(self, joinableLobbies):
-        self.__conn.sendall(NetworkEvent.LOBBYS_GET, joinableLobbies)
+        self.__conn.sendall(NetworkEvent.LOBBIES_GET, joinableLobbies)
 
     def recvMessage(self, sender:str, message):
         self.__conn.sendall(NetworkEvent.MESSAGE, {'from':sender, 'messsage':message})

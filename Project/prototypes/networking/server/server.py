@@ -75,7 +75,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
             NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(),                      #data: playerId
             NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(),                      #data: playerId
-            NetworkEvent.LOBBYS_GET.value: ServerEventHandler_LobbyBrowse(),                       #data: playerId
+            NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(),                       #data: playerId
             NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
