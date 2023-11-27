@@ -1,25 +1,20 @@
 
 from __future__ import annotations
 
-
-
-
-
 class ClientApi:
-    def __init__(self, conn:socket, playerId, playerName, lobbies, logger) -> None:
+    def __init__(self, conn:socket, playerId, playerName, lobbies) -> None:
         self.__conn = SocketWrapper(conn)
         self.__currentLobby:Lobby = None
         self.__playerId:str = playerId
         self.__playerName:str = playerName
         self.lobbies:dict = lobbies
-        self.logger:Logger = logger
+
 
     def createLobby(self, lobbyName):
         if self.__handleAllreadyInLobby(): return
         if self.__handleLobbyExists(lobbyName): return
 
         #TODO:the LobbyName must replaced with an actual, UNIQUE lobby id
-        self.logger.info(f'created lobby "{lobbyName}"')
         newLobby = Lobby(lobbyName, self.lobbies)
         self.__currentLobby = newLobby
         newLobby.join(self)
@@ -103,7 +98,7 @@ class ClientApi:
             self.sendSysMessage('not in a lobby')
             return True
         return False
-
+    
 
     @property
     def playerName(self):
@@ -127,4 +122,3 @@ from networking.server.lobby import Lobby
 from networking.server.clientsocketwrapper import ClientSocketWrapper
 from networking.common.socketwrapper import SocketWrapper
 from networking.common.networkevent import NetworkEvent
-from logging import Logger

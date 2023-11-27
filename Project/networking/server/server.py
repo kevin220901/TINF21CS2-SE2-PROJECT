@@ -14,12 +14,6 @@ from networking.common.socketwrapper import SocketWrapper
 
 from networking import *
 
-LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
-
-
-
-
-
 HOST = "localhost"
 PORT = 5555
 
@@ -29,9 +23,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     lobbies = {}
     connected = {}
 
-    logging.info('>>Initializing ServerEventHandlers')
-
-    logging.info('<<ServerEventHandlers Initialized')
     try:
         s.bind((HOST, PORT))
     except socket.error as e:
@@ -45,41 +36,33 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     
 
-    def threaded_client(context):
+    def threaded_client(sock:socket.socket, playerId, playerName):
         
         #do i need to make this a critical section?
         #maby use contextvars? -> dont know jet how they are to be used
-        sock:socket.socket = context['conn']
-        sock.sendall(context['playerId'])
+        sock.sendall(playerId)
 
-        playerName = context['playerName'],
-        
-        logging.basicConfig(filename=f'dev_server_conn{playerName}.log', encoding='utf-8', 
-            level=logging.DEBUG,
-            format= LOG_FORMAT,datefmt='%d/%m/%Y %H:%M:%S')
-
-        
+       
         api = ClientApi(
             conn=sock,
-            playerId=context['playerId'],
+            playerId=playerId,
             playerName=playerName,
             lobbies=lobbies,
-            logger = logging.getLogger()
         )
 
         
         
 
         events = {
-            NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),             #data: playerId, lobbyId
-            NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         #data: tbd ...
-            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(),                      #data: playerId
-            NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(),                      #data: playerId
-            NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(),                       #data: playerId
-            NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        #data: playerId, pieceId
+            NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),            
+            NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         
+            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(),                      
+            NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(),                     
+            NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(),                      
+            NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(),
-            NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      #data: LobbyId, winner
-            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               #data: playerId, message 
+            NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      
+            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               
         }
         
 
@@ -112,7 +95,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     state = 0
             except Exception as e:
                 running = False
-                api.logger.critical(e)
                 stderr.write(f"'error':{e}")
                 break
                 
@@ -126,19 +108,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     playerCounter = 0
     
     while True:
-        conn, addr = s.accept()
-        print(f"Connected to {addr}")
+        sock, addr = s.accept()
         playerCounter += 1
 
-        conn.setblocking(True)
+        sock.setblocking(True)
 
-        context = {
-            'conn':conn, 
-            'addr':addr,
-            'playerId':playerCounter.to_bytes(16, 'big'),
-            'playerName':f'player_{playerCounter}'
-        }
-
-        start_new_thread(threaded_client, (context,))
+        start_new_thread(threaded_client, (sock, 
+                                           playerCounter.to_bytes(16, 'big'), 
+                                           f'player_{playerCounter}', ))
+                                           
 
 
