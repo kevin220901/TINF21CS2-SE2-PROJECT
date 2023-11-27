@@ -119,7 +119,7 @@ class Lobby:
         return self.__canBeJoined
     
     @property
-    def canNOTBeJoined(self) -> bool:
+    def cantBeJoined(self) -> bool:
         return not self.__canBeJoined
     
     @property
