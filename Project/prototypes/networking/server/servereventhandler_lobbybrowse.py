@@ -19,7 +19,7 @@ class ServerEventHandler_LobbyBrowse:
         lobbyList = []
         lobby: Lobby
 
-        for lobby in client.lobbies:
+        for key, lobby in client.lobbies.items():
             if lobby.cantBeJoined: continue
             lobbyList.append({
                 'lobbyId':lobby.lobbyId,

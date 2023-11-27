@@ -163,3 +163,8 @@ class NetworkClient:
         eventId = NetworkEvent.MESSAGE
         eventData = {'message':message}
         self.send(eventId, eventData)
+
+    def getLobbies(self):
+        eventId = NetworkEvent.LOBBIES_GET
+        eventData = {'messag':''}
+        self.send(eventId, eventData)

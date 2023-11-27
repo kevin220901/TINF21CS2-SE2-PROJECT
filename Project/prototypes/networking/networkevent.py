@@ -8,7 +8,7 @@ class NetworkEvent(Enum):
     LOBBY_CREATE = 2
     LOBBY_LEAVE = 3
     LOBBY_READY = 4
-    LOBBYS_GET = 5
+    LOBBIES_GET = 5
     GAME_START = 6
     GAME_MOVE = 7
     GAME_UPDATE = 8

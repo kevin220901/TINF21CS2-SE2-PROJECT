@@ -11,7 +11,7 @@ class ClientApi:
         self.__currentLobby:Lobby = None
         self.__playerId:str = playerId
         self.__playerName:str = playerName
-        self.lobbies:[str,Lobby] = lobbies
+        self.lobbies:dict = lobbies
         self.logger:Logger = logger
 
     def createLobby(self, lobbyName):
@@ -99,6 +99,7 @@ class ClientApi:
     
     def __handleNotInLobby(self):
         if not self.__currentLobby:
+            #check connection still open
             self.sendSysMessage('not in a lobby')
             return True
         return False
