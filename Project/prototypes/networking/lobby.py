@@ -6,9 +6,9 @@ class Lobby:
         self.__lobbies = lobbies
         self.__lobbyName = lobbyName 
         self.__lobbyId = lobbyName #secrets.token_bytes(32)
-        self.__players = []
+        self.__players = [] #later this might get changed to a dictionary to store mor info. REMEMBER TO update all loops accordingly!
         self.__canBeJoined:bool = True
-        self.__isPrivate: bool = False
+        self.__isPrivate: bool = False #not yet needed 
         self.__ready = {}
         self.__host: ClientApi = None
 
@@ -100,7 +100,7 @@ class Lobby:
              True: if any one player has not jet been set to ready
             False: if all players are set to ready
         '''
-        for p,ready in self.__ready:
+        for p,ready in self.__ready.items():
             if ready == False: return True
 
         return False
