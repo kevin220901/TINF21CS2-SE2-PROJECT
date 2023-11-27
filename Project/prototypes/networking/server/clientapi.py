@@ -42,7 +42,6 @@ class ClientApi:
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
         self.__currentLobby = None
-        self.sendSysMessage('you have left the lobby')
         pass
 
     def sendMessage(self, message):

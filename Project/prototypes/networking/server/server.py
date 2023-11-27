@@ -94,7 +94,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if state == 0:  
                     recieved = sock.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
                     if not recieved:
-                        continue
+                        break
                     
                     eventId = int.from_bytes(recieved[2:], 'big')
                     eventDataLength = int.from_bytes(recieved[:2], 'big')
@@ -103,7 +103,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 else:
                     recieved = sock.recv(eventDataLength)
                     if not recieved:
-                        continue
+                        break
 
                     eventData = pickle.loads(recieved)
                     eventhandler:ServerEventHandler = events[eventId]
@@ -113,13 +113,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             except Exception as e:
                 running = False
                 api.logger.critical(e)
-
-                api.leaveLobby()
-                conn.close()
                 stderr.write(f"'error':{e}")
+                break
                 
-        
-        print(f"Disconnected from {addr}")
+                
+        api.leaveLobby()
+        sock.close()
+        print(f"{api.playerName} disconnected")
         
 
 
@@ -129,6 +129,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         conn, addr = s.accept()
         print(f"Connected to {addr}")
         playerCounter += 1
+
+        conn.setblocking(True)
 
         context = {
             'conn':conn, 
