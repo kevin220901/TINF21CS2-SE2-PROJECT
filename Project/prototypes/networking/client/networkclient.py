@@ -1,4 +1,5 @@
 
+import multiprocessing
 import pickle
 import queue
 import socket
@@ -28,10 +29,12 @@ class NetworkEventObject:
 class NetworkClient:
 
     def __init__(self, host, port) -> None:
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.port = port
         self.address = (self.host, self.port)
+
+        #move the actual connection to a public mthod to enable easier connect retries
 
         self.id = self.__connect()
 
@@ -41,34 +44,38 @@ class NetworkClient:
         self.__sendQueue = queue.Queue(maxsize=10)
         self.__recvQueue = queue.Queue(maxsize=10)
 
-        self.stopEvent = threading.Event()
+        self.__stopEvent = threading.Event()
 
-        recieve_thread = threading.Thread(target=self.__recieve, daemon=True)
-        send_thread = threading.Thread(target=self.__send, daemon=True)
+        self.__recieve_thread = threading.Thread(target=self.__recieve, daemon=True)
+        self.__send_thread = threading.Thread(target=self.__send, daemon=True)
 
-        
-
-        recieve_thread.start()
-        send_thread.start()
+        self.__recieve_thread.start()
+        self.__send_thread.start()
 
 
 
     def __connect(self):
         #TODO: Error handling
-        self.client.connect(self.address)
-        return self.client.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
+        self.__sock.connect(self.address)
+        return self.__sock.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
     
     
     def read(self):
         '''
         returns the first element of the recieved queue
         '''
-        if self.__recvQueue.empty(): return None
+        #if self.__recvQueue.empty(): return None
         return self.__recvQueue.get()
     
 
     def disconnect(self):
-        pass
+        self.__stopEvent.set()
+
+        self.__send_thread.join()
+        self.__recieve_thread.join()
+
+        self.__sock.close()
+
     
     
     def send(self, eventId:NetworkEvent, eventData):
@@ -79,16 +86,16 @@ class NetworkClient:
 
 
     def __send(self):
-        while not self.stopEvent.is_set():
-            if self.__sendQueue.empty():
-                continue
+        while not self.__stopEvent.is_set():
+            #if self.__sendQueue.empty():
+            #    continue
 
             netObj:NetworkObject = self.__sendQueue.get()
             
             with self.send_lock:
                 try:
-                    self.client.sendall(netObj.head)
-                    self.client.sendall(netObj.body)
+                    self.__sock.sendall(netObj.head)
+                    self.__sock.sendall(netObj.body)
                 except Exception as e:
                     print(e)
                     break
@@ -102,12 +109,12 @@ class NetworkClient:
         eventData = None
         eventDataLength = None
 
-        while not self.stopEvent.is_set():
+        while not self.__stopEvent.is_set():
 
             with self.recieve_lock:
                 try:
                     if state == 0:
-                        recieved = self.client.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
+                        recieved = self.__sock.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
                         if not recieved:
                             continue
 
@@ -116,7 +123,7 @@ class NetworkClient:
                         state = 1
 
                     elif state == 1:
-                        recieved = self.client.recv(eventDataLength)
+                        recieved = self.__sock.recv(eventDataLength)
                         if not recieved:
                             continue
 
@@ -127,7 +134,8 @@ class NetworkClient:
 
                 except Exception as e:
                     print(e)
-                    self.client.close()
+                    self.__stopEvent.set()
+                    #self.sock.close()
                     break
 
     
