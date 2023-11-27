@@ -78,6 +78,10 @@ def ChatBotWithHistory():
             nc.createLobby('ddt')
         elif event == 'JOIN':
             nc.joinLobby('ddt')
+        elif event == 'LEAVE':
+            nc.leaveLobby()
+        elif event == 'READY':
+            nc.ready()
         elif event == 'NETWORK':
             output.append(str(value[event]))
             window['output'].update('\n'.join(output))

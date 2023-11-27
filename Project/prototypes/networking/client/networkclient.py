@@ -41,8 +41,12 @@ class NetworkClient:
         self.__sendQueue = queue.Queue(maxsize=10)
         self.__recvQueue = queue.Queue(maxsize=10)
 
-        recieve_thread = threading.Thread(target=self.__recieve)
-        send_thread = threading.Thread(target=self.__send)
+        self.stopEvent = threading.Event()
+
+        recieve_thread = threading.Thread(target=self.__recieve, daemon=True)
+        send_thread = threading.Thread(target=self.__send, daemon=True)
+
+        
 
         recieve_thread.start()
         send_thread.start()
@@ -62,6 +66,10 @@ class NetworkClient:
         if self.__recvQueue.empty(): return None
         return self.__recvQueue.get()
     
+
+    def disconnect(self):
+        pass
+    
     
     def send(self, eventId:NetworkEvent, eventData):
         body = pickle.dumps(eventData)
@@ -71,7 +79,7 @@ class NetworkClient:
 
 
     def __send(self):
-        while True:
+        while not self.stopEvent.is_set():
             if self.__sendQueue.empty():
                 continue
 
@@ -94,7 +102,7 @@ class NetworkClient:
         eventData = None
         eventDataLength = None
 
-        while True:
+        while not self.stopEvent.is_set():
 
             with self.recieve_lock:
                 try:
