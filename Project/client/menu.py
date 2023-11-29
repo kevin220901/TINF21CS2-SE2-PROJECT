@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-from login import Login
-from register import Register
+from account.login import Login
+from account.register import Register
 
 class Menu:
     def __init__(self, mainWindow):
