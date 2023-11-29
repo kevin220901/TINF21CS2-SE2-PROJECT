@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from menu import Menu
-
+from settings import Settings
 
 class BlokusUtility(QMainWindow):
     def __init__(self):
@@ -39,7 +39,11 @@ class BlokusUtility(QMainWindow):
         menu.setFont(font)
 
     def settingsFrame(self):
-        print("Launch Settings")
+        popup = QDialog()
+        popup.setWindowTitle("Popup")
+        popup.setMinimumSize(300, 200)
+        layout = QGridLayout()
+        popup.exec()
 
     
 

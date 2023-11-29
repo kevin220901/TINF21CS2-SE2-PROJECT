@@ -8,4 +8,7 @@ class Settings:
         self.mainWindow = mainWindow
 
     def settingsFrame(self):
-        pass
+        popup = QDialog()
+        popup.setWindowTitle("Popup")
+        popup.setMinimumSize(300, 200)
+        layout = QVBoxLayout()

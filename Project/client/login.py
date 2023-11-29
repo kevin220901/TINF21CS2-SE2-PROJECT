@@ -63,4 +63,6 @@ class Login:
         print("Password:", password)
     
     def back(self):
-        pass
+        from menu import Menu
+        self.menu = Menu(self.mainWindow)
+        self.menu.menuFrame()

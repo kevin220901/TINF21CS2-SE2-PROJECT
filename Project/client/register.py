@@ -82,4 +82,6 @@ class Register:
         print("E-Mail:", email)
     
     def back(self):
-        pass
+        from menu import Menu
+        self.menu = Menu(self.mainWindow)
+        self.menu.menuFrame()
