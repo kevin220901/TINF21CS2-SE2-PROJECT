@@ -40,10 +40,13 @@ class BlokusUtility(QMainWindow):
 
     def settingsFrame(self):
         popup = QDialog()
-        popup.setWindowTitle("Popup")
-        popup.setMinimumSize(400, 300)
+        popup.setWindowTitle("Settings")
+        popup.setFixedSize(800, 500)
         layout = QGridLayout()
         popup.setModal(True)
+        
+        
+        
         popup.exec()
 
     
