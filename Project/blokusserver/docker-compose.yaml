@@ -1,0 +1,38 @@
+services:
+  web: 
+    build:
+      context: app
+      target: dev-envs
+    ports: 
+      - '8000:8000'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_db
+    
+  postgres_db:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        - POSTGRES_DB=${SQL_NAME}
+        - POSTGRES_USER=${SQL_USER}
+        - POSTGRES_PASSWORD=${SQL_PASSWORD}
+        
+      ports:
+        - '5432:80'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres_db
+    ports:
+      - 5555:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    restart: unless-stopped
+volumes:
+  postgres_data:
