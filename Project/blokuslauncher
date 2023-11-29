@@ -50,7 +50,8 @@ def ChatBotWithHistory():
                        default_element_size=(30, 2),
                        font=('Helvetica', ' 13'),
                        default_button_element_size=(8, 2),
-                       return_keyboard_events=True)
+                       return_keyboard_events=True,
+                       finalize=True)
 
     # ---===--- Loop taking in user input and using it  --- #
     command_history = []

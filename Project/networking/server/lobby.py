@@ -18,7 +18,6 @@ class Lobby:
     def join(self, player:ClientApi):
         self.__players.append(player)
         self.__ready[player] = False
-        player.logger.info(f'"{player.playerName}" joined lobby "{self.lobbyId}"')
         self.__notifyAll(f"new player {player.playerName} has joined the lobby.")
         self.__handleHostGone()
         pass
@@ -78,7 +77,6 @@ class Lobby:
             #pick first next player and assign as new host
             newHost:ClientApi = next(iter(self.__players))
             self.__host = newHost
-            newHost.logger.info(f'"{newHost.playerName}" is now host of "{self.lobbyId}"')
             self.__notifyAll(f"{newHost.playerName} is now host.")
             return True
         return False

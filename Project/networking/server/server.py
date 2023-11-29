@@ -1,42 +1,44 @@
-import logging
+
+
 import pickle
 import socket
 
 from _thread import *
 from sys import stderr
+import threading
 from networking.server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
 from networking.server.serverhandler_gamestart import ServerEventHandler_GameStart
 from networking.server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
 from networking.server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
 from networking.server.clientapi import ClientApi
 from networking.server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
-from networking.common.socketwrapper import SocketWrapper
+
 
 from networking import *
 
-HOST = "localhost"
-PORT = 5555
-
-
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-
-    lobbies = {}
-    connected = {}
-
-    try:
-        s.bind((HOST, PORT))
-    except socket.error as e:
-        str(e)
 
 
 
-    s.listen()
-    print("Server started")
-    print(f"Waiting for connections on {HOST}:{PORT}")
+class Server:
+    def __init__(self, host:str, port:int, runAsDaemon:bool) -> None:
+        self.__host = host
+        self.__port = port
+        self.__lobbies = {}
+        self.__globalStopEvent = threading.Event()
+        self.__server_handler_thread = threading.Thread(target=self.__threaded_server, 
+                                              args=(self.__host, self.__port, self.__globalStopEvent),
+                                              daemon=runAsDaemon)
+        self.__client_threads = []
+
+    def start(self):
+        self.__server_handler_thread.start()
+
+    def stop(self):
+        self.__globalStopEvent.set()
+        self.__server_handler_thread.join()
 
     
-
-    def threaded_client(sock:socket.socket, playerId, playerName):
+    def __threaded_client(self, sock:socket.socket, playerId, playerName, globalStopEvent:threading.Event, localStopEvent:threading.Event):
         
         #do i need to make this a critical section?
         #maby use contextvars? -> dont know jet how they are to be used
@@ -47,7 +49,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             conn=sock,
             playerId=playerId,
             playerName=playerName,
-            lobbies=lobbies,
+            lobbies=self.__lobbies,
         )
 
         
@@ -71,7 +73,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         eventDataLength = 0
         running = True
 
-        while running:
+        while not globalStopEvent.is_set() and not localStopEvent.is_set():
             try:
 
                 if state == 0:  
@@ -94,7 +96,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
                     state = 0
             except Exception as e:
-                running = False
+                localStopEvent.set()
                 stderr.write(f"'error':{e}")
                 break
                 
@@ -102,20 +104,27 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         api.leaveLobby()
         sock.close()
         print(f"{api.playerName} disconnected")
-        
 
 
-    playerCounter = 0
-    
-    while True:
-        sock, addr = s.accept()
-        playerCounter += 1
+    def __threaded_server(self, host:str, port:int, globalStopEvent:threading.Event):
+        playerCounter:int = 0
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            
+            s.bind((host, port))
+            s.listen()
+            print("Server started")
+            print(f"Waiting for connections on {host}:{port}")
 
-        sock.setblocking(True)
+            while not globalStopEvent.is_set():
+                sock, addr = s.accept()
+                playerCounter += 1
 
-        start_new_thread(threaded_client, (sock, 
-                                           playerCounter.to_bytes(16, 'big'), 
-                                           f'player_{playerCounter}', ))
-                                           
-
-
+                sock.setblocking(True)
+                client_thread = threading.Thread(target=self.__threaded_client, 
+                        args=(sock, 
+                                playerCounter.to_bytes(16, 'big'), 
+                                f'player_{playerCounter}', 
+                                globalStopEvent, 
+                                threading.Event()))
+                client_thread.start()
+                self.__client_threads.append(client_thread)
