@@ -21,5 +21,11 @@ class Settings:
         self.audioOutput = QAudioOutput()
         self.mediaPlayer.setAudioOutput(self.audioOutput)
         self.mediaPlayer.setSource(QUrl.fromLocalFile("jinglebells.mp3"))
-        self.audioOutput.setVolume(50)
+        self.audioOutput.setVolume(1)
+        self.mediaPlayer.mediaStatusChanged.connect(self.loopMusic)
         self.mediaPlayer.play()
+    
+    def loopMusic(self, status):
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            self.mediaPlayer.setPosition(0)
+            self.mediaPlayer.play()
