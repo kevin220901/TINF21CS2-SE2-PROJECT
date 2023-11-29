@@ -39,15 +39,8 @@ class BlokusUtility(QMainWindow):
         menu.setFont(font)
 
     def settingsFrame(self):
-        popup = QDialog()
-        popup.setWindowTitle("Settings")
-        popup.setFixedSize(800, 500)
-        layout = QGridLayout()
-        popup.setModal(True)
-        
-        
-        
-        popup.exec()
+        self.settings = Settings(self)
+        self.settings.settingsFrame()
 
     
 
