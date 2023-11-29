@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+from networking.server.server import Server
 
-from networking.server import server
+host = 'localhost'
+port = 5555
 
+server = Server(host, port, False)
+server.start()
