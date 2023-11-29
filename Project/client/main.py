@@ -28,7 +28,7 @@ class BlokusUtility(QMainWindow):
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
-        menu = QMenu("&Menü", self)
+        menu = QMenu("&Menu", self)
         menuBar.addMenu(menu)
         settings_action = QAction("Settings", self)
         exit_action = QAction("Exit", self)
