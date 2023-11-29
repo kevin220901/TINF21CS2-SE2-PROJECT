@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+from PyQt6.QtMultimedia import *
 from menu import Menu
 from settings import Settings
 
@@ -10,6 +11,7 @@ class BlokusUtility(QMainWindow):
         super().__init__()
 
         self.initUI()
+        self.initBackgroundMusic()
         self.menu = Menu(self)
         self.menu.menuFrame()
         
@@ -21,6 +23,14 @@ class BlokusUtility(QMainWindow):
         self.screen_geometry = self.primary_screen.availableGeometry()
         self.setGeometry(self.screen_geometry)
         self._createMenuBar()
+        
+    def initBackgroundMusic(self):
+        self.mediaPlayer = QMediaPlayer(self)
+        self.audioOutput = QAudioOutput(self)
+        self.mediaPlayer.setAudioOutput(self.audioOutput)
+        self.mediaPlayer.setSource(QUrl.fromLocalFile("jinglebells.mp3"))
+        self.audioOutput.setVolume(50)
+        self.mediaPlayer.play()
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
