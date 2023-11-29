@@ -11,7 +11,8 @@ class BlokusUtility(QMainWindow):
         super().__init__()
 
         self.initUI()
-        self.initBackgroundMusic()
+        self.settings = Settings(self)
+        self.settings.initBackgroundMusic()
         self.menu = Menu(self)
         self.menu.menuFrame()
         
