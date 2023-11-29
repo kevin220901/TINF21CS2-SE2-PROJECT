@@ -4,17 +4,13 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
 
-
 class BlokusUtility(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.initUI()
-        self.menuFrame()
-        #time.sleep(10)
-        
-        
-
+        self.menu = Menu(self)
+        self.menu.menuFrame()
 
     def initUI(self):
         self.setWindowTitle('Blokus Game')
@@ -23,10 +19,9 @@ class BlokusUtility(QMainWindow):
         self.screen_geometry = self.primary_screen.availableGeometry()
         self.setGeometry(self.screen_geometry)
         self._createMenuBar()
-    
+
     def _createMenuBar(self):
         menuBar = self.menuBar()
-        # Creating menus using a QMenu object
         menu = QMenu("&Menü", self)
         menuBar.addMenu(menu)
         settings_action = QAction("Settings", self)
@@ -38,61 +33,70 @@ class BlokusUtility(QMainWindow):
         menu.addSeparator()
         menu.addAction(exit_action)
         font = menu.font()
-        font.setPointSize(10)  # Setze die Schriftgröße
+        font.setPointSize(10)
         menu.setFont(font)
-    
+
     def settingsFrame(self):
         print("Launch Settings")
-        
+
+    def loginFrame(self):
+        # Your loginFrame method content goes here
+        pass
+
+    def test(self):
+        # Your test method content goes here
+        pass
+
+
+class Menu:
+    def __init__(self, mainWindow):
+        self.mainWindow = mainWindow
 
     def menuFrame(self):
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-        self.menuFrame = QFrame(self.central_widget)
-        self.menuFrame.setStyleSheet("QFrame { background-color: #E0E0E0; border: 2px solid black; }")
-        self.layout = QGridLayout(self.menuFrame)
-        self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.central_layout = QVBoxLayout(self.central_widget)
-        self.central_layout.addWidget(self.menuFrame)
-        self.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.central_widget.setLayout(self.central_layout)
-        self.button = QPushButton("Button1")  
-        self.button.setMinimumSize(400, 100)  
-        self.button.setMaximumSize(600, 400)
-        self.button.clicked.connect(self.test)
-        self.layout.addWidget(self.button)
-        self.button2 = QPushButton("Button2")
-        self.button2.setMinimumSize(400, 100)  
-        self.button2.setMaximumSize(600, 400)
-        self.layout.addWidget(self.button2)
-    
-    def loginFrame(self):
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-        self.loginFrame = QFrame(self.central_widget)
-        self.loginFrame.setStyleSheet("QFrame { background-color: #E0E0E0; border: 2px solid black; }")
-        self.layout = QGridLayout(self.loginFrame)
-        self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.central_layout = QVBoxLayout(self.central_widget)
-        self.central_layout.addWidget(self.loginFrame)
-        self.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.central_widget.setLayout(self.central_layout)
-        self.button = QPushButton("Login")  
-        self.button.setMinimumSize(400, 100)  
-        self.button.setMaximumSize(600, 400)
-        self.button.clicked.connect(self.test)
-        self.layout.addWidget(self.button)
-        self.button2 = QPushButton("Login")
-        self.button2.setMinimumSize(400, 100)  
-        self.button2.setMaximumSize(600, 400)
-        self.layout.addWidget(self.button2)
-        
-    def test(self):
-        self.menuFrame.deleteLater()
-        QTimer.singleShot(3000, self.loginFrame)
+        self.mainWindow.label = QLabel('Blokus', self.mainWindow)
+        self.mainWindow.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.mainWindow.central_widget = QWidget(self.mainWindow)
+        self.mainWindow.setCentralWidget(self.mainWindow.central_widget)
+        self.mainWindow.menuFrame = QFrame(self.mainWindow.central_widget)
+        self.mainWindow.menuFrame.setStyleSheet("QFrame { background-color: #E0E0E0; border: 2px solid black; }")
+        layout = QGridLayout(self.mainWindow.menuFrame)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.mainWindow.central_layout = QVBoxLayout(self.mainWindow.central_widget)
+        self.mainWindow.central_layout.addWidget(self.mainWindow.menuFrame)
+        self.mainWindow.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.mainWindow.central_widget.setLayout(self.mainWindow.central_layout)
+        layout.addWidget(self.mainWindow.label)
+        self.mainWindow.button_register = QPushButton("Registrieren", self.mainWindow)  
+        self.mainWindow.button_register.setMinimumSize(500, 100)  
+        self.mainWindow.button_register.setMaximumSize(600, 400)
+        self.mainWindow.button_register.clicked.connect(self.register)
+        layout.addWidget(self.mainWindow.button_register)
+        self.mainWindow.button_login = QPushButton("Anmelden", self.mainWindow)
+        self.mainWindow.button_login.setMinimumSize(500, 100)  
+        self.mainWindow.button_login.setMaximumSize(600, 400)
+        self.mainWindow.button_login.clicked.connect(self.login)
+        layout.addWidget(self.mainWindow.button_login)
+        self.mainWindow.button_exit = QPushButton("Exit", self.mainWindow)
+        self.mainWindow.button_exit.setMinimumSize(500, 100)  
+        self.mainWindow.button_exit.setMaximumSize(600, 400)
+        self.mainWindow.button_exit.clicked.connect(self.exit)
+        layout.addWidget(self.mainWindow.button_exit)
+
+    def register(self):
+        self.mainWindow.menuFrame.deleteLater()
+
+    def login(self):
+        self.mainWindow.menuFrame.deleteLater()
+
+    def exit(self):
+        self.mainWindow.close()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    font = app.font()
+    font.setPointSize(16)
+    app.setFont(font)
     mainWindow = BlokusUtility()
     mainWindow.showMaximized()
     sys.exit(app.exec())
