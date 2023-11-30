@@ -20,19 +20,20 @@ from common.networkevent import NetworkEvent
 from common import constants as NetworkConst
 
 class Server:
-    def __init__(self, host:str, port:int, runAsDaemon:bool) -> None:
+    def __init__(self, host:str, port:int, globalStopEvent:threading.Event) -> None:
         self.__host = host
         self.__port = port
         self.__lobbies = {}
-        self.__globalStopEvent = threading.Event()
+        self.__globalStopEvent = globalStopEvent
         self.__server_handler_thread = threading.Thread(target=self.__threaded_server, 
                                               args=(self.__host, self.__port, self.__globalStopEvent),
-                                              daemon=runAsDaemon)
+                                              daemon=True)
         self.__client_threads = []
 
     def start(self):
         self.__server_handler_thread.start()
 
+    
     def stop(self):
         self.__globalStopEvent.set()
         self.__server_handler_thread.join()
@@ -106,24 +107,31 @@ class Server:
 
 
     def __threaded_server(self, host:str, port:int, globalStopEvent:threading.Event):
+        logger.info(f'>>> starting blokus server on {host}:{port}')
+
         playerCounter:int = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            
             s.bind((host, port))
             s.listen()
-            print("Server started")
-            print(f"Waiting for connections on {host}:{port}")
+            logger.info(f"<<< server listening on {host}:{port}")
 
             while not globalStopEvent.is_set():
+                
                 sock, addr = s.accept()
                 playerCounter += 1
 
+                logger.info(f'>>> incomming connection from: {str(addr)}')
+                #logger.info(f'>>> starting new client thread')
                 sock.setblocking(True)
                 client_thread = threading.Thread(target=self.__threaded_client, 
                         args=(sock, 
                                 playerCounter.to_bytes(16, 'big'), 
                                 f'player_{playerCounter}', 
                                 globalStopEvent, 
-                                threading.Event()))
+                                threading.Event()),
+                                daemon=True
+                            )
+                
                 client_thread.start()
+                logger.info(f'<<< client thread {client_thread.ident} started')
                 self.__client_threads.append(client_thread)

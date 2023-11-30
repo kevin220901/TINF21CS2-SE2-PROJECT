@@ -1,17 +1,25 @@
 #!/usr/bin/python3
 
+import threading
 from server.logger import *
 from sys import stdout
 from server.server import Server
 
 
-host = 'localhost'
+host = '0.0.0.0'
 port = 5555
 
-logger.info(f'>>> starting blokus server on {host}:{port}')
+stopEvent = threading.Event()
 
-
-server = Server(host, port, False)
+server = Server(host, port, stopEvent)
 server.start()
 
-logger.info(f'<<< blokus server: waiting for connections')
+#this loop is required for the server to run in docker, 
+#reason: 
+#   Server starts its own thread for handling incomming clien requests
+#   If the main thread is not occupied docker throws the error: could not create thread ...
+
+#An alternativ solution could be returning the logic of the serverthread to the main thread. 
+# Final conclusion on how to coop with this problem hast yet to be discussed (or not, lol)
+while not stopEvent.is_set():
+    pass
