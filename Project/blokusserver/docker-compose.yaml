@@ -3,15 +3,15 @@ services:
   
       
 
-  src: 
+  authentication: 
     build:
-      context: src
+      context: authentication
     ports: 
       - '8000:8000'
     volumes:
-      - ./src:/app
+      - ./authentication:/app
     environment:
-       WEB_DOCUMENT_ROOT: /app/src
+       WEB_DOCUMENT_ROOT: /app/authentication
     depends_on:
       - postgres_db
     links:
