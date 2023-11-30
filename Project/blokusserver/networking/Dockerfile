@@ -8,4 +8,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --no-cache-dir
 COPY . /app 
 ENTRYPOINT ["python3"] 
-CMD ["blokuslauncher.py"]
+CMD ["blokusserverlauncher.py"]
