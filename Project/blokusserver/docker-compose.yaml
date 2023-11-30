@@ -46,7 +46,7 @@ services:
     depends_on:
       - postgres_db
     ports:
-      - 6666:80
+      - 9090:80
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
