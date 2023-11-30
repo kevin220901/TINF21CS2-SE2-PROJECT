@@ -59,8 +59,8 @@ class Login:
     def check_login(self):
         username = self.mainWindow.username_input.text()
         password = self.mainWindow.password_input.text()
-        print("Username:", username)
-        print("Password:", password)
+        #print("Username:", username)
+        #print("Password:", password)
     
     def back(self):
         from menu import Menu

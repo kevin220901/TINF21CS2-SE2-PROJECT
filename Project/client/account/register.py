@@ -76,10 +76,10 @@ class Register:
         password = self.mainWindow.password_input.text()
         password_confirm = self.mainWindow.password_confirm_input.text()
         email = self.mainWindow.email_input.text()
-        print("Username:", username)
-        print("Password:", password)
-        print("Username:", password_confirm)
-        print("E-Mail:", email)
+        #print("Username:", username)
+        #print("Password:", password)
+        #print("Username:", password_confirm)
+        #print("E-Mail:", email)
     
     def back(self):
         from menu import Menu
