@@ -5,6 +5,13 @@ from PyQt6.QtCore import *
 from menu import Menu
 from settings import Settings
 
+
+##################################################
+## Author: Kevin Wagner
+##################################################
+
+
+
 class BlokusUtility(QMainWindow):
     def __init__(self):
         super().__init__()

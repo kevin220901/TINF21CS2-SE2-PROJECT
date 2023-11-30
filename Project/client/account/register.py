@@ -19,7 +19,7 @@ class Register:
 
         self.mainWindow.username_label = QLabel("Username                   :")
         self.mainWindow.password_label = QLabel("Password                    :")
-        self.mainWindow.password_confirm_label = QLabel("Password bestätigen  :")
+        self.mainWindow.password_confirm_label = QLabel("Password bestätigen   :")
         self.mainWindow.email_label = QLabel("E-Mail                         :")
         self.mainWindow.username_input = QLineEdit()
         self.mainWindow.password_input = QLineEdit()

@@ -15,6 +15,8 @@ class Settings:
         layout = QGridLayout()
         popup.setModal(True)
         popup.exec()
+        
+        
     
     def initBackgroundMusic(self):
         self.mediaPlayer = QMediaPlayer()
