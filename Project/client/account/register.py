@@ -1,22 +1,25 @@
+# Imports
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
-
+# Register Class for User Registration
 class Register:
     def __init__(self, mainWindow):
         self.mainWindow = mainWindow
 
+    # Initilize Register Frame and Widget
     def registerFrame(self):
         register_widget = QWidget()
         register_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         register_widget.setFixedSize(700, 300)
 
+        # Add Grid Layout to Widget
         grid_layout = QGridLayout(register_widget)
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         self.mainWindow.central_layout.addWidget(register_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Add Labels and Input for User Registration
         self.mainWindow.username_label = QLabel("Username                   :")
         self.mainWindow.password_label = QLabel("Password                    :")
         self.mainWindow.password_confirm_label = QLabel("Password bestätigen   :")
@@ -25,19 +28,26 @@ class Register:
         self.mainWindow.password_input = QLineEdit()
         self.mainWindow.password_confirm_input = QLineEdit()
         self.mainWindow.email_input = QLineEdit()
+        
+        # Make Password Input unreadable
         self.mainWindow.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.mainWindow.password_confirm_input.setEchoMode(QLineEdit.EchoMode.Password)
+        
+        # Add Button for Registration Function
         self.mainWindow.register_button = QPushButton("Registrieren")
         self.mainWindow.register_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
+        
+        # Add Button for Back Function
         self.mainWindow.back_button = QPushButton("Zurück")
         self.mainWindow.back_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
 
+         # Layout for Label and Input inside of Grid Layout
         label_input_layout = QHBoxLayout()
         label_input_layout.addWidget(self.mainWindow.username_label)
         label_input_layout.addWidget(self.mainWindow.username_input)
@@ -60,7 +70,7 @@ class Register:
         back_button_layout = QHBoxLayout()
         back_button_layout.addWidget(self.mainWindow.back_button)
 
-        
+        # Set Layout
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
         grid_layout.addLayout(label_input_layout2, 1, 0, 1, 1)
         grid_layout.addLayout(label_input_layout3, 2, 0, 1, 1)
@@ -68,9 +78,11 @@ class Register:
         grid_layout.addLayout(register_button_layout, 4, 0, 1, 1)
         grid_layout.addLayout(back_button_layout, 5, 0, 1, 1)
 
+        #Add Button Functions
         self.mainWindow.register_button.clicked.connect(self.register)
         self.mainWindow.back_button.clicked.connect(self.back)
 
+    # Register User for Blokus Game
     def register(self):
         username = self.mainWindow.username_input.text()
         password = self.mainWindow.password_input.text()
@@ -81,6 +93,7 @@ class Register:
         #print("Username:", password_confirm)
         #print("E-Mail:", email)
     
+    #Add Back Button Function
     def back(self):
         from menu import Menu
         self.menu = Menu(self.mainWindow)

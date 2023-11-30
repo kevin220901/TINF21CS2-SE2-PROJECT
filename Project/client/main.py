@@ -1,3 +1,4 @@
+# Imports
 import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
@@ -11,7 +12,7 @@ from settings import Settings
 ##################################################
 
 
-
+# Main Window Class
 class BlokusUtility(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -22,7 +23,7 @@ class BlokusUtility(QMainWindow):
         self.menu = Menu(self)
         self.menu.menuFrame()
         
-
+    # Initilize Primary Screen
     def initUI(self):
         self.setWindowTitle('Blokus Game')
         self.primary_screen = QApplication.primaryScreen()
@@ -32,7 +33,7 @@ class BlokusUtility(QMainWindow):
         self._createMenuBar()
         
     
-
+    # Creation Top Menu Bar of Primary Screen
     def _createMenuBar(self):
         menuBar = self.menuBar()
         menu = QMenu("&Menu", self)
@@ -49,6 +50,7 @@ class BlokusUtility(QMainWindow):
         font.setPointSize(10)
         menu.setFont(font)
 
+    # Integration of Settings Popup and Background Music
     def settingsFrame(self):
         self.settings.settingsFrame()
 
@@ -56,11 +58,7 @@ class BlokusUtility(QMainWindow):
 
 
 
-
-
-
-
-
+# Initilize Main Window (Blokus Utility)
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     font = app.font()
