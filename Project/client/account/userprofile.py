@@ -107,4 +107,6 @@ class UserProfile:
         self.lobbymenu.lobbyMenuFrame()
         
     def delete_profile(self):
-        pass
+        from account.deleteprofile import DeleteProfile
+        self.deleteProfile = DeleteProfile(self.mainWindow)
+        self.deleteProfile.deleteProfileFrame()

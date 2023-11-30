@@ -14,7 +14,7 @@ class DeleteProfile:
     def deleteProfileFrame(self):
         popup = QDialog()
         popup.setWindowTitle("Delete Profile")
-        popup.setFixedSize(100, 50)
+        popup.setFixedSize(600, 250)
         layout = QGridLayout()
         popup.setModal(True)
         popup.exec()
