@@ -2,7 +2,7 @@
 
 
 import threading
-from networking import ServerApi, NetworkConst
+from networking.client.serverapi import ServerApi, NetworkConst
 
 #!/usr/bin/env python
 import PySimpleGUI as sg

@@ -1,5 +1,6 @@
 
 
+from server.logger import *
 import pickle
 import socket
 
@@ -95,11 +96,11 @@ class Server:
                     state = 0
             except Exception as e:
                 localStopEvent.set()
-                stderr.write(f"'error':{e}")
+                logger.critical(str(e))
                 break
                 
                 
-        api.leaveLobby()
+        #api.leaveLobby() #TODO: fix bug!!
         sock.close()
         print(f"{api.playerName} disconnected")
 
