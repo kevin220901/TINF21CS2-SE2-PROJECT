@@ -32,6 +32,12 @@ class LobbyConfig:
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
         
+        self.mainWindow.back_button = QPushButton("Back")
+        self.mainWindow.back_button.setStyleSheet(
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
+        
         label_input_layout = QHBoxLayout()
         label_input_layout.addWidget(self.mainWindow.lobby_name_label)
         label_input_layout.addWidget(self.mainWindow.lobby_name_input)
@@ -47,7 +53,9 @@ class LobbyConfig:
         
         
         button_layout = QHBoxLayout()
+        button_layout.addWidget(self.mainWindow.back_button)
         button_layout.addWidget(self.mainWindow.create_lobby_button)
+        
         
         
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
@@ -56,6 +64,7 @@ class LobbyConfig:
         grid_layout.addLayout(button_layout, 3, 0, 1, 1)
         
         self.mainWindow.create_lobby_button.clicked.connect(self.lobby_create)
+        self.mainWindow.back_button.clicked.connect(self.back)
         
         
     def lobby_create(self):
@@ -63,3 +72,8 @@ class LobbyConfig:
         ai_difficulty = self.mainWindow.ai_difficulty_choice.currentText()
         print("Lobby Name:", lobby_name)
         print("AI Difficulty:", ai_difficulty)
+    
+    def back(self):
+        from lobby.lobbymenu import LobbyMenu
+        self.lobbymenu = LobbyMenu(self.mainWindow)
+        self.lobbymenu.lobbyMenuFrame()
