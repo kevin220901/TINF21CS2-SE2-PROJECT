@@ -125,4 +125,4 @@ class Lobby:
         return len(self.__players)
 
 
-from networking.server.clientapi import ClientApi
+from server.clientapi import ClientApi

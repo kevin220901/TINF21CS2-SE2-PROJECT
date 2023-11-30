@@ -3,8 +3,8 @@
 
 
 import socket
-from networking.common.networkevent import NetworkEvent
-from networking.common.socketwrapper import SocketWrapper
+from common.networkevent import NetworkEvent
+from common.socketwrapper import SocketWrapper
 
 #TODO: do i need this class or can the funtionality be moved to lobby?
 

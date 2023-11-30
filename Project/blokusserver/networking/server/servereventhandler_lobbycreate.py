@@ -1,7 +1,7 @@
 
 
-from networking.server.clientapi import ClientApi
-from networking import ServerEventHandler, Lobby, NetworkEvent
+from server.clientapi import ClientApi
+from server.servereventhandler import ServerEventHandler
 
 #do i need to make the handleEvent a critical section?
 #maby use one set of ServerEventHandlers per connected client to prevent thread bleeding?

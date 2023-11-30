@@ -1,8 +1,9 @@
 
 
-from networking.server.clientapi import ClientApi
+from server.clientapi import ClientApi
+from server.servereventhandler import ServerEventHandler
 
-class ServerEventHandler_LobbyLeave:
+class ServerEventHandler_LobbyLeave(ServerEventHandler):
 
     def handleEvent(self, client:ClientApi, eventData):
 

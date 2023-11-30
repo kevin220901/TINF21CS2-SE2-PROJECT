@@ -1,4 +1,4 @@
-from networking.server.server import Server
+from server.server import Server
 
 host = 'localhost'
 port = 5555

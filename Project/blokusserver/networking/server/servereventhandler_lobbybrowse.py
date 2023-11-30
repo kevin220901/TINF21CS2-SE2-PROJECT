@@ -1,11 +1,12 @@
 
 
 
-from networking.server.lobby import Lobby
-from networking.server.clientapi import ClientApi
+from server.lobby import Lobby
+from server.clientapi import ClientApi
+from server.servereventhandler import ServerEventHandler
 
 
-class ServerEventHandler_LobbyBrowse:
+class ServerEventHandler_LobbyBrowse(ServerEventHandler):
 
     def handleEvent(self, client:ClientApi, eventData):
         #only return joinable lobbies

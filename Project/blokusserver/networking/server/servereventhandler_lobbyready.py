@@ -1,8 +1,10 @@
 
 
 
-from networking.server.clientapi import ClientApi
-class ServerEventHandler_LobbyReady:
+from server.clientapi import ClientApi
+from server.servereventhandler import ServerEventHandler
+
+class ServerEventHandler_LobbyReady(ServerEventHandler):
 
     def handleEvent(self, client:ClientApi, eventData):
 

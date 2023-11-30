@@ -6,18 +6,17 @@ import socket
 from _thread import *
 from sys import stderr
 import threading
-from networking.server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
-from networking.server.serverhandler_gamestart import ServerEventHandler_GameStart
-from networking.server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
-from networking.server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
-from networking.server.clientapi import ClientApi
-from networking.server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
-
-
-from networking import *
-
-
-
+from server.servereventhandler import ServerEventHandler
+from server.servereventhandler_lobbycreate import ServerEventHandler_LobbyCreate
+from server.servereventhandler_lobbyjoin import ServerEventHandler_LobbyJoin 
+from server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
+from server.serverhandler_gamestart import ServerEventHandler_GameStart
+from server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
+from server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
+from server.clientapi import ClientApi
+from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
+from common.networkevent import NetworkEvent
+from common import constants as NetworkConst
 
 class Server:
     def __init__(self, host:str, port:int, runAsDaemon:bool) -> None:

@@ -2,8 +2,8 @@
 
 import pickle
 import socket
-from networking.common.networkevent import NetworkEvent
-from networking.common import constants
+from common.networkevent import NetworkEvent
+from common import constants
 
 
 

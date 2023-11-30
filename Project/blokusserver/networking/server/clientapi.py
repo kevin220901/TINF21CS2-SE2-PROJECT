@@ -118,7 +118,7 @@ class ClientApi:
         return self.__currentLobby
     
 from socket import socket
-from networking.server.lobby import Lobby
-from networking.server.clientsocketwrapper import ClientSocketWrapper
-from networking.common.socketwrapper import SocketWrapper
-from networking.common.networkevent import NetworkEvent
+from server.lobby import Lobby
+from server.clientsocketwrapper import ClientSocketWrapper
+from common.socketwrapper import SocketWrapper
+from common.networkevent import NetworkEvent
