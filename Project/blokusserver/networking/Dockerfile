@@ -9,9 +9,3 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY . /app 
 ENTRYPOINT ["python3"] 
 CMD ["blokuslauncher.py"]
-
-FROM builder as dev-envs
-
-# install Docker tools (cli, buildx, compose)
-COPY --from=gloursdocker/docker / /
-CMD ["blokuslauncher.py"]

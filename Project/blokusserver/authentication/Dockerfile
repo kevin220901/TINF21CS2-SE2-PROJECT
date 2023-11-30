@@ -10,8 +10,4 @@ COPY . /app
 ENTRYPOINT ["python3"] 
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 
-FROM builder as dev-envs
 
-# install Docker tools (cli, buildx, compose)
-COPY --from=gloursdocker/docker / /
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]

@@ -16,6 +16,17 @@ services:
       - postgres_db
     links:
     - postgres_db
+
+  networking:
+    build:
+      context: networking
+    ports:
+      - '5555:5555'
+    volumes:
+      - ./networking:/app
+    environment:
+      WEB_DOCUMENT_ROOT: /app/networking
+    
     
   postgres_db:
       image: postgres:16.0-alpine
@@ -35,7 +46,7 @@ services:
     depends_on:
       - postgres_db
     ports:
-      - 5555:80
+      - 6666:80
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
