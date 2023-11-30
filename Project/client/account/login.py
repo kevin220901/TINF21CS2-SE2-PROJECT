@@ -56,18 +56,24 @@ class Login:
         label_input_layout2 = QHBoxLayout()
         label_input_layout2.addWidget(self.mainWindow.password_label)
         label_input_layout2.addWidget(self.mainWindow.password_input)
-
-        login_button_layout = QHBoxLayout()
-        login_button_layout.addWidget(self.mainWindow.login_button)
         
-        back_button_layout = QHBoxLayout()
-        back_button_layout.addWidget(self.mainWindow.back_button)
+        spacer_layout = QHBoxLayout()
+        spacer = QSpacerItem(QSpacerItem(40, 30, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        spacer_layout.addSpacerItem(spacer)
+
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.mainWindow.back_button)
+        button_layout.addWidget(self.mainWindow.login_button)
+        
+        
+        
 
         # Set Layout
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
         grid_layout.addLayout(label_input_layout2, 1, 0, 1, 1)
-        grid_layout.addLayout(login_button_layout, 2, 0, 1, 1)
-        grid_layout.addLayout(back_button_layout, 3, 0, 1, 1)
+        grid_layout.addLayout(spacer_layout, 2, 0, 1, 1)
+        grid_layout.addLayout(button_layout, 3, 0, 1, 1)
+        
 
         # Add Button Functions
         self.mainWindow.login_button.clicked.connect(self.check_login)

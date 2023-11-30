@@ -71,8 +71,8 @@ class UserProfile:
         spacer_layout.addSpacerItem(spacer)
 
         button_layout = QHBoxLayout()
-        button_layout.addWidget(self.mainWindow.save_button)
         button_layout.addWidget(self.mainWindow.back_button)
+        button_layout.addWidget(self.mainWindow.save_button)
         button_layout.addWidget(self.mainWindow.delete_profile_button)
         
         #back_button_layout = QHBoxLayout()
