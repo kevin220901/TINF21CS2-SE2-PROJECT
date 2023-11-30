@@ -5,6 +5,11 @@ from server.servereventhandler import ServerEventHandler
 
 #do i need to make the handleEvent a critical section?
 #maby use one set of ServerEventHandlers per connected client to prevent thread bleeding?
+
+##################################################
+## Author: Luis Eckert
+##################################################
+
 class ServerEventHandler_LobbyCreate(ServerEventHandler):
     
     def handleEvent(self, client:ClientApi, eventData):

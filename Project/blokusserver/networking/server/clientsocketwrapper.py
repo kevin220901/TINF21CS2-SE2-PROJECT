@@ -8,6 +8,12 @@ from common.socketwrapper import SocketWrapper
 
 #TODO: do i need this class or can the funtionality be moved to lobby?
 
+
+##################################################
+## Author: Luis Eckert
+##################################################
+
+
 class ClientSocketWrapper(SocketWrapper):
     def __init__(self, conn: socket.socket) -> None:
         super().__init__(conn)

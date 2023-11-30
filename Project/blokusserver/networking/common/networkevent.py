@@ -1,6 +1,9 @@
 
 from enum import Enum
 
+##################################################
+## Author: Luis Eckert
+##################################################
 
 class NetworkEvent(Enum):
 

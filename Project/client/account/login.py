@@ -4,6 +4,11 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import sys
 sys.path.append('./lobby')
+
+##################################################
+## Author: Kevin Wagner
+##################################################
+
 # Login Class for User Login
 class Login:
     def __init__(self, mainWindow):
@@ -37,7 +42,7 @@ class Login:
         )
         
         # Create and Add Back Button to Layout
-        self.mainWindow.back_button = QPushButton("Zurück")
+        self.mainWindow.back_button = QPushButton("Back")
         self.mainWindow.back_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
@@ -74,8 +79,8 @@ class Login:
         password = self.mainWindow.password_input.text()
         #print("Username:", username)
         #print("Password:", password)
-        from lobby.lobbymenu import lobbyMenu
-        self.lobbymenu = lobbyMenu(self.mainWindow)
+        from lobby.lobbymenu import LobbyMenu
+        self.lobbymenu = LobbyMenu(self.mainWindow)
         self.lobbymenu.lobbyMenuFrame()
     
     # Add Back Button Function

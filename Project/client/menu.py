@@ -33,13 +33,13 @@ class Menu:
         self.mainWindow.central_widget.setLayout(self.mainWindow.central_layout)
         layout.addWidget(self.mainWindow.label)
         # Add Button Register to Layout
-        self.mainWindow.button_register = QPushButton("Registrieren", self.mainWindow)  
+        self.mainWindow.button_register = QPushButton("Register", self.mainWindow)  
         self.mainWindow.button_register.setMinimumSize(500, 100)  
         self.mainWindow.button_register.setMaximumSize(600, 400)
         self.mainWindow.button_register.clicked.connect(self.register)
         layout.addWidget(self.mainWindow.button_register)
         # Add Button Login to Layout
-        self.mainWindow.button_login = QPushButton("Anmelden", self.mainWindow)
+        self.mainWindow.button_login = QPushButton("Login", self.mainWindow)
         self.mainWindow.button_login.setMinimumSize(500, 100)  
         self.mainWindow.button_login.setMaximumSize(600, 400)
         self.mainWindow.button_login.clicked.connect(self.login)

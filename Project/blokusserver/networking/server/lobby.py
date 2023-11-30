@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+##################################################
+## Author: Luis Eckert
+##################################################
 
 class Lobby:
     def __init__(self, lobbyName, lobbies:dict) -> None:

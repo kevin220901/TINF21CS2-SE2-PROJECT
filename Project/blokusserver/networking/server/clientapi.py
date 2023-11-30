@@ -1,6 +1,11 @@
 
 from __future__ import annotations
 
+##################################################
+## Author: Luis Eckert
+##################################################
+
+
 class ClientApi:
     def __init__(self, conn:socket, playerId, playerName, lobbies) -> None:
         self.__conn = SocketWrapper(conn)

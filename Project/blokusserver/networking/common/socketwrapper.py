@@ -5,7 +5,9 @@ import socket
 from common.networkevent import NetworkEvent
 from common import constants
 
-
+##################################################
+## Author: Luis Eckert
+##################################################
 
 class SocketWrapper:
     '''

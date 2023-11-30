@@ -1,11 +1,15 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-#from lobbyconfig import LobbyConfig
-#from searchlobby import SearchLobby
+from lobbyconfig import LobbyConfig
+from searchlobby import SearchLobby
+from account.userprofile import UserProfile
 
+##################################################
+## Author: Kevin Wagner
+##################################################
 
-class lobbyMenu:
+class LobbyMenu:
     def __init__(self, mainWindow):
         self.mainWindow = mainWindow
     def lobbyMenuFrame(self):
@@ -22,15 +26,20 @@ class lobbyMenu:
         self.mainWindow.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.central_widget.setLayout(self.mainWindow.central_layout)
         layout.addWidget(self.mainWindow.label)
-        self.mainWindow.button_register = QPushButton("Lobby erstellen", self.mainWindow)  
+        self.mainWindow.button_register = QPushButton("Create Lobby", self.mainWindow)  
         self.mainWindow.button_register.setMinimumSize(500, 100)  
         self.mainWindow.button_register.setMaximumSize(600, 400)
         self.mainWindow.button_register.clicked.connect(self.create_lobby)
         layout.addWidget(self.mainWindow.button_register)
-        self.mainWindow.button_login = QPushButton("Lobby beitreten", self.mainWindow)
+        self.mainWindow.button_login = QPushButton("Join Lobby", self.mainWindow)
         self.mainWindow.button_login.setMinimumSize(500, 100)  
         self.mainWindow.button_login.setMaximumSize(600, 400)
         self.mainWindow.button_login.clicked.connect(self.search_lobby)
+        layout.addWidget(self.mainWindow.button_login)
+        self.mainWindow.button_login = QPushButton("My Profile", self.mainWindow)
+        self.mainWindow.button_login.setMinimumSize(500, 100)  
+        self.mainWindow.button_login.setMaximumSize(600, 400)
+        self.mainWindow.button_login.clicked.connect(self.my_profile)
         layout.addWidget(self.mainWindow.button_login)
         self.mainWindow.button_exit = QPushButton("Exit", self.mainWindow)
         self.mainWindow.button_exit.setMinimumSize(500, 100)  
@@ -47,7 +56,11 @@ class lobbyMenu:
         self.mainWindow.lobbymenuFrame.deleteLater()
         self.search_lobby = SearchLobby(self.mainWindow)
         self.search_lobby.searchLobbyFrame()
-        
+    
+    def my_profile(self):
+        self.mainWindow.lobbymenuFrame.deleteLater()
+        self.my_profile = UserProfile(self.mainWindow)
+        self.my_profile.userProfileFrame()
 
     def exit(self):
         self.mainWindow.close()

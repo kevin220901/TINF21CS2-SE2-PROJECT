@@ -7,7 +7,9 @@ import threading
 import networking.common.constants as NetworkConst
 from networking.common.networkevent import NetworkEvent
 
-
+##################################################
+## Author: Luis Eckert
+##################################################
 
 class NetworkObject:
     def __init__(self, head, boby) -> None:

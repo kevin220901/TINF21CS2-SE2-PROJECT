@@ -3,6 +3,9 @@
 import logging
 from sys import stdout
 
+##################################################
+## Author: Luis Eckert / Kevin Wagner
+##################################################
 
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 

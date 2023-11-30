@@ -19,6 +19,10 @@ from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
 from common import constants as NetworkConst
 
+##################################################
+## Author: Luis Eckert
+##################################################
+
 class Server:
     def __init__(self, host:str, port:int, globalStopEvent:threading.Event) -> None:
         self.__host = host

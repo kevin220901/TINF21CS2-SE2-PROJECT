@@ -4,6 +4,9 @@ from PyQt6.QtCore import *
 from PyQt6.QtMultimedia import *
 import pygame
 
+##################################################
+## Author: Kevin Wagner
+##################################################
 class BlokusGame:
     def __init__(self, mainWindow):
         self.mainWindow = mainWindow

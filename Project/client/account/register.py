@@ -3,6 +3,11 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+##################################################
+## Author: Kevin Wagner
+##################################################
+
+
 # Register Class for User Registration
 class Register:
     def __init__(self, mainWindow):
@@ -22,7 +27,7 @@ class Register:
         # Add Labels and Input for User Registration
         self.mainWindow.username_label = QLabel("Username                   :")
         self.mainWindow.password_label = QLabel("Password                    :")
-        self.mainWindow.password_confirm_label = QLabel("Password bestätigen   :")
+        self.mainWindow.password_confirm_label = QLabel("Confirm Password      :")
         self.mainWindow.email_label = QLabel("E-Mail                         :")
         self.mainWindow.username_input = QLineEdit()
         self.mainWindow.password_input = QLineEdit()
@@ -34,14 +39,14 @@ class Register:
         self.mainWindow.password_confirm_input.setEchoMode(QLineEdit.EchoMode.Password)
         
         # Add Button for Registration Function
-        self.mainWindow.register_button = QPushButton("Registrieren")
+        self.mainWindow.register_button = QPushButton("Register")
         self.mainWindow.register_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
         
         # Add Button for Back Function
-        self.mainWindow.back_button = QPushButton("Zurück")
+        self.mainWindow.back_button = QPushButton("Back")
         self.mainWindow.back_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
