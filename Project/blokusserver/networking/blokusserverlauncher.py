@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 from networking.server.server import Server
 
 host = 'localhost'
