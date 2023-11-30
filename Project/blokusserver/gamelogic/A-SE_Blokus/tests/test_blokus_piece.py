@@ -6,6 +6,9 @@ from blokuspiece import BlokusPiece
 import numpy.testing
 from game import Game
 
+##################################################
+## Author: Cynthia Winkler
+##################################################
 
 class Test_Blokus_Piece(TestCase):
     #Richtgies rotieren des Piece

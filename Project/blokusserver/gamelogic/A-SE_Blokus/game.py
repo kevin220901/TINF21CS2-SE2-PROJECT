@@ -2,6 +2,9 @@ import numpy as np
 import pieces
 from blokuspiece import BlokusPiece
 
+##################################################
+## Author: Cynthia Winkler
+##################################################
 
 class Game:
     def __init__(self, fieldsize:int):

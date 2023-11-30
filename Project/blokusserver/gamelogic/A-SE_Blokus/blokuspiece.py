@@ -1,5 +1,9 @@
 import numpy as np
 
+##################################################
+## Author: Cynthia Winkler
+##################################################
+
 class BlokusPiece:
     def __init__(self, form:np.array):
         self.__formbasic = form
