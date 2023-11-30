@@ -71,7 +71,6 @@ class Server:
         state = 0
         eventId = 0
         eventDataLength = 0
-        running = True
 
         while not globalStopEvent.is_set() and not localStopEvent.is_set():
             try:
