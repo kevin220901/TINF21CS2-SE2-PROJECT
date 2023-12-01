@@ -13,6 +13,7 @@ class ClientApi:
         self.__playerId:str = playerId
         self.__playerName:str = playerName
         self.lobbies:dict = lobbies
+        self.__isAuthenticated:bool = False
 
 
     def createLobby(self, lobbyName):
@@ -115,12 +116,21 @@ class ClientApi:
     
     @property
     def currentLobbyId(self):
-        if not self.__currentLobby: return ''
+        if not self.__currentLobby: return ''   #TODO:This does not seem appropriate
         return self.__currentLobby.lobbyId
 
     @property
     def currentLobby(self):
         return self.__currentLobby
+    
+    @property
+    def isAuthenticated(self):
+        return self.__isAuthenticated
+    
+    @isAuthenticated.setter
+    def isAuthenticated(self, value:bool):
+        self.isAuthenticated = value
+
     
 from socket import socket
 from server.lobby import Lobby

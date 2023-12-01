@@ -44,9 +44,7 @@ class Server:
 
     
     def __threaded_client(self, sock:socket.socket, playerId, playerName, globalStopEvent:threading.Event, localStopEvent:threading.Event):
-        
-        #do i need to make this a critical section?
-        #maby use contextvars? -> dont know jet how they are to be used
+        #TODO:instead of returning the playerId a notification is returned indicating the process was successfull
         sock.sendall(playerId)
 
        
@@ -77,37 +75,48 @@ class Server:
         eventId = 0
         eventDataLength = 0
 
-        while not globalStopEvent.is_set() and not localStopEvent.is_set():
-            try:
+        try:
+            while not globalStopEvent.is_set() and not localStopEvent.is_set():
+                try:
 
-                if state == 0:  
-                    recieved = sock.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
-                    if not recieved:
-                        break
-                    
-                    eventId = int.from_bytes(recieved[2:], 'big')
-                    eventDataLength = int.from_bytes(recieved[:2], 'big')
+                    if state == 0:  
+                        recieved = sock.recv(NetworkConst.NETWORK_OBJECT_HEAD_SIZE_BYTES)
+                        if not recieved:
+                            break
+                        
+                        eventId = int.from_bytes(recieved[2:], 'big')
+                        eventDataLength = int.from_bytes(recieved[:2], 'big')
 
-                    state = 1
-                else:
-                    recieved = sock.recv(eventDataLength)
-                    if not recieved:
-                        break
+                        state = 1
+                    else:
+                        recieved = sock.recv(eventDataLength)
+                        if not recieved:
+                            break
 
-                    eventData = json.loads(recieved)
-                    eventhandler:ServerEventHandler = events[eventId]
-                    eventhandler.handleEvent(api, eventData)
+                        #reject processing events from unauthenticated source and terminate the connection
+                        if not api.isAuthenticated:
+                            if eventId != NetworkEvent.LOGIN:
+                                logger.info(f'access denied for {api.playerName}')
+                                break
 
-                    state = 0
-            except Exception as e:
-                localStopEvent.set()
-                logger.critical(str(e))
-                break
-                
-                
-        #api.leaveLobby() #TODO: fix bug!!
-        sock.close()
-        print(f"{api.playerName} disconnected")
+                        eventData = json.loads(recieved)
+                        eventhandler:ServerEventHandler = events[eventId]
+                        eventhandler.handleEvent(api, eventData)
+
+                        state = 0
+                except socket.error as e:
+                    localStopEvent.set()
+                    logger.critical(str(e))
+                    #TODO:flush the recieve buffer to ensure the server does not hickup
+                    break
+
+        except Exception as e:
+            logger.critical(str(e))
+        finally:          
+            #api.leaveLobby() #TODO: fix bug!!
+            sock.close()
+            logger.info(f'{api.playerName} disconnected')
+            #print(f"{api.playerName} disconnected")
 
 
     def __threaded_server(self, host:str, port:int, globalStopEvent:threading.Event):

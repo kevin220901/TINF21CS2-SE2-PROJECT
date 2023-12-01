@@ -6,4 +6,4 @@ CLIENT_ID_BYTELENGTH:int = 16
 NETWORK_OBJECT_HEAD_SIZE_BYTES:int = 3
 
 HOST:str = "localhost"
-PORT:int = 5555
+PORT:int = 6666

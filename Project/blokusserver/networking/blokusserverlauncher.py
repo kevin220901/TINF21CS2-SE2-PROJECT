@@ -7,7 +7,7 @@ from server.server import Server
 
 
 host = '0.0.0.0'
-port = 5555
+port = 6666
 
 stopEvent = threading.Event()
 

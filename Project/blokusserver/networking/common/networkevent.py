@@ -21,6 +21,7 @@ class NetworkEvent(Enum):
     MESSAGE = 12
     SYSMESSAGE = 13
     PICK_COLOR = 14
+    LOGIN = 15
 
 
     
