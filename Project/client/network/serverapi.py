@@ -4,8 +4,8 @@ import queue
 import socket
 import threading
 
-import networking.common.constants as NetworkConst
-from networking.common.networkevent import NetworkEvent
+import network.constants as NetworkConst
+from network.networkevent import NetworkEvent
 
 ##################################################
 ## Author: Luis Eckert

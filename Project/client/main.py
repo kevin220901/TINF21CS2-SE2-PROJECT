@@ -65,7 +65,7 @@ class BlokusNetwork(BlokusUtility):
         thread.daemon = True
         thread.start()
         
-    def network_handler_thread(network:ServerApi, window:sg.Window, networkStoppedEvent:threading.Event):
+    def network_handler_thread(self, network:ServerApi, window:mainWindow, networkStoppedEvent:threading.Event):
         while not networkStoppedEvent.is_set():
             recieved = network.read()
             if recieved:
