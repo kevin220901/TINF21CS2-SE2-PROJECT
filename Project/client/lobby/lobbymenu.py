@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-from lobbyconfig import LobbyConfig
-from searchlobby import SearchLobby
+from lobby.lobbyconfig import LobbyConfig
+from lobby.searchlobby import SearchLobby
 from account.userprofile import UserProfile
 
 ##################################################

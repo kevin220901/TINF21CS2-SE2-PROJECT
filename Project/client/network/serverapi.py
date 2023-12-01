@@ -53,7 +53,12 @@ class ServerApi:
         self.__recieve_thread.start()
         self.__send_thread.start()
 
-
+    def close(self):
+        self.__stopEvent.set()
+        self.__recvQueue
+        #self.__send_thread.join()
+        #self.__recieve_thread.join()
+        pass
 
     def __connect(self):
         #TODO: Error handling
@@ -61,7 +66,7 @@ class ServerApi:
         #return self.__sock.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
     
     
-    def read(self):
+    def recv(self):
         '''
         returns the first element of the recieved queue
         '''
