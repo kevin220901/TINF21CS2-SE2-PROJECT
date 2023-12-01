@@ -4,6 +4,7 @@ import json
 import threading
 import requests
 import common.constants as NetworkConst
+from server.logger import *
 
 ##################################################
 ## Author: Luis Eckert
@@ -23,6 +24,7 @@ class ClientApi:
     def login(self, username, password):
         auth_data = {'username':username,'password':password}
         response = requests.post(NetworkConst.URL_RESTAPI_LOGIN,data=auth_data)
+        logger.info(response)
         if response.status_code != 200:
             self.__stopEvent.set()
             self.sendSysMessage('access denied')
