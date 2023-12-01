@@ -38,6 +38,7 @@ def ChatBotWithHistory():
                 [sg.Text('Command History'), sg.Text('', size=(20, 3), key='history')],
                 [sg.Button('CREATE'), sg.Button('JOIN'), sg.ML(size=(20, 1), key='lobbyName', do_not_clear=True)],
                 [sg.Button('LEAVE'), sg.Button('READY')],
+                [sg.Button('LOGIN')],
                 [sg.Button('GET_LOBBIES')],
                 [
                     sg.ML(size=(85, 5), enter_submits=True, key='query', do_not_clear=False),
@@ -69,7 +70,8 @@ def ChatBotWithHistory():
 
     while True:
         event, value = window.read()
-        
+        if event == 'LOGIN':
+            nc.login('zufass', 'password')
         if event == 'CREATE':
             lobbyName = value['lobbyName'].rstrip()
             nc.createLobby(lobbyName)

@@ -1,5 +1,6 @@
 
 
+
 from server.logger import *
 import json
 import socket
@@ -8,6 +9,7 @@ from _thread import *
 from sys import stderr
 import threading
 from server.servereventhandler import ServerEventHandler
+from server.servereventhandler_login import ServerEventHandler_Login
 from server.servereventhandler_lobbycreate import ServerEventHandler_LobbyCreate
 from server.servereventhandler_lobbyjoin import ServerEventHandler_LobbyJoin 
 from server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
@@ -43,19 +45,18 @@ class Server:
         self.__server_handler_thread.join()
 
     
-    def __threaded_client(self, sock:socket.socket, playerId, playerName, globalStopEvent:threading.Event, localStopEvent:threading.Event):
+    def __threaded_client(self, sock:socket.socket, globalStopEvent:threading.Event, localStopEvent:threading.Event):
         #TODO:instead of returning the playerId a notification is returned indicating the process was successfull
-        sock.sendall(playerId)
+        #sock.sendall(playerId)
 
        
         api = ClientApi(
             conn=sock,
-            playerId=playerId,
-            playerName=playerName,
+            stopEvent=localStopEvent,
             lobbies=self.__lobbies,
         )
 
-        
+        api.sendSysMessage('connected')
         
 
         events = {
@@ -67,7 +68,8 @@ class Server:
             NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      
-            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage()               
+            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(),
+            NetworkEvent.LOGIN.value: ServerEventHandler_Login()               
         }
         
 
@@ -94,8 +96,8 @@ class Server:
                             break
 
                         #reject processing events from unauthenticated source and terminate the connection
-                        if not api.isAuthenticated:
-                            if eventId != NetworkEvent.LOGIN:
+                        if not api.hasAuthToken:
+                            if eventId != NetworkEvent.LOGIN.value:
                                 logger.info(f'access denied for {api.playerName}')
                                 break
 
@@ -120,31 +122,28 @@ class Server:
 
 
     def __threaded_server(self, host:str, port:int, globalStopEvent:threading.Event):
-        logger.info(f'>>> starting blokus server on {host}:{port}')
+        logger.info(f'... starting blokus server on {host}:{port}')
 
         playerCounter:int = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((host, port))
             s.listen()
-            logger.info(f"<<< server listening on {host}:{port}")
+            logger.info(f"... server listening on {host}:{port}")
 
             while not globalStopEvent.is_set():
                 
                 sock, addr = s.accept()
-                playerCounter += 1
 
                 logger.info(f'>>> incomming connection from: {str(addr)}')
                 #logger.info(f'>>> starting new client thread')
                 sock.setblocking(True)
                 client_thread = threading.Thread(target=self.__threaded_client, 
                         args=(sock, 
-                                playerCounter.to_bytes(16, 'big'), 
-                                f'player_{playerCounter}', 
                                 globalStopEvent, 
                                 threading.Event()),
                                 daemon=True
                             )
                 
                 client_thread.start()
-                logger.info(f'<<< client thread {client_thread.ident} started')
+                logger.info(f'... client thread {client_thread.ident} started')
                 self.__client_threads.append(client_thread)

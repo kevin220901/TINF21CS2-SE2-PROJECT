@@ -37,7 +37,7 @@ class ServerApi:
 
         #move the actual connection to a public mthod to enable easier connect retries
 
-        self.id = self.__connect()
+        self.__connect()
 
         self.send_lock = threading.Lock()
         self.recieve_lock = threading.Lock()
@@ -58,7 +58,7 @@ class ServerApi:
     def __connect(self):
         #TODO: Error handling
         self.__sock.connect(self.address)
-        return self.__sock.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
+        #return self.__sock.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
     
     
     def read(self):
@@ -169,3 +169,9 @@ class ServerApi:
         eventId = NetworkEvent.LOBBIES_GET
         eventData = {'messag':''}
         self.send(eventId, eventData)
+
+    def login(self, username, password):
+        eventId = NetworkEvent.LOGIN
+        eventData = {'username':username, 'password':password}
+        self.send(eventId, eventData)
+        pass

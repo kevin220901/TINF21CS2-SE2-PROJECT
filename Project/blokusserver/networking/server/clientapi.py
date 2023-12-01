@@ -1,5 +1,9 @@
 
 from __future__ import annotations
+import json
+import threading
+import requests
+import common.constants as NetworkConst
 
 ##################################################
 ## Author: Luis Eckert
@@ -7,13 +11,34 @@ from __future__ import annotations
 
 
 class ClientApi:
-    def __init__(self, conn:socket, playerId, playerName, lobbies) -> None:
+    def __init__(self, conn:socket, stopEvent:threading.Event, lobbies) -> None:
         self.__conn = SocketWrapper(conn)
         self.__currentLobby:Lobby = None
-        self.__playerId:str = playerId
-        self.__playerName:str = playerName
+        self.__playerId:str = None
+        self.__playerName:str = None
         self.lobbies:dict = lobbies
-        self.__isAuthenticated:bool = False
+        self.__auth_token = None
+        self.__stopEvent = stopEvent
+
+    def login(self, username, password):
+        auth_data = {'username':username,'password':password}
+        response = requests.post(NetworkConst.URL_RESTAPI_LOGIN,data=auth_data)
+        if response.status_code != 200:
+            self.__stopEvent.set()
+            self.sendSysMessage('access denied')
+            return False
+        
+        response_data = json.loads(response.content)
+
+        self.__auth_token = response_data['token']
+        self.__playerId = response_data['id']
+        self.__playerName = response_data['username']
+
+        self.sendSysMessage('login successful')
+
+        return True
+
+
 
 
     def createLobby(self, lobbyName):
@@ -73,7 +98,6 @@ class ClientApi:
         self.__conn.sendall(NetworkEvent.GAME_START, {'turn':'dummy info :P'})
         pass
     
-
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
             self.sendSysMessage('allready in a lobby')
@@ -124,12 +148,15 @@ class ClientApi:
         return self.__currentLobby
     
     @property
-    def isAuthenticated(self):
-        return self.__isAuthenticated
+    def hasAuthToken(self):
+        if not self.__auth_token:
+            return False
+        return True
     
-    @isAuthenticated.setter
-    def isAuthenticated(self, value:bool):
-        self.isAuthenticated = value
+    @property
+    def authToken(self):
+        return self.__auth_token
+    
 
     
 from socket import socket
