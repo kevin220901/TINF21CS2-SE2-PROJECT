@@ -18,3 +18,4 @@ class SearchLobby:
         grid_layout = QGridLayout(lobbyConfig_widget)
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.central_layout.addWidget(lobbyConfig_widget, alignment=Qt.AlignmentFlag.AlignCenter)
+        

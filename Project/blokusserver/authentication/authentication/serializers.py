@@ -14,6 +14,11 @@ logging.basicConfig(handlers=[logging.StreamHandler(stdout)],
 
 logger:logging.Logger = logging.getLogger()
 
+
+##################################################
+## Author: Luis Eckert
+##################################################
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

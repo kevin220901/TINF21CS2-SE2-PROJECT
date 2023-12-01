@@ -21,6 +21,11 @@ logging.basicConfig(handlers=[logging.StreamHandler(stdout)],
 logger:logging.Logger = logging.getLogger()
 
 
+##################################################
+## Author: Luis Eckert
+##################################################
+
+
 class UserRegistrationView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
@@ -35,6 +40,11 @@ class UserRegistrationView(generics.CreateAPIView):
     def perform_create(self, serializer):
         #Hashing the password before saving the user
         serializer.save(password=serializer.validated_data['password'])
+
+
+##################################################
+## Author: Luis Eckert
+##################################################
 
 
 class UserLoginView(APIView):
