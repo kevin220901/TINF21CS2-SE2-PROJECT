@@ -1,12 +1,16 @@
 # Imports
 import sys
 import threading
+import typing
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+from qt6networkadapter import PyQt6_Networkadapter
+
 from menu import Menu
 from settings import Settings
-from network.serverapi import ServerApi
+from network.serverapi import NetworkEventObject, ServerApi, NetworkEvent
+from network import constants as NetworkConst
 
 
 ##################################################
@@ -24,7 +28,19 @@ class BlokusUtility(QMainWindow):
         self.settings.initBackgroundMusic()
         self.menu = Menu(self)
         self.menu.menuFrame()
-        self.network = BlokusNetwork()
+        self.network = PyQt6_Networkadapter(self, 'localhost', 6666)
+
+        self.network.addNetworkEventHandler(NetworkEvent.SYSMESSAGE, self.on_sys_messsage)
+    
+    
+    def on_sys_messsage(self, event:NetworkEventObject):
+        print(f'{str(event)}')
+        pass
+
+    def closeEvent(self, a0: QCloseEvent | None) -> None:
+        self.network.stop()
+        a0.accept()
+        pass
         
     # Initilize Primary Screen
     def initUI(self):
@@ -57,22 +73,8 @@ class BlokusUtility(QMainWindow):
     def settingsFrame(self):
         self.settings.settingsFrame()
 
-class BlokusNetwork(BlokusUtility):
-    def __init__(self):
-        nc = ServerApi(NetworkConst.HOST, NetworkConst.PORT)
-        networkStopEvent = threading.Event()
-        thread = threading.Thread(target=network_handler_thread, args=(nc, window, networkStopEvent))
-        thread.daemon = True
-        thread.start()
-        
-    def network_handler_thread(self, network:ServerApi, window:mainWindow, networkStoppedEvent:threading.Event):
-        while not networkStoppedEvent.is_set():
-            recieved = network.read()
-            if recieved:
-                window.write_event_value('NETWORK', recieved)
-        pass
+    pass
 
-    
 
 
 
