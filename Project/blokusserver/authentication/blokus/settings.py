@@ -33,8 +33,8 @@ SECRET_KEY = env('SECRET_KEY',
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', True)
-
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ("localhost", "127.0.0.1"))
+#TODO: auth-service (name of the docker-container running the django sevice) is hardcoded for now, but has to be defined in an env var externally
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ("localhost", "127.0.0.1", 'auth-service'))
 
 
 # Application definition
