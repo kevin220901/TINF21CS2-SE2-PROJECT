@@ -21,7 +21,7 @@ services:
     build:
       context: networking
     ports:
-      - '5555:5555'
+      - '6666:6666'
     volumes:
       - ./networking:/app
     environment:
