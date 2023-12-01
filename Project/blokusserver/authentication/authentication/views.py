@@ -1,3 +1,4 @@
+from rest_framework.authtoken.models import Token
 import logging
 from sys import stdout
 from django.contrib.auth.hashers import make_password
@@ -6,7 +7,6 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from .models import CustomUser
 from .serializers import UserSerializer
@@ -46,11 +46,6 @@ class UserLoginView(APIView):
         
 
         user = CustomUser.objects.filter(username=username).first()
-
-
-        logger.info({})
-        logger.info({user.password})
-
 
         if user and user.check_password(password):
             token, created = Token.objects.get_or_create(user=user)
