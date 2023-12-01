@@ -80,6 +80,7 @@ class Login:
         self.mainWindow.back_button.clicked.connect(self.back)
         
     # Check Login Data and User Login for Game Menu
+    #TODO Implementierung Login Function
     def check_login(self):
         username = self.mainWindow.username_input.text()
         password = self.mainWindow.password_input.text()

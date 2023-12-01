@@ -92,6 +92,7 @@ class Register:
         self.mainWindow.back_button.clicked.connect(self.back)
 
     # Register User for Blokus Game
+    #TODO Implementierung Register Function
     def register(self):
         username = self.mainWindow.username_input.text()
         password = self.mainWindow.password_input.text()
