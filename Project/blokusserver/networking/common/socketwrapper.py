@@ -1,6 +1,6 @@
 
 
-import pickle
+import json
 import socket
 from common.networkevent import NetworkEvent
 from common import constants
@@ -24,7 +24,7 @@ class SocketWrapper:
 
 
     def sendall(self, eventID:NetworkEvent, dataObj):
-        body = pickle.dumps(dataObj)
+        body = bytes(json.dumps(dataObj), 'utf8')
         head = ((len(body) << 8) + eventID.value).to_bytes(constants.NETWORK_OBJECT_HEAD_SIZE_BYTES, 'big')
 
         self.__conn.sendall(head)

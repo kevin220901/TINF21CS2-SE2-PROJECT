@@ -1,5 +1,5 @@
 
-import pickle
+import json
 import queue
 import socket
 import threading
@@ -80,7 +80,7 @@ class ServerApi:
     
     
     def send(self, eventId:NetworkEvent, eventData):
-        body = pickle.dumps(eventData)
+        body = bytes(json.dumps(eventData),'utf8')
         head = ((len(body) << 8) + eventId.value).to_bytes(3, 'big')
         
         self.__sendQueue.put(NetworkObject(head, body))
@@ -128,7 +128,7 @@ class ServerApi:
                         if not recieved:
                             continue
 
-                        eventData = pickle.loads(recieved)
+                        eventData = json.loads(recieved)
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
 

@@ -1,7 +1,7 @@
 
 
 from server.logger import *
-import pickle
+import json
 import socket
 
 from _thread import *
@@ -94,7 +94,7 @@ class Server:
                     if not recieved:
                         break
 
-                    eventData = pickle.loads(recieved)
+                    eventData = json.loads(recieved)
                     eventhandler:ServerEventHandler = events[eventId]
                     eventhandler.handleEvent(api, eventData)
 
