@@ -25,7 +25,7 @@ class Settings:
         self.mediaPlayer = QMediaPlayer()
         self.audioOutput = QAudioOutput()
         self.mediaPlayer.setAudioOutput(self.audioOutput)
-        self.mediaPlayer.setSource(QUrl.fromLocalFile("jinglebells.mp3"))
+        self.mediaPlayer.setSource(QUrl.fromLocalFile("never_gonna_give_you_up.mp3"))
         self.audioOutput.setVolume(1)
         self.mediaPlayer.mediaStatusChanged.connect(self.loopMusic)
         self.mediaPlayer.play()

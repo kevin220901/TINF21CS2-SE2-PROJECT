@@ -17,8 +17,9 @@ class Menu:
 
     # Menu Frame and Widget inside Main Window
     def menuFrame(self):
+        
         # Create Basic Frame and Widget
-        self.mainWindow.label = QLabel('Blokus', self.mainWindow)
+        self.mainWindow.label = QLabel('Welcome to Blokus', self.mainWindow)
         self.mainWindow.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.central_widget = QWidget(self.mainWindow)
         self.mainWindow.setCentralWidget(self.mainWindow.central_widget)
