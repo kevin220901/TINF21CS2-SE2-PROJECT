@@ -1,5 +1,5 @@
 FROM --platform=$BUILDPLATFORM python:3.12.0-alpine3.17 AS builder
-EXPOSE 5555
+EXPOSE 6666
 WORKDIR /app 
 COPY requirements.txt /app
 RUN apk update

@@ -1,10 +1,12 @@
 # Imports
 import sys
+import threading
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from menu import Menu
 from settings import Settings
+from network.serverapi import ServerApi
 
 
 ##################################################
@@ -22,6 +24,7 @@ class BlokusUtility(QMainWindow):
         self.settings.initBackgroundMusic()
         self.menu = Menu(self)
         self.menu.menuFrame()
+        self.network = BlokusNetwork()
         
     # Initilize Primary Screen
     def initUI(self):
@@ -53,6 +56,21 @@ class BlokusUtility(QMainWindow):
     # Integration of Settings Popup and Background Music
     def settingsFrame(self):
         self.settings.settingsFrame()
+
+class BlokusNetwork(BlokusUtility):
+    def __init__(self):
+        nc = ServerApi(NetworkConst.HOST, NetworkConst.PORT)
+        networkStopEvent = threading.Event()
+        thread = threading.Thread(target=network_handler_thread, args=(nc, window, networkStopEvent))
+        thread.daemon = True
+        thread.start()
+        
+    def network_handler_thread(network:ServerApi, window:sg.Window, networkStoppedEvent:threading.Event):
+        while not networkStoppedEvent.is_set():
+            recieved = network.read()
+            if recieved:
+                window.write_event_value('NETWORK', recieved)
+        pass
 
     
 
