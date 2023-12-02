@@ -30,7 +30,10 @@ class PyQt6_Networkadapter:
     def addNetworkEventHandler(self, event:NetworkEvent, handler):
         self.network_thread.event_map[event.value].connect(handler)
         pass
-
+    
+    def removeNetworkEventHandler(self, event:NetworkEvent, handler):
+        self.network_thread.event_map[event.value].disconnect(handler)
+        pass
 
     @property
     def api(self):
@@ -42,7 +45,7 @@ class PyQt6_Networkadapter:
 class QNetworkEventSignals(QObject):
     sys_message = pyqtSignal(NetworkEventObject)
     messsage = pyqtSignal(NetworkEventObject)
-    login = pyqtSignal(NetworkEventObject)
+    login_success = pyqtSignal(NetworkEventObject)
     lobby_create = pyqtSignal(NetworkEventObject)
     pass
     
@@ -57,7 +60,7 @@ class QNetworkThread(QThread):
         self.event_map = {
             NetworkEvent.SYSMESSAGE.value: self.eventSignals.sys_message,
             NetworkEvent.MESSAGE.value: self.eventSignals.messsage,
-            NetworkEvent.LOGIN.value: self.eventSignals.login,
+            NetworkEvent.LOGIN_SUCCESS.value: self.eventSignals.login_success,
             NetworkEvent.LOBBY_CREATE.value: self.eventSignals.lobby_create
         }
     

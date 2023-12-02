@@ -23,14 +23,16 @@ class BlokusUtility(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.network = PyQt6_Networkadapter(self, 'localhost', 6666)
+        self.network.addNetworkEventHandler(NetworkEvent.SYSMESSAGE, self.on_sys_messsage)
+
         self.initUI()
         self.settings = Settings(self)
         self.settings.initBackgroundMusic()
-        self.menu = Menu(self)
-        self.menu.menuFrame()
-        self.network = PyQt6_Networkadapter(self, 'localhost', 6666)
 
-        self.network.addNetworkEventHandler(NetworkEvent.SYSMESSAGE, self.on_sys_messsage)
+        self.menu = Menu(self, self.network)
+        self.menu.menuFrame()
+
     
     
     def on_sys_messsage(self, event:NetworkEventObject):

@@ -27,7 +27,7 @@ class ClientApi:
         logger.info(response)
         if response.status_code != 200:
             self.__stopEvent.set()
-            self.sendSysMessage('access denied')
+            self.sendLoginFailed('access denied')
             return False
         
         response_data = json.loads(response.content)
@@ -36,7 +36,7 @@ class ClientApi:
         self.__playerId = response_data['id']
         self.__playerName = response_data['username']
 
-        self.sendSysMessage('login successful')
+        self.sendLoginSuccess(self.__auth_token)
 
         return True
 
@@ -60,7 +60,7 @@ class ClientApi:
         selectedLobby:Lobby = self.lobbies[lobbyId]
         
         if self.__handleLobbyNotJoinable(selectedLobby): return
-
+        
         self.__currentLobby = selectedLobby
         self.__currentLobby.join(self)
 
@@ -70,6 +70,14 @@ class ClientApi:
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
         self.__currentLobby = None
+        pass
+
+    def sendLoginSuccess(self, token):
+        self.__conn.sendall(NetworkEvent.LOGIN_SUCCESS,{'token':token})
+        pass
+
+    def sendLoginFailed(self, message):
+        self.__conn.sendall(NetworkEvent.LOGIN_FAIL,{'message':message})
         pass
 
     def sendMessage(self, message):
