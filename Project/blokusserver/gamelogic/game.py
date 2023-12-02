@@ -44,8 +44,8 @@ class Game:
     def __deleteAvaileblePiece(self, spielerID:int, pieceKey:str):
         del self.__availeblePieces[spielerID][pieceKey]
 
-    def __isPieceAvaileble(self, spielerID:int, pieceKey:str)->bool:
-        return pieceKey in self.__availeblePieces[spielerID] #boolscher Wert
+    def __isPieceAvaileble(self, spielerID:int, pieceKey:str):
+        return pieceKey in self.__availeblePieces[spielerID] #String
 
     def print(self):
         print(self.__feld)
@@ -59,6 +59,8 @@ class Game:
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
             if self.__placePiece(piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
+        else:
+            self.__event = (GameEventCodes.SAME_PIECE, "Das Piece wurde bereits platziert")
 
     def __placePiece(self, piece:BlokusPiece, start_x, start_y, spielerID:int):
         if self.__isFirstPiece[spielerID] == True:
