@@ -8,9 +8,11 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_LobbyLeave(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
 
-    def handleEvent(self, client:ClientApi, eventData):
-
-        client.leaveLobby()
+    def handleEvent(self, eventData):
+        self._client.leaveLobby()
         pass
     

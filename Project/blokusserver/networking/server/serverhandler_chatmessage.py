@@ -9,12 +9,15 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_ChatMessage(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
     
-    def handleEvent(self, client:ClientApi, eventData):
+    def handleEvent(self, eventData):
         if 'message' not in eventData: 
-            client.sendSysMessage('invalid message')
+            self._client.sendSysMessage('invalid message')
             return 
         
-        client.sendMessage(eventData['message'])
+        self._client.sendMessage(eventData['message'])
         pass
 

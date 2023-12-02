@@ -8,9 +8,11 @@ from server.clientapi import ClientApi
 ##################################################
 
 class ServerEventHandler:
-    def handleEvent(self, client:ClientApi, eventData):
+
+    def __init__(self, client:ClientApi) -> None:
+        self._client:ClientApi = client
+
+    def handleEvent(self, eventData):
         
         pass
-
-    
     
