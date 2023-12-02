@@ -43,10 +43,20 @@ class PyQt6_Networkadapter:
     pass
     
 class QNetworkEventSignals(QObject):
-    sys_message = pyqtSignal(NetworkEventObject)
-    messsage = pyqtSignal(NetworkEventObject)
+    recv_sys_message = pyqtSignal(NetworkEventObject)
+    recv_messsage = pyqtSignal(NetworkEventObject)
     login_success = pyqtSignal(NetworkEventObject)
-    lobby_create = pyqtSignal(NetworkEventObject)
+    lobby_created = pyqtSignal(NetworkEventObject)
+    lobby_joined = pyqtSignal(NetworkEventObject)
+    lobby_new_host = pyqtSignal(NetworkEventObject)
+    lobby_player_joined = pyqtSignal(NetworkEventObject)
+    lobby_player_left = pyqtSignal(NetworkEventObject)
+    lobby_player_ready = pyqtSignal(NetworkEventObject)
+    lobby_browser = pyqtSignal(NetworkEventObject)
+    game_start = pyqtSignal(NetworkEventObject)
+    game_invalid_move = pyqtSignal(NetworkEventObject)
+    game_end = pyqtSignal(NetworkEventObject)
+    
     pass
     
     
@@ -58,10 +68,17 @@ class QNetworkThread(QThread):
         self.eventSignals = QNetworkEventSignals()
         self.__stopEvent = threading.Event()
         self.event_map = {
-            NetworkEvent.SYSMESSAGE.value: self.eventSignals.sys_message,
-            NetworkEvent.MESSAGE.value: self.eventSignals.messsage,
+            NetworkEvent.SYSMESSAGE.value: self.eventSignals.recv_sys_message,
+            NetworkEvent.MESSAGE.value: self.eventSignals.recv_messsage,
             NetworkEvent.LOGIN_SUCCESS.value: self.eventSignals.login_success,
-            NetworkEvent.LOBBY_CREATE.value: self.eventSignals.lobby_create
+            NetworkEvent.LOBBY_JOIN.value: self.eventSignals.lobby_joined,
+            NetworkEvent.LOBBY_CREATE.value: self.eventSignals.lobby_created,
+            NetworkEvent.LOBBIES_GET.value: self.eventSignals.lobby_browser,
+            NetworkEvent.LOBBY_LEAVE.value: self.eventSignals.lobby_player_left,
+            NetworkEvent.LOBBY_READY.value: self.eventSignals.lobby_player_ready,
+            #NetworkEvent.LOBBY_JOIN.value: self.eventSignals.lobby_new_host,
+            NetworkEvent.GAME_START.value: self.eventSignals.game_start
+            
         }
     
     def run(self):
