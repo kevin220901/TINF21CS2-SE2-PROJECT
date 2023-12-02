@@ -41,8 +41,6 @@ class ClientApi:
         return True
 
 
-
-
     def createLobby(self, lobbyName):
         if self.__handleAllreadyInLobby(): return
         if self.__handleLobbyExists(lobbyName): return
@@ -70,10 +68,6 @@ class ClientApi:
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
         self.__currentLobby = None
-        pass
-
-    def recvMessage(self, sender:str, message):
-        self.__conn.emit_Message(sender, message)
         pass
 
     def toggleReady(self):
