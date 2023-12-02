@@ -10,9 +10,11 @@ from server.servereventhandler import ServerEventHandler
 
 
 class ServerEventHandler_LobbyReady(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
 
-    def handleEvent(self, client:ClientApi, eventData):
-
-        client.toggleReady()
+    def handleEvent(self, eventData):
+        self._client.toggleReady()
         pass
     

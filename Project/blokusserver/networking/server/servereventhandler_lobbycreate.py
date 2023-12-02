@@ -11,15 +11,18 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_LobbyCreate(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
     
-    def handleEvent(self, client:ClientApi, eventData):
+    def handleEvent(self, eventData):
         if not eventData: 
-            client.sendSysMessage('server recieved invalid data')
+            self._client.sendSysMessage('server recieved invalid data')
             return
          
         if 'lobbyName' not in eventData: 
-            client.sendSysMessage('server recieved invalid lobby name')
+            self._client.sendSysMessage('server recieved invalid lobby name')
             return
 
-        client.createLobby(eventData['lobbyName'])
+        self._client.createLobby(eventData['lobbyName'])
         pass

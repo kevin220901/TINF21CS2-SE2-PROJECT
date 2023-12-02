@@ -7,15 +7,19 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_Login(ServerEventHandler):
-    
-    def handleEvent(self, client:ClientApi, eventData):
-        if 'username' not in eventData or 'password' not in eventData:
-            client.sendSysMessage('invalid eventData: missing credentials')
 
-        if client.hasAuthToken:
-            client.sendSysMessage('allready logged in')
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
+    
+    def handleEvent(self, eventData):
+        if 'username' not in eventData or 'password' not in eventData:
+            self._client.sendSysMessage('invalid eventData: missing credentials')
+
+        if self._client.hasAuthToken:
+            self._client.sendSysMessage('allready logged in')
             return
             
-        client.login(eventData['username'], eventData['password'])
+        self._client.login(eventData['username'], eventData['password'])
 
         pass

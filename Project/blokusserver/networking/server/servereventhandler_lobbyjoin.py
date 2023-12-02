@@ -8,12 +8,15 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_LobbyJoin(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
     
     def handleEvent(self, client:ClientApi, eventData):
         if 'lobbyId' not in eventData:
-            client.sendSysMessage('invalid eventData: missing lobby id')
+            self._client.sendSysMessage('invalid eventData: missing lobby id')
             return
-
-        client.joinLobby(eventData['lobbyId']) 
+        
+        self._client.joinLobby(eventData['lobbyId']) 
 
         pass

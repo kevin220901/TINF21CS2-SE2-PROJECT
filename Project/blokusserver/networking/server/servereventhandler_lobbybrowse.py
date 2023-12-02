@@ -10,8 +10,11 @@ from server.servereventhandler import ServerEventHandler
 ##################################################
 
 class ServerEventHandler_LobbyBrowse(ServerEventHandler):
+    def __init__(self, client: ClientApi) -> None:
+        super().__init__(client)
+        pass
 
-    def handleEvent(self, client:ClientApi, eventData):
+    def handleEvent(self, eventData):
         #only return joinable lobbies
         #lobbyId
         #lobbyName
@@ -20,7 +23,7 @@ class ServerEventHandler_LobbyBrowse(ServerEventHandler):
         lobbyList = []
         lobby: Lobby
 
-        for key, lobby in client.lobbies.items():
+        for key, lobby in self._client.lobbies.items():
             if lobby.cantBeJoined: continue
             lobbyList.append({
                 'lobbyId':lobby.lobbyId,
@@ -28,6 +31,6 @@ class ServerEventHandler_LobbyBrowse(ServerEventHandler):
                 'playerCount':lobby.playerCount
             })
         
-        client.sendLobbyBrowsingResult(lobbyList)
+        self._client.sendLobbyBrowsingResult(lobbyList)
         pass
     

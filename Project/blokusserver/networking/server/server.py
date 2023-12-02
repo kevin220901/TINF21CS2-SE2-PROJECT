@@ -60,16 +60,16 @@ class Server:
         
 
         events = {
-            NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(),            
-            NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(),         
-            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(),                      
-            NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(),                     
-            NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(),                      
-            NetworkEvent.GAME_MOVE.value: ServerEventHandler(),                        
-            NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(),
-            NetworkEvent.GAME_FINISH.value: ServerEventHandler(),                      
-            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(),
-            NetworkEvent.LOGIN.value: ServerEventHandler_Login()               
+            NetworkEvent.LOBBY_JOIN.value: ServerEventHandler_LobbyJoin(api),            
+            NetworkEvent.LOBBY_CREATE.value: ServerEventHandler_LobbyCreate(api),         
+            NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(api),                      
+            NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(api),                     
+            NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(api),                      
+            NetworkEvent.GAME_MOVE.value: ServerEventHandler(api),                        
+            NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(api),
+            NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
+            NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
+            NetworkEvent.LOGIN.value: ServerEventHandler_Login(api)               
         }
         
 
@@ -103,7 +103,7 @@ class Server:
 
                         eventData = json.loads(recieved)
                         eventhandler:ServerEventHandler = events[eventId]
-                        eventhandler.handleEvent(api, eventData)
+                        eventhandler.handleEvent(eventData)
 
                         state = 0
                 except socket.error as e:
