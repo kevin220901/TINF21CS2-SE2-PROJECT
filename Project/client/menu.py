@@ -5,6 +5,10 @@ from PyQt6.QtCore import *
 from account.login import Login
 from account.register import Register
 
+from network.networkevent import NetworkEvent
+from network.serverapi import NetworkEventObject
+from qt6networkadapter import PyQt6_Networkadapter
+
 ##################################################
 ## Author: Kevin Wagner
 ##################################################
@@ -12,8 +16,9 @@ from account.register import Register
 
 # Main Menu Class
 class Menu:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
+        self.network = network
 
     # Menu Frame and Widget inside Main Window
     def menuFrame(self):
@@ -61,7 +66,7 @@ class Menu:
     # Menu Function Login (Destroy Widget Menu and Create Widget Login inside Main Window)
     def login(self):
         self.mainWindow.menuFrame.deleteLater()
-        self.login = Login(self.mainWindow)
+        self.login = Login(self.mainWindow, self.network)
         self.login.loginFrame()
         
     # Menu Function Exit (Destroy Main Window)
