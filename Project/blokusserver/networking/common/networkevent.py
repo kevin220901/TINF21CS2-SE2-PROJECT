@@ -23,7 +23,6 @@ class NetworkEvent(Enum):
     PICK_COLOR = 14
     LOGIN = 15
     LOGIN_SUCCESS = 16
-    LOGIN_FAIL = 17
 
 
     
