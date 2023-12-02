@@ -64,4 +64,5 @@ class UserLoginView(APIView):
             response_data.update(serializer.data)
             return Response(response_data, status=status.HTTP_200_OK)
         else:
+            logger.critical(f'failt authentication for user {username}')
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
