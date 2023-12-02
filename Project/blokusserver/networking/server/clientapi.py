@@ -13,7 +13,7 @@ from server.logger import *
 
 class ClientApi:
     def __init__(self, conn:socket, stopEvent:threading.Event, lobbies) -> None:
-        self.__conn = SocketWrapper(conn)
+        self.__conn = ClientSocketWrapper(conn)
         self.__currentLobby:Lobby = None
         self.__playerId:str = None
         self.__playerName:str = None
@@ -73,11 +73,11 @@ class ClientApi:
         pass
 
     def sendLoginSuccess(self, token):
-        self.__conn.sendall(NetworkEvent.LOGIN_SUCCESS,{'token':token})
+        self.__conn.notify_Login_success(token)
         pass
 
     def sendLoginFailed(self, message):
-        self.__conn.sendall(NetworkEvent.LOGIN_FAIL,{'message':message})
+        self.__conn.notify_Login_fail
         pass
 
     def sendMessage(self, message):
@@ -88,14 +88,14 @@ class ClientApi:
         pass
 
     def sendSysMessage(self, message):
-        self.__conn.sendall(NetworkEvent.SYSMESSAGE, {'message':message})
+        self.__conn.notify_SysMessage(message)
         pass
 
     def sendLobbyBrowsingResult(self, joinableLobbies):
         self.__conn.sendall(NetworkEvent.LOBBIES_GET, joinableLobbies)
 
     def recvMessage(self, sender:str, message):
-        self.__conn.sendall(NetworkEvent.MESSAGE, {'from':sender, 'messsage':message})
+        self.__conn.notify_Message(sender, message)
         pass
 
     def toggleReady(self):
