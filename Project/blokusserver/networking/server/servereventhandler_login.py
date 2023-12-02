@@ -14,10 +14,10 @@ class ServerEventHandler_Login(ServerEventHandler):
     
     def handleEvent(self, eventData):
         if 'username' not in eventData or 'password' not in eventData:
-            self._client.sendSysMessage('invalid eventData: missing credentials')
+            self._client.connection.emit_SysMessage('invalid eventData: missing credentials')
 
         if self._client.hasAuthToken:
-            self._client.sendSysMessage('allready logged in')
+            self._client.connection.emit_SysMessage('allready logged in')
             return
             
         self._client.login(eventData['username'], eventData['password'])

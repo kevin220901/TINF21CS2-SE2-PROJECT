@@ -31,6 +31,6 @@ class ServerEventHandler_LobbyBrowse(ServerEventHandler):
                 'playerCount':lobby.playerCount
             })
         
-        self._client.sendLobbyBrowsingResult(lobbyList)
+        self._client.connection.emit_availableLobbies(lobbyList)
         pass
     

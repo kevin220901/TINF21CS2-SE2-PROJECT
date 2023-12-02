@@ -27,7 +27,7 @@ class ClientApi:
         logger.info(response)
         if response.status_code != 200:
             self.__stopEvent.set()
-            self.sendLoginFailed('access denied')
+            self.__conn.emit_Login_fail()
             return False
         
         response_data = json.loads(response.content)
@@ -36,7 +36,7 @@ class ClientApi:
         self.__playerId = response_data['id']
         self.__playerName = response_data['username']
 
-        self.sendLoginSuccess(self.__auth_token)
+        self.__conn.emit_Login_success(self.__auth_token)
 
         return True
 
@@ -72,70 +72,43 @@ class ClientApi:
         self.__currentLobby = None
         pass
 
-    def sendLoginSuccess(self, token):
-        self.__conn.notify_Login_success(token)
-        pass
-
-    def sendLoginFailed(self, message):
-        self.__conn.notify_Login_fail
-        pass
-
-    def sendMessage(self, message):
-        if self.__handleNotInLobby(): return
-
-        self.__currentLobby.broadcastMessage(self, message)
-
-        pass
-
-    def sendSysMessage(self, message):
-        self.__conn.notify_SysMessage(message)
-        pass
-
-    def sendLobbyBrowsingResult(self, joinableLobbies):
-        self.__conn.sendall(NetworkEvent.LOBBIES_GET, joinableLobbies)
-
     def recvMessage(self, sender:str, message):
-        self.__conn.notify_Message(sender, message)
+        self.__conn.emit_Message(sender, message)
         pass
 
     def toggleReady(self):
         if self.__handleNotInLobby(): return
         self.__currentLobby.toggleReady(self)
         pass
-
-    def notifyGameStarted(self):
-        #TODO: transmitt who plays first
-        self.__conn.sendall(NetworkEvent.GAME_START, {'turn':'dummy info :P'})
-        pass
     
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
-            self.sendSysMessage('allready in a lobby')
+            self.__conn.emit_SysMessage('allready in a lobby')
             return True
         return False
     
     def __handleLobbyExists(self, lobbyName):
         if lobbyName in self.lobbies:
-            self.sendSysMessage('lobby allready exists')
+            self.__conn.emit_SysMessage('lobby allready exists')
             return True
         return False
     
     def __handleLobbyNotFound(self, lobbyName):
         if lobbyName not in self.lobbies:
-            self.sendSysMessage('lobby not found')
+            self.__conn.emit_SysMessage('lobby not found')
             return True
         return False
     
     def __handleLobbyNotJoinable(self, lobby:Lobby):
         if lobby.cantBeJoined:
-            self.sendSysMessage('lobby not joinable')
+            self.__conn.emit_SysMessage('lobby not joinable')
             return True
         return False
     
     def __handleNotInLobby(self):
         if not self.__currentLobby:
             #check connection still open
-            self.sendSysMessage('not in a lobby')
+            self.__conn.emit_SysMessage('not in a lobby')
             return True
         return False
     
@@ -167,6 +140,9 @@ class ClientApi:
     def authToken(self):
         return self.__auth_token
     
+    @property
+    def connection(self):
+        return self.__conn
 
     
 from socket import socket

@@ -56,7 +56,7 @@ class Server:
             lobbies=self.__lobbies,
         )
 
-        api.sendSysMessage('connected')
+        api.connection.emit_SysMessage('connected')
         
 
         events = {

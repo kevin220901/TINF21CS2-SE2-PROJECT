@@ -15,9 +15,9 @@ class ServerEventHandler_ChatMessage(ServerEventHandler):
     
     def handleEvent(self, eventData):
         if 'message' not in eventData: 
-            self._client.sendSysMessage('invalid message')
+            self._client.connection.emit_SysMessage('invalid message')
             return 
         
-        self._client.sendMessage(eventData['message'])
+        self._client.connection.emit_Message(eventData['message'])
         pass
 
