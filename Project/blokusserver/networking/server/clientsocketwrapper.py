@@ -6,9 +6,6 @@ import socket
 from common.networkevent import NetworkEvent
 from common.socketwrapper import SocketWrapper
 
-#TODO: do i need this class or can the funtionality be moved to lobby?
-
-
 ##################################################
 ## Author: Luis Eckert
 ##################################################
@@ -19,7 +16,7 @@ class ClientSocketWrapper(SocketWrapper):
         super().__init__(conn)
 
 
-    def notify_SysMessage(self, message):
+    def emit_SysMessage(self, message):
         eventId = NetworkEvent.SYSMESSAGE
         eventData = {
             'message':message
@@ -27,7 +24,7 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
 
 
-    def notify_Message(self, sender:str, message:str):
+    def emit_Message(self, sender:str, message:str):
         eventId = NetworkEvent.MESSAGE
         eventData = {
             'from':sender, 
@@ -36,7 +33,7 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
 
-    def notify_Login_success(self, token):
+    def emit_Login_success(self, token):
         eventId = NetworkEvent.LOGIN_SUCCESS
         eventData = {
             'token':token
@@ -44,11 +41,11 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
 
-    def notify_Login_fail(self):
-        self.notify_SysMessage('access denied')
+    def emit_Login_fail(self):
+        self.emit_SysMessage('access denied')
         pass
 
-    def notify_LobbyCreate_success(self, lobbyInfo): #TODO: the data structure for lobbyInfo has yet to be defined
+    def emit_LobbyCreate_success(self, lobbyInfo): #TODO: the data structure for lobbyInfo has yet to be defined
         eventId = NetworkEvent.LOGIN_SUCCESS
         eventData = {
             'lobbyInfo':lobbyInfo
@@ -56,11 +53,11 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
 
-    def notify_LobbyCreate_fail(self, message):
-        self.notify_SysMessage(message)
+    def emit_LobbyCreate_fail(self, message):
+        self.emit_SysMessage(message)
         pass
 
-    def notify_LobbyJoin_success(self, lobbyInfo):
+    def emit_LobbyJoin_success(self, lobbyInfo):
         eventId = NetworkEvent.LOBBY_JOIN
         eventData = {
             'lobbyInfo':lobbyInfo
@@ -68,6 +65,13 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
 
-    def notify_LobbyJoin_fail(self, message):
-        self.notify_SysMessage(message)
+    def emit_LobbyJoin_fail(self, message):
+        self.emit_SysMessage(message)
+        pass
+
+
+    def emit_availableLobbies(self, lobbies):
+        eventId = NetworkEvent.LOBBIES_GET
+        eventData = lobbies
+        self.__conn.sendall(eventId, eventData)
         pass

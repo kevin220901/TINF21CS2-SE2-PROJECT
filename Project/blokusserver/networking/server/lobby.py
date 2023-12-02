@@ -41,8 +41,9 @@ class Lobby:
         pass
 
     def broadcastMessage(self, sender:ClientApi, message):
+        p:ClientApi
         for p in self.__players:
-            p.recvMessage(sender.playerName, message)
+            p.connection.emit_Message(sender.playerName, message)
         pass
 
     def startGame(self, player:ClientApi):
@@ -51,17 +52,13 @@ class Lobby:
         
         p:ClientApi
         for p in self.__players:
-            p.notifyGameStarted()
+            p.connection.emit_SysMessage('game started') #TODO: replace with own emit to transmit initial game info
         pass
     
-    
-   
-    def sendSysMessage(self, sysmessage):
-        for p in self.__players:
-            p.sendSysMessage(sysmessage)
-
     def __notifyAll(self, message):
-        self.sendSysMessage(message)
+        p:ClientApi
+        for p in self.__players:
+            p.connection.emit_SysMessage(message)
         pass
 
     def __handleLobbyAbbandoned(self):
@@ -92,7 +89,7 @@ class Lobby:
         '''
         if self.__host == player: return False
 
-        player.sendSysMessage('only the host is permitted to start the game')
+        player.connection.emit_SysMessage('only the host is permitted to start the game')
         return True 
 
     def __handleLobbyIsNotReady(self):

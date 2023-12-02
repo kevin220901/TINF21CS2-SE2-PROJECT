@@ -14,7 +14,7 @@ class ServerEventHandler_LobbyJoin(ServerEventHandler):
     
     def handleEvent(self, client:ClientApi, eventData):
         if 'lobbyId' not in eventData:
-            self._client.sendSysMessage('invalid eventData: missing lobby id')
+            self._client.connection.emit_SysMessage('invalid eventData: missing lobby id')
             return
         
         self._client.joinLobby(eventData['lobbyId']) 

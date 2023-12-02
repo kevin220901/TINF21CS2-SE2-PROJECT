@@ -17,11 +17,11 @@ class ServerEventHandler_LobbyCreate(ServerEventHandler):
     
     def handleEvent(self, eventData):
         if not eventData: 
-            self._client.sendSysMessage('server recieved invalid data')
+            self._client.connection.emit_SysMessage('server recieved invalid data')
             return
          
         if 'lobbyName' not in eventData: 
-            self._client.sendSysMessage('server recieved invalid lobby name')
+            self._client.connection.emit_SysMessage('server recieved invalid lobby name')
             return
 
         self._client.createLobby(eventData['lobbyName'])
