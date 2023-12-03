@@ -5,13 +5,19 @@ from lobby.lobbyconfig import LobbyConfig
 from lobby.searchlobby import SearchLobby
 from account.userprofile import UserProfile
 
+from network.networkevent import NetworkEvent
+from qt6networkadapter import PyQt6_Networkadapter
+
 ##################################################
 ## Author: Kevin Wagner
 ##################################################
 
 class LobbyMenu:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
+        self.__network = network
+        pass
+
     def lobbyMenuFrame(self):
         self.mainWindow.label = QLabel('Blokus', self.mainWindow)
         self.mainWindow.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -59,7 +65,7 @@ class LobbyMenu:
     
     def my_profile(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
-        self.my_profile = UserProfile(self.mainWindow)
+        self.my_profile = UserProfile(self.mainWindow, self.__network)
         self.my_profile.userProfileFrame()
 
     def exit(self):

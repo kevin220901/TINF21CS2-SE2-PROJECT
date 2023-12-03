@@ -2,13 +2,18 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+from network.networkevent import NetworkEvent
+from qt6networkadapter import PyQt6_Networkadapter
+
 ##################################################
 ## Author: Kevin Wagner
 ##################################################
 
 class UserProfile:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
+        self.__network = network
+
     def userProfileFrame(self):
         userProfile_widget = QWidget()
         userProfile_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
@@ -91,6 +96,15 @@ class UserProfile:
         self.mainWindow.back_button.clicked.connect(self.back)
         self.mainWindow.delete_profile_button.clicked.connect(self.delete_profile)
 
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+
+
+
+    def __onProfileReadSuccess(self, eventData):
+        self.mainWindow.username_input.setText(eventData['username'])
+        self.mainWindow.email_input.setText(eventData['email'])
+        pass
+
     # Register User for Blokus Game
     def save(self):
         username = self.mainWindow.username_input.text()
@@ -99,14 +113,17 @@ class UserProfile:
         print("Username:", username)
         print("E-Mail:", email)
         print("Selected Color:", selected_color)
-    
+        pass
+
     #Add Back Button Function
     def back(self):
         from lobby.lobbymenu import LobbyMenu
-        self.lobbymenu = LobbyMenu(self.mainWindow)
+        self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()
-        
+        pass
+
     def delete_profile(self):
         from account.deleteprofile import DeleteProfile
         self.deleteProfile = DeleteProfile(self.mainWindow)
         self.deleteProfile.deleteProfileFrame()
+        pass

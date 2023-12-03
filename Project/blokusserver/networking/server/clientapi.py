@@ -140,12 +140,7 @@ class ClientApi:
             return True
         return False
     
-    def __handleIvalidateAuthToken(self, token):
-        if token != self.__auth_token:
-            logger.critical('access denied')
-            self.__conn.emit_SysMessage('access denied')
-            return True
-        return False
+    
     
 
     @property

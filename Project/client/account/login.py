@@ -104,7 +104,7 @@ class Login:
     def __on_login(self, eventObj:NetworkEventObject):
         print(eventObj)
         from lobby.lobbymenu import LobbyMenu
-        self.lobbymenu = LobbyMenu(self.mainWindow)
+        self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()
         pass
 
