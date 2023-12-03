@@ -103,7 +103,7 @@ class ClientApi:
             self.__conn.emit_SysMessage('failed to delete profile')
             return False
         self.__auth_token = None
-        self.__conn.emit_SysMessage('profile deleted')
+        self.__conn.emit_profile_deleted()
 
         return True
 

@@ -138,12 +138,15 @@ class ServerApi:
                         
                         if eventId == NetworkEvent.LOGIN_SUCCESS.value:
                             self.__auth_token = eventData['token']
+                        elif eventId == NetworkEvent.PROFILE_DELETE.value:
+                            self.__auth_token = None
 
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
 
 
                 except Exception as e:
+                    self.__auth_token = None
                     print(e)
                     self.__stopEvent.set()
                     #self.sock.close()

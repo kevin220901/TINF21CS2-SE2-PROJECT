@@ -98,13 +98,17 @@ class UserProfile:
         self.mainWindow.delete_profile_button.clicked.connect(self.delete_profile)
 
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
         self.__network.api.requestProfile()
 
 
     def __onProfileReadSuccess(self, event:NetworkEventObject):
-        print(event)
         self.mainWindow.username_input.setText(event.eventData['username'])
         self.mainWindow.email_input.setText(event.eventData['email'])
+        pass
+
+    def __onProfileUpdateSuccess(self, event:NetworkEventObject):
+        self.__network.api.requestProfile()
         pass
 
     # Register User for Blokus Game
@@ -112,9 +116,7 @@ class UserProfile:
         username = self.mainWindow.username_input.text()
         email = self.mainWindow.email_input.text()
         selected_color = self.mainWindow.color_choice.currentText()
-        print("Username:", username)
-        print("E-Mail:", email)
-        print("Selected Color:", selected_color)
+        self.__network.api.updateProfile(username, email)
         pass
 
     #Add Back Button Function
@@ -126,6 +128,6 @@ class UserProfile:
 
     def delete_profile(self):
         from account.deleteprofile import DeleteProfile
-        self.deleteProfile = DeleteProfile(self.mainWindow)
+        self.deleteProfile = DeleteProfile(self.mainWindow, self.__network)
         self.deleteProfile.deleteProfileFrame()
         pass
