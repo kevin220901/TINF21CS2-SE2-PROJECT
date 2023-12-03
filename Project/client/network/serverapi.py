@@ -34,6 +34,7 @@ class ServerApi:
         self.host = host
         self.port = port
         self.address = (self.host, self.port)
+        self.__auth_token = None
 
         #move the actual connection to a public mthod to enable easier connect retries
 
@@ -134,6 +135,10 @@ class ServerApi:
                             continue
 
                         eventData = json.loads(recieved)
+                        
+                        if eventId == NetworkEvent.LOGIN_SUCCESS.value:
+                            self.__auth_token = eventData['token']
+
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
 
@@ -147,32 +152,32 @@ class ServerApi:
     
     def createLobby(self, lobbyName):
         eventId = NetworkEvent.LOBBY_CREATE
-        eventData = {'lobbyName':lobbyName}
+        eventData = {'token':self.__auth_token,'lobbyName':lobbyName}
         self.send(eventId, eventData)
     
     def joinLobby(self, lobbyId):
         eventId = NetworkEvent.LOBBY_JOIN
-        eventData = {'lobbyId':lobbyId}
+        eventData = {'token':self.__auth_token,'lobbyId':lobbyId}
         self.send(eventId, eventData)
 
     def leaveLobby(self):
         eventId = NetworkEvent.LOBBY_LEAVE
-        eventData = {'':''}
+        eventData = {'token':self.__auth_token,}
         self.send(eventId, eventData)
 
     def ready(self):
         eventId = NetworkEvent.LOBBY_READY
-        eventData = {'':''}
+        eventData = {'token':self.__auth_token,}
         self.send(eventId, eventData)
 
     def sendMessage(self, message):
         eventId = NetworkEvent.MESSAGE
-        eventData = {'message':message}
+        eventData = {'token':self.__auth_token,'message':message}
         self.send(eventId, eventData)
 
     def getLobbies(self):
         eventId = NetworkEvent.LOBBIES_GET
-        eventData = {'messag':''}
+        eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
 
     def login(self, username, password):
