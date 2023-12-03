@@ -18,13 +18,13 @@ class LobbyConfig:
         pass
 
     def lobbyConfigFrame(self):
-        lobbyConfig_widget = QWidget()
-        lobbyConfig_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
-        lobbyConfig_widget.setFixedSize(700, 400)
+        self.lobbyConfig_widget = QWidget(self.mainWindow)
+        self.lobbyConfig_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        self.lobbyConfig_widget.setFixedSize(700, 400)
     
-        grid_layout = QGridLayout(lobbyConfig_widget)
+        grid_layout = QGridLayout(self.lobbyConfig_widget)
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mainWindow.central_layout.addWidget(lobbyConfig_widget, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.mainWindow.central_layout.addWidget(self.lobbyConfig_widget, alignment=Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.lobby_name_label = QLabel("Lobby Name           :")
         self.mainWindow.ai_difficulty_label = QLabel("AI Difficulty             :")
         self.mainWindow.lobby_name_input = QLineEdit()
@@ -85,8 +85,8 @@ class LobbyConfig:
     def lobby_create(self):
         lobby_name = self.mainWindow.lobby_name_input.text()
         ai_difficulty = self.mainWindow.ai_difficulty_choice.currentText()
-        
         self.__network.api.createLobby(lobby_name, ai_difficulty)
+        self.lobbyConfig_widget.deleteLater()
         pass
 
     

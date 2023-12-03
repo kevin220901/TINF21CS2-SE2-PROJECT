@@ -3,12 +3,16 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from PyQt6.QtMultimedia import *
 
+from network.networkevent import NetworkEvent
+from network.serverapi import NetworkEventObject
+from qt6networkadapter import PyQt6_Networkadapter
+
 ##################################################
 ## Author: Kevin Wagner
 ##################################################
 
 class SearchLobby:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
     def searchLobbyFrame(self):
         lobbyConfig_widget = QWidget()
