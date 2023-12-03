@@ -51,10 +51,21 @@ class ClientApi:
 
         return True
     
-    def readProfile(self):
+    def readProfile(self, token):
+        if token != self.__auth_token:
+            logger.critical('access denied')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+
         response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {self.__auth_token}'})
         logger.info(response)
-        if response.status_code != 200:
+
+        if response.status_code == 401:
+            logger.critical('access denied')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+        elif response.status_code != 200:
+            logger.critical('failed to read profile')
             self.__conn.emit_SysMessage('failed to read profile')
             return False
 

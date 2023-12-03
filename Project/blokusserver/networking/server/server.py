@@ -71,7 +71,8 @@ class Server:
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
             NetworkEvent.LOGIN.value: ServerEventHandler_Login(api),
-            NetworkEvent.REGISTRATION.value: ServerEventHandler_Register(api),           
+            NetworkEvent.REGISTRATION.value: ServerEventHandler_Register(api),
+            NetworkEvent.PROFILE_READ.value: ServerEventHandler_Register(api)            
         }
         
 
