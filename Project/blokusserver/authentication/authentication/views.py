@@ -77,7 +77,6 @@ class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        logger.info(request.META)
         user = request.user
         serializer = UserSerializer(instance=user)
         return Response(serializer.data, status=status.HTTP_200_OK)
