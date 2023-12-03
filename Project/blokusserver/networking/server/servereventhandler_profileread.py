@@ -1,6 +1,5 @@
 
 
-from logger import logger
 from server.clientapi import ClientApi
 from server.servereventhandler import ServerEventHandler
 

@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+from network.serverapi import NetworkEventObject
 from network.networkevent import NetworkEvent
 from qt6networkadapter import PyQt6_Networkadapter
 
@@ -97,12 +98,13 @@ class UserProfile:
         self.mainWindow.delete_profile_button.clicked.connect(self.delete_profile)
 
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.api.requestProfile()
 
 
-
-    def __onProfileReadSuccess(self, eventData):
-        self.mainWindow.username_input.setText(eventData['username'])
-        self.mainWindow.email_input.setText(eventData['email'])
+    def __onProfileReadSuccess(self, event:NetworkEventObject):
+        print(event)
+        self.mainWindow.username_input.setText(event.eventData['username'])
+        self.mainWindow.email_input.setText(event.eventData['email'])
         pass
 
     # Register User for Blokus Game

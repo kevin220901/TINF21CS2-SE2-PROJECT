@@ -55,7 +55,7 @@ class ClientApi:
         return True
     
     def readProfile(self, token):
-        response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {self.__auth_token}'})
+        response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {token}'})
         logger.info(response)
 
         if response.status_code == 401:
@@ -75,13 +75,13 @@ class ClientApi:
 
 
 
-    def createLobby(self, lobbyName):
+    def createLobby(self, lobbyId):
         if self.__handleAllreadyInLobby(): return
-        if self.__handleLobbyExists(lobbyName): return
+        if self.__handleLobbyExists(lobbyId): return
 
-        #TODO:the LobbyName must replaced with an actual, UNIQUE lobby id
-        newLobby = Lobby(lobbyName, self.lobbies)
+        newLobby = Lobby(lobbyId, self.lobbies)
         self.__currentLobby = newLobby
+        self.__conn.emit_LobbyCreate_success(newLobby.lobbyId)
         newLobby.join(self)
         return newLobby
 
@@ -115,14 +115,14 @@ class ClientApi:
             return True
         return False
     
-    def __handleLobbyExists(self, lobbyName):
-        if lobbyName in self.lobbies:
+    def __handleLobbyExists(self, lobbyId):
+        if lobbyId in self.lobbies:
             self.__conn.emit_SysMessage('lobby allready exists')
             return True
         return False
     
-    def __handleLobbyNotFound(self, lobbyName):
-        if lobbyName not in self.lobbies:
+    def __handleLobbyNotFound(self, lobbyId):
+        if lobbyId not in self.lobbies:
             self.__conn.emit_SysMessage('lobby not found')
             return True
         return False

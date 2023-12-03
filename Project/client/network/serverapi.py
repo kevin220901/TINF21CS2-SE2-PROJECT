@@ -191,3 +191,9 @@ class ServerApi:
         eventData = {'username':username, 'password':password, 'email':email}
         self.send(eventId, eventData)
         pass
+
+    def requestProfile(self):
+        eventId = NetworkEvent.PROFILE_READ
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass

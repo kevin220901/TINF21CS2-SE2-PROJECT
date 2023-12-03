@@ -82,8 +82,8 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
      
-    def emit_Profile_read(self, profile):
+    def emit_Profile_read(self, profileData):
         eventId = NetworkEvent.PROFILE_READ
-        eventData = profile
+        eventData = profileData
         self.sendall(eventId, eventData)
         pass

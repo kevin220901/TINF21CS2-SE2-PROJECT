@@ -17,6 +17,7 @@ from server.serverhandler_gamestart import ServerEventHandler_GameStart
 from server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
 from server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
 from server.servereventhandler_register import ServerEventHandler_Register
+from server.servereventhandler_profileread import ServerEventHandler_ProfileRead
 from server.clientapi import ClientApi
 from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
@@ -72,7 +73,7 @@ class Server:
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
             NetworkEvent.LOGIN.value: ServerEventHandler_Login(api),
             NetworkEvent.REGISTRATION.value: ServerEventHandler_Register(api),
-            NetworkEvent.PROFILE_READ.value: ServerEventHandler_Register(api)            
+            NetworkEvent.PROFILE_READ.value: ServerEventHandler_ProfileRead(api)            
         }
         
 

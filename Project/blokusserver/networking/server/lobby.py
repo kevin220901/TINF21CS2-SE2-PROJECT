@@ -1,14 +1,14 @@
 from __future__ import annotations
+import uuid
 
 ##################################################
 ## Author: Luis Eckert
 ##################################################
 
 class Lobby:
-    def __init__(self, lobbyName, lobbies:dict) -> None:
+    def __init__(self, lobbyId, lobbies:dict) -> None:
         self.__lobbies = lobbies
-        self.__lobbyName = lobbyName 
-        self.__lobbyId = lobbyName #secrets.token_bytes(32)
+        self.__lobbyId = lobbyId
         self.__players = [] #later this might get changed to a dictionary to store mor info. REMEMBER TO update all loops accordingly!
         self.__canBeJoined:bool = True
         self.__isPrivate: bool = False #not yet needed 
@@ -21,7 +21,8 @@ class Lobby:
     def join(self, player:ClientApi):
         self.__players.append(player)
         self.__ready[player] = False
-        self.__notifyAll(f"new player {player.playerName} has joined the lobby.")
+        if self.__players.count(player) > 1: 
+            self.__notifyAll(f"new player {player.playerName} has joined the lobby.")
         self.__handleHostGone()
         pass
         
@@ -103,15 +104,16 @@ class Lobby:
 
         return False
 
+    def getLobbyInfo(self):
+        return {
+            'lobbyId': self.__lobbyId,
+            'aiDifficulty': 'not yet implemented'            
+        }
 
     @property
     def lobbyId(self) -> str:
         return self.__lobbyId
     
-    @property
-    def lobbyName(self) -> str:
-        return self.__lobbyName
-
     @property
     def canBeJoined(self) -> bool:
         return self.__canBeJoined
