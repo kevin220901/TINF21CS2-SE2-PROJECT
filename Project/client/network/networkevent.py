@@ -23,6 +23,9 @@ class NetworkEvent(Enum):
     PICK_COLOR = 14
     LOGIN = 15
     LOGIN_SUCCESS = 16
+    REGISTRATION = 17
+    REGISTRATION_SUCCESS = 18
+    PROFILE_READ = 19
 
 
     
