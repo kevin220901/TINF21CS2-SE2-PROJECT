@@ -26,7 +26,6 @@ class ClientApi:
         response = requests.post(NetworkConst.URL_RESTAPI_LOGIN,data=auth_data)
         logger.info(response)
         if response.status_code != 200:
-            self.__stopEvent.set()
             self.__conn.emit_Login_fail()
             return False
         
@@ -39,6 +38,32 @@ class ClientApi:
         self.__conn.emit_Login_success(self.__auth_token)
 
         return True
+
+    def register(self, username, password, email):
+        auth_data = {'username':username,'password':password, 'email':email}
+        response = requests.post(NetworkConst.URL_RESTAPI_REGISTER,data=auth_data)
+        logger.info(response)
+        if response.status_code != 201:
+            self.__conn.emit_SysMessage('registration failed')
+            return False
+
+        self.__conn.emit_Registration_success()
+
+        return True
+    
+    def readProfile(self):
+        response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {self.__auth_token}'})
+        logger.info(response)
+        if response.status_code != 200:
+            self.__conn.emit_SysMessage('failed to read profile')
+            return False
+
+        response_data = json.loads(response.content)
+
+        self.__conn.emit_Profile_read(response_data)
+
+        return True
+
 
 
     def createLobby(self, lobbyName):

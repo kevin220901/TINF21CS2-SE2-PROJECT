@@ -10,6 +10,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from .models import CustomUser
 from .serializers import UserSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 
@@ -66,3 +68,16 @@ class UserLoginView(APIView):
         else:
             logger.critical(f'failt authentication for user {username}')
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+
+class UserProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        logger.info(request.META)
+        user = request.user
+        serializer = UserSerializer(instance=user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -75,3 +75,15 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = lobbies
         self.__conn.sendall(eventId, eventData)
         pass
+
+    def emit_Registration_success(self):
+        eventId = NetworkEvent.REGISTRATION_SUCCESS
+        eventData = {}
+        self.sendall(eventId, eventData)
+        pass
+     
+    def emit_Profile_read(self, profile):
+        eventId = NetworkEvent.PROFILE_READ
+        eventData = profile
+        self.sendall(eventId, eventData)
+        pass

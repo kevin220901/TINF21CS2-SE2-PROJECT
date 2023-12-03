@@ -26,7 +26,5 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        logger.info({validated_data['password']})
         validated_data['password'] = make_password(validated_data['password'])
-        logger.info({validated_data['password']})
         return super(UserSerializer, self).create(validated_data)
