@@ -6,9 +6,6 @@ from blokuspiece import BlokusPiece
 import numpy.testing
 from game import Game
 
-##################################################
-## Author: Cynthia Winkler
-##################################################
 
 class Test_Blokus_Piece(TestCase):
     #Richtgies rotieren des Piece
@@ -81,7 +78,7 @@ class Test_Blokus_Piece(TestCase):
 
         #act
         game.placeFirstPiece(piece_1, 5, 0, 1)
-        game.placePiece(piece_1, 0, 0, 1)
+        game.__placePiece(piece_1, 0, 0, 1)
 
         #assert
         assert_array_equal(game.getFeld, expected)
@@ -102,7 +99,7 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         # act
-        game.placePiece(piece_1, 0, 0, 1)
+        game.__placePiece(piece_1, 0, 0, 1)
 
         # assert
         assert_array_equal(game.getFeld, expected)
@@ -128,8 +125,8 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         # act
-        game.placePiece(piece_1, 0, 0, 1)
-        game.placePiece(piece_2, 1, 0, 1)
+        game.__placePiece(piece_1, 0, 0, 1)
+        game.__placePiece(piece_2, 1, 0, 1)
 
         # assert
         assert_array_equal(game.getFeld, expected)
@@ -152,12 +149,12 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         # act
-        game.placePiece(piece_1, 0, 0, 1)
+        game.__placePiece(piece_1, 0, 0, 1)
         piece_2.rotieren()
         piece_2.rotieren()
         piece_2.rotieren()
-        game.placePiece(piece_2, 4, 0, 4)
-        game.placePiece(piece_3, 2, 0, 4)
+        game.__placePiece(piece_2, 4, 0, 4)
+        game.__placePiece(piece_3, 2, 0, 4)
 
         # assert
         assert_array_equal(game.getFeld, expected)
