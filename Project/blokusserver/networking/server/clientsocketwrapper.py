@@ -45,11 +45,9 @@ class ClientSocketWrapper(SocketWrapper):
         self.emit_SysMessage('access denied')
         pass
 
-    def emit_LobbyCreate_success(self, lobbyInfo): #TODO: the data structure for lobbyInfo has yet to be defined
-        eventId = NetworkEvent.LOGIN_SUCCESS
-        eventData = {
-            'lobbyInfo':lobbyInfo
-        }
+    def emit_LobbyCreate_success(self, lobbyInfo):
+        eventId = NetworkEvent.LOBBY_CREATE
+        eventData = lobbyInfo
         self.sendall(eventId, eventData)
         pass
 

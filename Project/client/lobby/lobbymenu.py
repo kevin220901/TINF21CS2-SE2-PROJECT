@@ -4,7 +4,6 @@ from PyQt6.QtCore import *
 from lobby.lobbyconfig import LobbyConfig
 from lobby.searchlobby import SearchLobby
 from account.userprofile import UserProfile
-
 from network.networkevent import NetworkEvent
 from qt6networkadapter import PyQt6_Networkadapter
 
@@ -55,12 +54,12 @@ class LobbyMenu:
 
     def create_lobby(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
-        self.create_lobby = LobbyConfig(self.mainWindow)
+        self.create_lobby = LobbyConfig(self.mainWindow, self.__network)
         self.create_lobby.lobbyConfigFrame()
 
     def search_lobby(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
-        self.search_lobby = SearchLobby(self.mainWindow)
+        self.search_lobby = SearchLobby(self.mainWindow, self.__network)
         self.search_lobby.searchLobbyFrame()
     
     def my_profile(self):

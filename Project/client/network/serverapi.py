@@ -150,10 +150,15 @@ class ServerApi:
                     break
 
     
-    def createLobby(self, lobbyName):
+    def createLobby(self, lobbyId, aiDifficulty):
         eventId = NetworkEvent.LOBBY_CREATE
-        eventData = {'token':self.__auth_token,'lobbyName':lobbyName}
+        eventData = {
+            'token':self.__auth_token,
+            'lobbyName':lobbyId, 
+            'aiDifficulty':aiDifficulty
+        }
         self.send(eventId, eventData)
+        pass
     
     def joinLobby(self, lobbyId):
         eventId = NetworkEvent.LOBBY_JOIN

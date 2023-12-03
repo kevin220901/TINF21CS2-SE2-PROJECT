@@ -3,13 +3,20 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from PyQt6.QtMultimedia import *
 
+from network.networkevent import NetworkEvent
+from network.serverapi import NetworkEventObject
+from qt6networkadapter import PyQt6_Networkadapter
+
 ##################################################
 ## Author: Kevin Wagner
 ##################################################
 
 class LobbyConfig:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
+        self.__network = network
+        pass
+
     def lobbyConfigFrame(self):
         lobbyConfig_widget = QWidget()
         lobbyConfig_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
@@ -65,15 +72,26 @@ class LobbyConfig:
         
         self.mainWindow.create_lobby_button.clicked.connect(self.lobby_create)
         self.mainWindow.back_button.clicked.connect(self.back)
-        
+
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_CREATE, self.__on_lobby_created)
+        pass
+
+    def __on_lobby_created(self, event:NetworkEventObject):
+        from lobby.lobby import Lobby
+        self.lobby = Lobby(self.mainWindow, self.__network, event.eventData)
+        self.lobby.lobbyFrame()
+        pass
         
     def lobby_create(self):
         lobby_name = self.mainWindow.lobby_name_input.text()
         ai_difficulty = self.mainWindow.ai_difficulty_choice.currentText()
-        print("Lobby Name:", lobby_name)
-        print("AI Difficulty:", ai_difficulty)
+        
+        self.__network.api.createLobby(lobby_name, ai_difficulty)
+        pass
+
     
     def back(self):
         from lobby.lobbymenu import LobbyMenu
-        self.lobbymenu = LobbyMenu(self.mainWindow)
+        self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()
+        pass
