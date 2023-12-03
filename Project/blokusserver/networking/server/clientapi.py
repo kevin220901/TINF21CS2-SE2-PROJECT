@@ -81,6 +81,7 @@ class ClientApi:
 
         newLobby = Lobby(lobbyId, self.lobbies)
         self.__currentLobby = newLobby
+        logger.info(f"lobby {newLobby.lobbyId} created")
         self.__conn.emit_LobbyCreate_success(newLobby.lobbyId)
         newLobby.join(self)
         return newLobby

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid
+from server.logger import *
 
 ##################################################
 ## Author: Luis Eckert
@@ -64,7 +65,8 @@ class Lobby:
 
     def __handleLobbyAbbandoned(self):
         if self.playerCount == 0: 
-                self.__lobbies[self] = None
+                self.__lobbies.pop(self.__lobbyId)
+                logger.info(f"lobby '{self.__lobbyId}' abbandoned")
                 return True
         return False
 

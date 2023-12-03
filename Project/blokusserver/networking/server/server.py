@@ -121,6 +121,8 @@ class Server:
             logger.critical(str(e))
         finally:          
             #api.leaveLobby() #TODO: fix bug!!
+            if api.currentLobby:
+                api.currentLobby.leave(api)
             sock.close()
             logger.info(f'{api.playerName} disconnected')
             #print(f"{api.playerName} disconnected")
