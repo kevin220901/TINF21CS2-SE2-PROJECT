@@ -202,3 +202,15 @@ class ServerApi:
         eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
         pass
+
+    def updateProfile(self, username, email):
+        eventId = NetworkEvent.PROFILE_UPDATE
+        eventData = {'token':self.__auth_token, 'username':username, 'email':email}
+        self.send(eventId, eventData)
+        pass
+
+    def deleteProfile(self):
+        eventId = NetworkEvent.PROFILE_DELETE
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass

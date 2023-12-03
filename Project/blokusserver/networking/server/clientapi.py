@@ -56,7 +56,6 @@ class ClientApi:
     
     def readProfile(self, token):
         response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {token}'})
-        logger.info(response)
 
         if response.status_code == 401:
             logger.critical('access denied')
@@ -72,8 +71,41 @@ class ClientApi:
         self.__conn.emit_Profile_read(response_data)
 
         return True
+    
+    def updateProfile(self, token, username, email):
+        data = {'username':username,'email':email}
+        response = requests.put(url=NetworkConst.URL_RESTAPI_PROFILE, 
+                                headers={'Authorization': f'Token {token}'}, 
+                                data=data)
+        
+        if response.status_code == 401:
+            logger.critical('access denied')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+        elif response.status_code != 200:
+            logger.critical('failed to update profile')
+            self.__conn.emit_SysMessage('failed to update profile')
+            return False
+        self.__conn.emit_SysMessage('profile updated')
 
+        return True
+        
+    def deleteProfile(self, token):
+        response = requests.delete(url=NetworkConst.URL_RESTAPI_PROFILE, 
+                                   headers={'Authorization': f'Token {token}'})
+        
+        if response.status_code == 401:
+            logger.critical('access denied')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+        elif response.status_code != 204:
+            logger.critical('failed to delete profile')
+            self.__conn.emit_SysMessage('failed to delete profile')
+            return False
+        self.__auth_token = None
+        self.__conn.emit_SysMessage('profile deleted')
 
+        return True
 
     def createLobby(self, lobbyId):
         if self.__handleAllreadyInLobby(): return
