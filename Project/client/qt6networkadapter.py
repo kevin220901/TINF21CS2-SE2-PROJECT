@@ -36,7 +36,7 @@ class PyQt6_Networkadapter:
         pass
 
     @property
-    def api(self):
+    def api(self) -> ServerApi:
         return self.__api
 
 

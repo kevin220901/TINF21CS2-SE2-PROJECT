@@ -2,6 +2,9 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+from network.networkevent import NetworkEvent
+
+from qt6networkadapter import PyQt6_Networkadapter
 
 ##################################################
 ## Author: Kevin Wagner
@@ -10,8 +13,11 @@ from PyQt6.QtCore import *
 
 # Register Class for User Registration
 class Register:
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, network: PyQt6_Networkadapter):
+        self.__network = network
         self.mainWindow = mainWindow
+
+        self.__network.addNetworkEventHandler(NetworkEvent.REGISTRATION_SUCCESS, self.__on_registration_successfull)
 
     # Initilize Register Frame and Widget
     def registerFrame(self):
@@ -98,13 +104,21 @@ class Register:
         password = self.mainWindow.password_input.text()
         password_confirm = self.mainWindow.password_confirm_input.text()
         email = self.mainWindow.email_input.text()
-        #print("Username:", username)
-        #print("Password:", password)
-        #print("Username:", password_confirm)
-        #print("E-Mail:", email)
+
+        #TODO: validate password and email
+
+        self.__network.api.register(username, password, email)
+        pass
+
+    def __on_registration_successfull(self, event):
+        from menu import Menu
+        self.menu = Menu(self.mainWindow, self.__network)
+        self.menu.menuFrame()
+        pass
     
     #Add Back Button Function
     def back(self):
         from menu import Menu
         self.menu = Menu(self.mainWindow)
         self.menu.menuFrame()
+        pass

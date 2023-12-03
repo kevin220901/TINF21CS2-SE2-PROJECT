@@ -180,3 +180,9 @@ class ServerApi:
         eventData = {'username':username, 'password':password}
         self.send(eventId, eventData)
         pass
+
+    def register(self, username, password, email):
+        eventId = NetworkEvent.REGISTRATION
+        eventData = {'username':username, 'password':password, 'email':email}
+        self.send(eventId, eventData)
+        pass

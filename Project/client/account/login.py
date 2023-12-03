@@ -16,9 +16,9 @@ sys.path.append('./lobby')
 class Login:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
-        self.network = network
+        self.__network = network
 
-        self.network.addNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
+        self.__network.addNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
         
     # Initilize Login Frame and Widget
     def loginFrame(self):
@@ -91,7 +91,7 @@ class Login:
         username = self.mainWindow.username_input.text()
         password = self.mainWindow.password_input.text()
 
-        self.network.api.login(username, password)
+        self.__network.api.login(username, password)
         #api.events.login.connect(self.__on_connect)
         #send Auth Request to socket server 
         #api.login(username, password)
@@ -110,7 +110,7 @@ class Login:
 
     # Add Back Button Function
     def back(self):
-        self.network.removeNetworkEventHandler(NetworkEvent.LOGIN, self.__on_login)
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
         from menu import Menu
-        self.menu = Menu(self.mainWindow)
+        self.menu = Menu(self.mainWindow, self.__network)
         self.menu.menuFrame()

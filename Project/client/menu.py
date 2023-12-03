@@ -18,7 +18,7 @@ from qt6networkadapter import PyQt6_Networkadapter
 class Menu:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
-        self.network = network
+        self.__network = network
 
     # Menu Frame and Widget inside Main Window
     def menuFrame(self):
@@ -60,13 +60,13 @@ class Menu:
     # Menu Function Register (Destroy Widget Menu and Create Widget Register inside Main Window)
     def register(self):
         self.mainWindow.menuFrame.deleteLater()
-        self.register = Register(self.mainWindow)
+        self.register = Register(self.mainWindow, self.__network)
         self.register.registerFrame()
 
     # Menu Function Login (Destroy Widget Menu and Create Widget Login inside Main Window)
     def login(self):
         self.mainWindow.menuFrame.deleteLater()
-        self.login = Login(self.mainWindow, self.network)
+        self.login = Login(self.mainWindow, self.__network)
         self.login.loginFrame()
         
     # Menu Function Exit (Destroy Main Window)

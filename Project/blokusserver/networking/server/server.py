@@ -16,6 +16,7 @@ from server.servereventhandler_lobbybrowse import ServerEventHandler_LobbyBrowse
 from server.serverhandler_gamestart import ServerEventHandler_GameStart
 from server.servereventhandler_lobbyleave import ServerEventHandler_LobbyLeave
 from server.servereventhandler_lobbyready import ServerEventHandler_LobbyReady
+from server.servereventhandler_register import ServerEventHandler_Register
 from server.clientapi import ClientApi
 from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
@@ -69,7 +70,8 @@ class Server:
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(api),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
-            NetworkEvent.LOGIN.value: ServerEventHandler_Login(api)               
+            NetworkEvent.LOGIN.value: ServerEventHandler_Login(api),
+            NetworkEvent.REGISTRATION.value: ServerEventHandler_Register(api),           
         }
         
 
@@ -96,8 +98,9 @@ class Server:
                             break
 
                         #reject processing events from unauthenticated source and terminate the connection
+                        #allow login and register events
                         if not api.hasAuthToken:
-                            if eventId != NetworkEvent.LOGIN.value:
+                            if eventId != NetworkEvent.LOGIN.value and eventId != NetworkEvent.REGISTRATION.value:
                                 logger.info(f'access denied for {api.playerName}')
                                 break
 
