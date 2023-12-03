@@ -19,10 +19,8 @@ class Lobby:
         pass
     
     def lobbyFrame(self):
-        lobby_widget = QWidget()
-        lobby_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
-        lobby_widget.setFixedSize(1000, 750)
+        self.lobby_widget = QWidget(self.mainWindow)
+        self.lobby_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        self.lobby_widget.setFixedSize(1000, 750)
         
-        grid_layout = QGridLayout(lobby_widget)
-        grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mainWindow.central_layout.addWidget(lobby_widget, alignment=Qt.AlignmentFlag.AlignCenter)
+       
