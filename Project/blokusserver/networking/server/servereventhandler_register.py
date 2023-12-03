@@ -9,7 +9,7 @@ class ServerEventHandler_Register(ServerEventHandler):
     def __init__(self, client:ClientApi):
         super().__init__(client)
     
-    def handle(self, data):
+    def handleEvent(self, data):
         ## TODO:Check if username is already taken
         ## TODO:Check if username is valid
         ## TODO:Check if password is valid
