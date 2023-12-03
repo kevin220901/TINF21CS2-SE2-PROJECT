@@ -15,10 +15,7 @@ class ServerEventHandler_LobbyBrowse(ServerEventHandler):
         pass
 
     def handleEvent(self, eventData):
-        #only return joinable lobbies
-        #lobbyId
-        #lobbyName
-        #playerCount
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
         
         lobbyList = []
         lobby: Lobby

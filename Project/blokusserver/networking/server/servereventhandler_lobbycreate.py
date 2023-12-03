@@ -19,7 +19,9 @@ class ServerEventHandler_LobbyCreate(ServerEventHandler):
         if not eventData: 
             self._client.connection.emit_SysMessage('server recieved invalid data')
             return
-         
+        
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
+
         if 'lobbyName' not in eventData: 
             self._client.connection.emit_SysMessage('server recieved invalid lobby name')
             return

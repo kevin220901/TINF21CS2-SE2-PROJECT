@@ -14,6 +14,7 @@ class ServerEventHandler_ChatMessage(ServerEventHandler):
         pass
     
     def handleEvent(self, eventData):
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
         if 'message' not in eventData: 
             self._client.connection.emit_SysMessage('invalid message')
             return 

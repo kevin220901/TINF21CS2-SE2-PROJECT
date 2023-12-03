@@ -9,10 +9,7 @@ class ServerEventHandler_ProfileRead(ServerEventHandler):
     def __init__(self, client:ClientApi):
         super().__init__(client)
     
-    def handleEvent(self, data):
-        if 'token' not in data:
-            logger.critical('access denied')
-            self._client.connection.emit_SysMessage('access denied')
-            return False
+    def handleEvent(self, eventData):
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
 
-        self._client.readProfile(data['token'])
+        self._client.readProfile(eventData['token'])

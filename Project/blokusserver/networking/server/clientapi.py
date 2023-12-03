@@ -21,6 +21,9 @@ class ClientApi:
         self.__auth_token = None
         self.__stopEvent = stopEvent
 
+
+    
+
     def login(self, username, password):
         auth_data = {'username':username,'password':password}
         response = requests.post(NetworkConst.URL_RESTAPI_LOGIN,data=auth_data)
@@ -52,11 +55,6 @@ class ClientApi:
         return True
     
     def readProfile(self, token):
-        if token != self.__auth_token:
-            logger.critical('access denied')
-            self.__conn.emit_SysMessage('access denied')
-            return False
-
         response = requests.get(NetworkConst.URL_RESTAPI_PROFILE, headers={'Authorization': f'Token {self.__auth_token}'})
         logger.info(response)
 
@@ -139,6 +137,13 @@ class ClientApi:
         if not self.__currentLobby:
             #check connection still open
             self.__conn.emit_SysMessage('not in a lobby')
+            return True
+        return False
+    
+    def __handleIvalidateAuthToken(self, token):
+        if token != self.__auth_token:
+            logger.critical('access denied')
+            self.__conn.emit_SysMessage('access denied')
             return True
         return False
     

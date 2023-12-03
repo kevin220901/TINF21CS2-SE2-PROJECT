@@ -13,6 +13,7 @@ class ServerEventHandler_LobbyLeave(ServerEventHandler):
         pass
 
     def handleEvent(self, eventData):
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
         self._client.leaveLobby()
         pass
     

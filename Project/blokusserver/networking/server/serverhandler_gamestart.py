@@ -14,7 +14,7 @@ class ServerEventHandler_GameStart(ServerEventHandler):
         pass
 
     def handleEvent(self, eventData):
-        
+        if self._handleIvalidateAuthToken(eventData.get('token')): return
         self._client.currentLobby.startGame(self._client)
         
         pass

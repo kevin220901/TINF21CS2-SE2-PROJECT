@@ -1,6 +1,7 @@
 
 
 
+from venv import logger
 from server.clientapi import ClientApi
 
 ##################################################
@@ -16,3 +17,9 @@ class ServerEventHandler:
         
         pass
     
+    def _handleIvalidateAuthToken(self, token):
+        if token != self._client.authToken or not token:
+            logger.critical('access denied')
+            self._client.connection.emit_SysMessage('access denied')
+            return True
+        return False
