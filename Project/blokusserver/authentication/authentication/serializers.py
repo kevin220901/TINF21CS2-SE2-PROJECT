@@ -28,3 +28,11 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
         return super(UserSerializer, self).create(validated_data)
+
+class UserWithouPwdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email']  
+
+    def update(self, instance, validated_data):
+        return super(UserWithouPwdSerializer, self).update(instance, validated_data)
