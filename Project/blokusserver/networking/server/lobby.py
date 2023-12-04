@@ -34,12 +34,10 @@ class Lobby:
         self.__ready[player] = False
         
         if len(self.__players) > 1: 
-            logger.info(f'{player.playerName} joining Step A1')
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} joined')
 
             if self.__handleHostGone():
-                logger.info(f'{player.playerName} joining Step A2')
                 lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
                 lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
             
@@ -47,14 +45,11 @@ class Lobby:
             p: ClientApi
             for p in self.__players:
                 if p == player:
-                    logger.info(f'{player.playerName} joining Step A3')
                     p.connection.emit_LobbyJoin_success(lobbyInfo)
                 else:
-                    logger.info(f'{player.playerName} joining Step A4')
                     p.connection.emit_lobby_update(lobbyInfo)
         else:
             #first player to join is the host
-            logger.info(f'{player.playerName} joining Step B1')
             self.__host = player
         pass
         

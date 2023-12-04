@@ -16,10 +16,29 @@ class Lobby:
         self.mainWindow = mainWindow
         self.__network = network
         self.__lobbyInfo = lobbyInfo
-        pass
+        return
     
     def lobbyFrame(self):
 
+        #setup lobby ui
+        self.__init_ui()
+
+        #add button event handler
+        self.button_ready.clicked.connect(self.__on_game_started)
+        self.button_start_game.clicked.connect(self.__on_start_game_clicked)
+        self.button_leave.clicked.connect(self.__on_leave_clicked)
+        self.chat_send_button.clicked.connect(self.__on_send_clicked)
+
+
+        #add network event handler
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
+        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        
+        return
+
+    def __init_ui(self):
+        
         self.__lobby = QWidget()
         self.__lobby.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         self.__lobby_layout = QGridLayout(self.__lobby)
@@ -32,12 +51,8 @@ class Lobby:
         self.__init_chat()
 
         self.__update_lobby(self.__lobbyInfo)
-
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
-
-        
         self.mainWindow.central_layout.addWidget(self.__lobby, alignment=Qt.AlignmentFlag.AlignCenter)
-        pass
+        return
 
 
     def __update_lobby(self, lobbyInfo):
@@ -51,14 +66,12 @@ class Lobby:
         self.__lobby_layout.addWidget(self.player_list, 0, 0)
         pass
 
-#TODO: remove dummy data
     def __init_players(self):
-        # 1. List of players
         self.player_list = QListWidget()
+        self.__lobby_layout.addWidget(self.player_list, 0, 0)
         pass
 
     def __init_button_menu(self):
-        # 2. Four buttons
         self.button_layout = QVBoxLayout()
 
         self.button_ready = QPushButton('Ready')
@@ -67,15 +80,13 @@ class Lobby:
                 "QPushButton:hover { background-color: #70a8ff; }"
                 "QPushButton:pressed { background-color: #1e90ff; }"
             )
-        self.button_ready.clicked.connect(self.__on_game_started)
-
+        
         self.button_start_game = QPushButton('Start Game')
         self.button_start_game.setFixedSize(150, 40)
         self.button_start_game.setStyleSheet(
                 "QPushButton:hover { background-color: #70a8ff; }"
                 "QPushButton:pressed { background-color: #1e90ff; }"
             )
-        self.button_start_game.clicked.connect(self.__on_start_game_clicked)
 
         self.button_leave = QPushButton('Leave Lobby')
         self.button_leave.setFixedSize(150, 40)
@@ -83,7 +94,6 @@ class Lobby:
                 "QPushButton:hover { background-color: #70a8ff; }"
                 "QPushButton:pressed { background-color: #1e90ff; }"
             )
-        self.button_leave.clicked.connect(self.__on_leave_clicked)
 
         self.button_layout.addWidget(self.button_ready, alignment=Qt.AlignmentFlag.AlignCenter)
         self.button_layout.addWidget(self.button_start_game, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -94,12 +104,32 @@ class Lobby:
         pass
 
     def __init_chat(self):
+        self.chat = QWidget()
+        self.chat_layout = QVBoxLayout(self.chat)
         
-        # 3. Chat window
-        self.chat_window = QTextEdit()
-        self.__lobby_layout.addWidget(self.chat_window, 1, 0, 1, 3)
+        self.chat_output = QTextEdit()
+        self.chat_output.setReadOnly(True)
+
+        self.chat_input = QLineEdit()
+        self.chat_input_layout = QHBoxLayout()
+        self.chat_input.setPlaceholderText("Enter Message")
+
+        self.chat_send_button = QPushButton('Send')
+        #self.chat_send_button.setFixedSize(150, 40)
+        self.chat_send_button.setStyleSheet(
+                "QPushButton:hover { background-color: #70a8ff; }"
+                "QPushButton:pressed { background-color: #1e90ff; }"
+            )
+        
+        self.chat_input_layout.addWidget(self.chat_input)
+        self.chat_input_layout.addWidget(self.chat_send_button)
+        
+        self.chat_layout.addWidget(self.chat_output)
+        self.chat_layout.addLayout(self.chat_input_layout)
+
+
+        self.__lobby_layout.addWidget(self.chat, 1, 0, 1, 3)
         pass
-    
 
     #NetworkEventHandler >>> 
     def __on_lobby_update(self, event:NetworkEventObject):
@@ -108,11 +138,17 @@ class Lobby:
         self.__update_lobby(self.__lobbyInfo)
         #add payer to list
         #display message in chat
-        pass
+        return
+    
+    def __on_message(self, event:NetworkEventObject):
+        #display message in chat
+        self.chat_output.append(f'[{event.eventData["from"]}]: {event.eventData["message"]}')
+        return
+
 
     def __on_game_started(self, event:NetworkEventObject):
         #switch to game ui
-        pass
+        return
     #<<< NetworkEventHandler
 
 
@@ -120,7 +156,13 @@ class Lobby:
     def __on_ready_clicked(self):
         #notify server
         self.__network.api.ready()
-        pass
+        return
+
+    def __on_send_clicked(self):
+        #notify server
+        self.__network.api.sendMessage(self.chat_input.text())
+        self.chat_input.clear()
+        return
 
     def __on_start_game_clicked(self):
         #notify server
@@ -132,7 +174,7 @@ class Lobby:
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()
-        pass
+        return
     #<<< ButtonHandler
 
 

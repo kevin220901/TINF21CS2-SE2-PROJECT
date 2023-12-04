@@ -19,6 +19,6 @@ class ServerEventHandler_ChatMessage(ServerEventHandler):
             self._client.connection.emit_SysMessage('invalid message')
             return 
         
-        self._client.connection.emit_Message(eventData['message'])
+        self._client.currentLobby.broadcastMessage(self._client, eventData['message'])
         pass
 
