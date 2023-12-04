@@ -19,17 +19,19 @@ class SearchLobby:
         pass
 
     def searchLobbyFrame(self):
-        self.table = SearchableTable()
-        self.table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
-        self.table.setFixedSize(1000, 750)
+        self.__table = SearchableTable()
+        self.__table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        self.__table.setFixedSize(700, 400)
         
-        grid_layout = self.table.layout
+        grid_layout = self.__table.layout
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mainWindow.central_layout.addWidget(self.table, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.mainWindow.central_layout.addWidget(self.__table, alignment=Qt.AlignmentFlag.AlignCenter)
         self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.on_lobbies_get)
+        self.__network.api.getLobbies()
         pass
 
     def on_lobbies_get(self, event:NetworkEventObject):
+        print(f'{str(event)}')
         self.__table.updateTable(event.eventData)
         pass
 
@@ -43,14 +45,20 @@ class SearchableTable(QWidget):
         self.search_bar.textChanged.connect(self.filter_table)
         self.layout.addWidget(self.search_bar)
 
-        self.table = QTableWidget(5, 4)
+        self.table = QTableWidget(0, 4)
         self.table.setHorizontalHeaderLabels(["Loby ID", "Player Count", "Difficulty", ""])
         self.table.verticalHeader().setVisible(False)
         self.layout.addWidget(self.table)
+        self.table.resizeColumnsToContents()
+        self.table.setColumnWidth(0, 250) #lobby id
+        self.table.setColumnWidth(3, 150) #join button
+
 
         #self.refresh_button = QPushButton("Refresh")
         #self.refresh_button.clicked.connect(self.refresh_table)
         #self.layout.addWidget(self.refresh_button)
+        #self.table.horizontalHeader().setStretchLastSection(True)
+        #self.table.verticalHeader().setStretchLastSection(True)
         pass
 
     def updateTable(self, data):
@@ -60,23 +68,23 @@ class SearchableTable(QWidget):
             row = self.table.rowCount()
             self.table.insertRow(row)
 
-            for column, cell_data in enumerate(row_data):
+            for column, cell_data in enumerate(row_data.values()):
                 self.table.setItem(row, column, QTableWidgetItem(str(cell_data)))
 
             join_button = QPushButton("Join")
+            join_button.setStyleSheet(
+                "QPushButton:hover { background-color: #70a8ff; }"
+                "QPushButton:pressed { background-color: #1e90ff; }"
+            )
             join_button.clicked.connect(lambda checked, row=row: self.join_lobby(row))
             self.table.setCellWidget(row, 3, join_button)
             pass
 
     def filter_table(self, text):
+        ''''Filter the table based on the text (lobby id) in the search bar'''
         for i in range(self.table.rowCount()):
-            match = False
-            for j in range(3):  # Only check the first three columns
-                item = self.table.item(i, j)
-                if item and text in item.text():
-                    match = True
-                    break
-            if match:
+            item = self.table.item(i, 0)  
+            if item and text in item.text():
                 self.table.showRow(i)
             else:
                 self.table.hideRow(i)

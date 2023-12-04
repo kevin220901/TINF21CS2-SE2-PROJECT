@@ -24,8 +24,8 @@ class ServerEventHandler_LobbyBrowse(ServerEventHandler):
             if lobby.cantBeJoined: continue
             lobbyList.append({
                 'lobbyId':lobby.lobbyId,
-                'lobbyName':lobby.lobbyName,
-                'playerCount':lobby.playerCount
+                'playerCount':lobby.playerCount,
+                'difficulty':'easy'
             })
         
         self._client.connection.emit_availableLobbies(lobbyList)

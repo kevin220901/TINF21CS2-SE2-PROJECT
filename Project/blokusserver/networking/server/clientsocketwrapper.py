@@ -71,7 +71,7 @@ class ClientSocketWrapper(SocketWrapper):
     def emit_availableLobbies(self, lobbies):
         eventId = NetworkEvent.LOBBIES_GET
         eventData = lobbies
-        self.__conn.sendall(eventId, eventData)
+        self.sendall(eventId, eventData)
         pass
 
     def emit_Registration_success(self):
