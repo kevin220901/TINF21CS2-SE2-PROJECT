@@ -12,9 +12,9 @@ from network.networkevent import NetworkEvent
 ##################################################
 
 class NetworkObject:
-    def __init__(self, head, boby) -> None:
+    def __init__(self, head, body) -> None:
         self.head:bytes = head
-        self.body:bytes = boby
+        self.body:bytes = body
 
 
 class NetworkEventObject:
@@ -54,28 +54,28 @@ class ServerApi:
         self.__recieve_thread.start()
         self.__send_thread.start()
 
-    def close(self):
+    def close(self) -> None:
         self.__stopEvent.set()
-        self.__recvQueue
+        self.__sendQueue.put(self.__stopEvent)
         #self.__send_thread.join()
         #self.__recieve_thread.join()
         pass
 
     def __connect(self):
-        #TODO: Error handling
-        self.__sock.connect(self.address)
-        #return self.__sock.recv(NetworkConst.CLIENT_ID_BYTELENGTH)
+        """Establish a connection to the server."""
+        try:
+            self.__sock.connect(self.address)
+        except Exception as e:
+            #logging.error(f"Failed to connect: {e}")
+            raise
     
     
-    def recv(self):
-        '''
-        returns the first element of the recieved queue
-        '''
-        #if self.__recvQueue.empty(): return None
+    def recv(self) -> NetworkEventObject:
+        """Return the first element of the received queue."""
         return self.__recvQueue.get()
     
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         self.__stopEvent.set()
 
         self.__send_thread.join()
@@ -85,25 +85,27 @@ class ServerApi:
 
     
     
-    def send(self, eventId:NetworkEvent, eventData):
+    def send(self, eventId:NetworkEvent, eventData) -> None:
         body = bytes(json.dumps(eventData),'utf8')
         head = ((len(body) << 8) + eventId.value).to_bytes(3, 'big')
         
         self.__sendQueue.put(NetworkObject(head, body))
 
 
-    def __send(self):
+    def __send(self) -> None:
+        """Send data from the send queue until the stop event is set."""
         while not self.__stopEvent.is_set():
-            #if self.__sendQueue.empty():
-            #    continue
 
-            netObj:NetworkObject = self.__sendQueue.get()
+            item = self.__sendQueue.get()
+            if item == self.__stopEvent: break
+            netObj:NetworkObject = item
             
             with self.send_lock:
                 try:
                     self.__sock.sendall(netObj.head)
                     self.__sock.sendall(netObj.body)
                 except Exception as e:
+                    #logging.error(f"Failed to send data: {e}")
                     print(e)
                     break
                 
