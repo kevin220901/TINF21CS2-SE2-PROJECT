@@ -26,8 +26,9 @@ class NetworkEvent(Enum):
     REGISTRATION = 17
     REGISTRATION_SUCCESS = 18
     PROFILE_READ = 19
+    PROFILE_UPDATE = 20
+    PROFILE_DELETE = 21
 
 
-    
     
 

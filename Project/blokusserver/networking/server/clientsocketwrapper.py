@@ -85,3 +85,15 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = profileData
         self.sendall(eventId, eventData)
         pass
+
+    def emit_profile_deleted(self):
+        eventId = NetworkEvent.PROFILE_DELETE
+        eventData = {}
+        self.sendall(eventId, eventData)
+        pass
+
+    def emit_profile_updated(self):
+        eventId = NetworkEvent.PROFILE_UPDATE
+        eventData = {}
+        self.sendall(eventId, eventData)
+        pass

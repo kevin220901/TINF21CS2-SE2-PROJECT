@@ -138,12 +138,15 @@ class ServerApi:
                         
                         if eventId == NetworkEvent.LOGIN_SUCCESS.value:
                             self.__auth_token = eventData['token']
+                        elif eventId == NetworkEvent.PROFILE_DELETE.value:
+                            self.__auth_token = None
 
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
 
 
                 except Exception as e:
+                    self.__auth_token = None
                     print(e)
                     self.__stopEvent.set()
                     #self.sock.close()
@@ -199,6 +202,18 @@ class ServerApi:
 
     def requestProfile(self):
         eventId = NetworkEvent.PROFILE_READ
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass
+
+    def updateProfile(self, username, email):
+        eventId = NetworkEvent.PROFILE_UPDATE
+        eventData = {'token':self.__auth_token, 'username':username, 'email':email}
+        self.send(eventId, eventData)
+        pass
+
+    def deleteProfile(self):
+        eventId = NetworkEvent.PROFILE_DELETE
         eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
         pass
