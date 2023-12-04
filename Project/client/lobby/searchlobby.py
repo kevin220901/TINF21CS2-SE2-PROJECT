@@ -41,9 +41,23 @@ class SearchableTable(QWidget):
 
         self.layout = QVBoxLayout(self)
 
+        self.search_layout = QHBoxLayout()
+
         self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Enter Lobby ID")
         self.search_bar.textChanged.connect(self.filter_table)
-        self.layout.addWidget(self.search_bar)
+        self.search_bar.returnPressed.connect(self.searchbar_on_return_pressed)
+        self.search_layout.addWidget(self.search_bar)
+
+        self.search_button = QPushButton("Refresh Lobbies")
+        self.search_layout.addWidget(self.search_button)
+        
+        self.search_button.setStyleSheet(
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
+
+        self.layout.addLayout(self.search_layout)
 
         self.table = QTableWidget(0, 4)
         self.table.setHorizontalHeaderLabels(["Loby ID", "Player Count", "Difficulty", ""])
@@ -91,3 +105,6 @@ class SearchableTable(QWidget):
 
     def join_lobby(self, row):
         print(f"Joining lobby {row}")
+
+    def searchbar_on_return_pressed(self):
+        print("Enter key pressed")
