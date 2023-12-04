@@ -25,7 +25,8 @@ class SearchLobby:
         self.search_button.clicked.connect(lambda: self.__network.api.getLobbies())
 
         #setup network handlers
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.on_lobbies_get)
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.__on_lobbies_get)
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_JOIN, self.__on_lobby_join)
 
         #request available lobbies
         self.__network.api.getLobbies()
@@ -75,9 +76,8 @@ class SearchLobby:
         return
 
 
-
-
     def __updateTable(self, data):
+        '''Update the serachable table with the data from the server'''
         self.__rows = data
         self.table.setRowCount(0)
 
@@ -96,12 +96,7 @@ class SearchLobby:
             join_button.clicked.connect(lambda checked, row=row: self.join_lobby_clicked(self.__rows[row]))
             self.table.setCellWidget(row, 3, join_button)
             return
-
-    def on_lobbies_get(self, event:NetworkEventObject):
-        print(f'{str(event)}')
-        self.__updateTable(event.eventData)
-        return
-
+    
     def filter_table(self, text):
         ''''Filter the table based on the text (lobby id) in the search bar'''
         for i in range(self.table.rowCount()):
@@ -112,6 +107,31 @@ class SearchLobby:
                 self.table.hideRow(i)
         return
 
+    #network handlers >>>
+    def __on_lobby_join(self, event:NetworkEventObject):
+        self.searchable_table.deleteLater()
+        from lobby.lobby import Lobby
+        self.lobby = Lobby(self.mainWindow, self.__network, event.eventData)
+        self.lobby.lobbyFrame()
+        pass
+
+    def __on_lobbies_get(self, event:NetworkEventObject):
+        print(f'{str(event)}')
+        self.__updateTable(event.eventData)
+        return
+    #network handlers <<<
+
+
+    #button handlers >>>
     def join_lobby_clicked(self, row):
+        print(f'Joining lobby {row["lobbyId"]}')
         self.__network.api.joinLobby(row['lobbyId'])
         return
+    
+    def back_clicked(self):
+        from lobby.lobbymenu import LobbyMenu
+        self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
+        self.lobbymenu.lobbyMenuFrame()
+        pass
+    #button handlers <<<
+

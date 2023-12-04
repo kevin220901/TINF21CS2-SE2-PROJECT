@@ -12,7 +12,7 @@ class ServerEventHandler_LobbyJoin(ServerEventHandler):
         super().__init__(client)
         pass
     
-    def handleEvent(self, client:ClientApi, eventData):
+    def handleEvent(self, eventData):
         if self._handleIvalidateAuthToken(eventData.get('token')): return
         if 'lobbyId' not in eventData:
             self._client.connection.emit_SysMessage('invalid eventData: missing lobby id')

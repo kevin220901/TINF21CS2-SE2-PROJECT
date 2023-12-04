@@ -32,16 +32,29 @@ class Lobby:
     def join(self, player:ClientApi):
         self.__players.append(player)
         self.__ready[player] = False
-        if self.__players.count(player) > 1: 
-
+        
+        if len(self.__players) > 1: 
+            logger.info(f'{player.playerName} joining Step A1')
             lobbyInfo = self.get_lobby_info()
-            lobbyInfo['messsages'].append(f'{player.playerName} joined')
+            lobbyInfo['messages'].append(f'{player.playerName} joined')
 
             if self.__handleHostGone():
+                logger.info(f'{player.playerName} joining Step A2')
                 lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
-                lobbyInfo['messsages'].append(f'{self.__host.playerName} is the new host') 
+                lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
+            
+            #Notify all players in lobby about the change
+            p: ClientApi
+            for p in self.__players:
+                if p == player:
+                    logger.info(f'{player.playerName} joining Step A3')
+                    p.connection.emit_LobbyJoin_success(lobbyInfo)
+                else:
+                    logger.info(f'{player.playerName} joining Step A4')
+                    p.connection.emit_lobby_update(lobbyInfo)
         else:
             #first player to join is the host
+            logger.info(f'{player.playerName} joining Step B1')
             self.__host = player
         pass
         
@@ -51,16 +64,16 @@ class Lobby:
         if self.__handleLobbyAbbandoned(): return
 
         lobbyInfo = self.get_lobby_info()
-        lobbyInfo['messsages'].append(f'{player.playerName} left')
+        lobbyInfo['messages'].append(f'{player.playerName} left')
 
         if self.__handleHostGone():
             lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
-            lobbyInfo['messsages'].append(f'{self.__host.playerName} is the new host')    
+            lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')    
 
         #Notify all players in lobby about the change
         p: ClientApi
         for p in self.__players:
-            p.connection.emit_lobby_update(self.get_lobby_info())
+            p.connection.emit_lobby_update(lobbyInfo)
        
         pass
 

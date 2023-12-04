@@ -57,9 +57,7 @@ class ClientSocketWrapper(SocketWrapper):
 
     def emit_LobbyJoin_success(self, lobbyInfo):
         eventId = NetworkEvent.LOBBY_JOIN
-        eventData = {
-            'lobbyInfo':lobbyInfo
-        }
+        eventData = lobbyInfo
         self.sendall(eventId, eventData)
         pass
 
