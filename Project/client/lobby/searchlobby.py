@@ -15,38 +15,37 @@ class SearchLobby:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
-        self.__table: SearchableTable = None
-        pass
+        return
 
     def searchLobbyFrame(self):
-        self.__table = SearchableTable()
-        self.__table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
-        self.__table.setFixedSize(700, 400)
-        
-        grid_layout = self.__table.layout
-        grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mainWindow.central_layout.addWidget(self.__table, alignment=Qt.AlignmentFlag.AlignCenter)
+        #setup searchable table
+        self.__init_searchable_table()
+
+        #setup button handlers
+        self.search_button.clicked.connect(lambda: self.__network.api.getLobbies())
+
+        #setup network handlers
         self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.on_lobbies_get)
+
+        #request available lobbies
         self.__network.api.getLobbies()
-        pass
+        return
 
-    def on_lobbies_get(self, event:NetworkEventObject):
-        print(f'{str(event)}')
-        self.__table.updateTable(event.eventData)
-        pass
+    def __init_searchable_table(self):
+        #setup seachable table
+        self.searchable_table = QWidget()
+        self.searchable_table.setFixedSize(700, 400)
+        self.searchable_table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        self.searchable_table_layout = QVBoxLayout(self.searchable_table)
+        self.searchable_table_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
 
-class SearchableTable(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.layout = QVBoxLayout(self)
-
+        ##setup search bar
         self.search_layout = QHBoxLayout()
 
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Enter Lobby ID")
         self.search_bar.textChanged.connect(self.filter_table)
-        self.search_bar.returnPressed.connect(self.searchbar_on_return_pressed)
         self.search_layout.addWidget(self.search_bar)
 
         self.search_button = QPushButton("Refresh Lobbies")
@@ -56,29 +55,33 @@ class SearchableTable(QWidget):
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
-
-        self.layout.addLayout(self.search_layout)
-
+        
+        self.searchable_table_layout.addLayout(self.search_layout)
+        
+        
+        ##setup table
         self.table = QTableWidget(0, 4)
+        self.table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         self.table.setHorizontalHeaderLabels(["Loby ID", "Player Count", "Difficulty", ""])
         self.table.verticalHeader().setVisible(False)
-        self.layout.addWidget(self.table)
         self.table.resizeColumnsToContents()
         self.table.setColumnWidth(0, 250) #lobby id
         self.table.setColumnWidth(3, 150) #join button
+        
+        self.searchable_table_layout.addWidget(self.table)
+
+        #add searchabe table to main window
+        self.mainWindow.central_layout.addWidget(self.searchable_table, alignment=Qt.AlignmentFlag.AlignCenter)
+        return
 
 
-        #self.refresh_button = QPushButton("Refresh")
-        #self.refresh_button.clicked.connect(self.refresh_table)
-        #self.layout.addWidget(self.refresh_button)
-        #self.table.horizontalHeader().setStretchLastSection(True)
-        #self.table.verticalHeader().setStretchLastSection(True)
-        pass
 
-    def updateTable(self, data):
+
+    def __updateTable(self, data):
+        self.__rows = data
         self.table.setRowCount(0)
 
-        for row_data in data:
+        for row_data in self.__rows:
             row = self.table.rowCount()
             self.table.insertRow(row)
 
@@ -90,9 +93,14 @@ class SearchableTable(QWidget):
                 "QPushButton:hover { background-color: #70a8ff; }"
                 "QPushButton:pressed { background-color: #1e90ff; }"
             )
-            join_button.clicked.connect(lambda checked, row=row: self.join_lobby(row))
+            join_button.clicked.connect(lambda checked, row=row: self.join_lobby_clicked(self.__rows[row]))
             self.table.setCellWidget(row, 3, join_button)
-            pass
+            return
+
+    def on_lobbies_get(self, event:NetworkEventObject):
+        print(f'{str(event)}')
+        self.__updateTable(event.eventData)
+        return
 
     def filter_table(self, text):
         ''''Filter the table based on the text (lobby id) in the search bar'''
@@ -102,9 +110,8 @@ class SearchableTable(QWidget):
                 self.table.showRow(i)
             else:
                 self.table.hideRow(i)
+        return
 
-    def join_lobby(self, row):
-        print(f"Joining lobby {row}")
-
-    def searchbar_on_return_pressed(self):
-        print("Enter key pressed")
+    def join_lobby_clicked(self, row):
+        self.__network.api.joinLobby(row['lobbyId'])
+        return
