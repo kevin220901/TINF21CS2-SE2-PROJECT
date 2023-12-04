@@ -28,6 +28,8 @@ class Lobby:
         self.button_start_game.clicked.connect(self.__on_start_game_clicked)
         self.button_leave.clicked.connect(self.__on_leave_clicked)
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
+        ##send message on enter
+        self.chat_input.returnPressed.connect(self.chat_send_button.click)
 
 
         #add network event handler
