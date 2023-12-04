@@ -132,9 +132,7 @@ class ClientApi:
         return selectedLobby
 
     def leaveLobby(self):
-        logger.info(f"{self.playerName} leaving lobby A1")
         if self.__handleNotInLobby(): return
-        logger.info(f"{self.playerName} leaving lobby A2")
         self.__currentLobby.leave(self)
         self.__currentLobby = None
         pass

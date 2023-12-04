@@ -57,13 +57,16 @@ class Lobby:
         self.__players.remove(player)
         self.__ready.pop(player)
         if self.__handleLobbyAbbandoned(): return
-
-        lobbyInfo = self.get_lobby_info()
-        lobbyInfo['messages'].append(f'{player.playerName} left')
-
+        if self.__host == player:
+            self.__host = None
+        
         if self.__handleHostGone():
-            lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
-            lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')    
+            lobbyInfo = self.get_lobby_info()
+            lobbyInfo['messages'].append(f'{player.playerName} left')
+            lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
+        else:
+            lobbyInfo = self.get_lobby_info()
+            lobbyInfo['messages'].append(f'{player.playerName} left')
 
         #Notify all players in lobby about the change
         p: ClientApi
@@ -89,7 +92,7 @@ class Lobby:
         pass
 
     def startGame(self, player:ClientApi):
-        if self.__handlePlayerIsNotHost(self, player): return
+        if self.__handleMissingPermission(self, player): return
         if self.__handleLobbyIsNotReady(self): return
         
         p:ClientApi
@@ -105,11 +108,7 @@ class Lobby:
         return False
 
     def __handleHostGone(self):
-        '''
-        returns
-             True: if there currently is no host
-            False: if the lobby has a host
-        '''
+        '''returns True if a new host was assigned else False'''
         if not self.__host:
             #pick first next player and assign as new host
             newHost:ClientApi = next(iter(self.__players))
@@ -117,12 +116,8 @@ class Lobby:
             return True
         return False
     
-    def __handlePlayerIsNotHost(self, player:ClientApi):
-        '''
-        returns
-             True: if the player is NOT the host
-            False: if the player is the host
-        '''
+    def __handleMissingPermission(self, player:ClientApi):
+        '''returns True if the player is NOT the host else False'''
         if self.__host == player: return False
 
         player.connection.emit_SysMessage('only the host is permitted to start the game')
