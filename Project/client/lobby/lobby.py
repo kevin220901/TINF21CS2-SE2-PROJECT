@@ -64,6 +64,9 @@ class Lobby:
             self.player_list.addItem(player['playerName'])
 
         self.__lobby_layout.addWidget(self.player_list, 0, 0)
+        
+        for message in lobbyInfo.get('messages'):
+            self.chat_output.append(f'>>>>> {message}')
         pass
 
     def __init_players(self):
