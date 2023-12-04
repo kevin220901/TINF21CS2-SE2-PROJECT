@@ -23,7 +23,7 @@ class SearchLobby:
         self.table.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         self.table.setFixedSize(1000, 750)
         
-        grid_layout = QGridLayout(self.table)
+        grid_layout = self.table.layout
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.central_layout.addWidget(self.table, alignment=Qt.AlignmentFlag.AlignCenter)
         self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.on_lobbies_get)
