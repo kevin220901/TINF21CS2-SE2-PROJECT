@@ -97,3 +97,9 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = {}
         self.sendall(eventId, eventData)
         pass
+
+    def emit_lobby_update(self, lobbyInfo):
+        eventId = NetworkEvent.LOBBY_UPDATE
+        eventData = lobbyInfo
+        self.sendall(eventId, eventData)
+        pass

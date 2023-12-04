@@ -119,6 +119,6 @@ class Register:
     #Add Back Button Function
     def back(self):
         from menu import Menu
-        self.menu = Menu(self.mainWindow)
+        self.menu = Menu(self.mainWindow, self.__network)
         self.menu.menuFrame()
         pass

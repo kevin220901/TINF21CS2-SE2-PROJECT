@@ -10,7 +10,7 @@ class Lobby:
     def __init__(self, lobbyId, lobbies:dict) -> None:
         self.__lobbies = lobbies
         self.__lobbyId = lobbyId
-        self.__players = [] #later this might get changed to a dictionary to store mor info. REMEMBER TO update all loops accordingly!
+        self.__players = [ ] #later this might get changed to a dictionary to store mor info. REMEMBER TO update all loops accordingly!
         self.__canBeJoined:bool = True
         self.__isPrivate: bool = False #not yet needed 
         self.__ready = {}
@@ -19,27 +19,59 @@ class Lobby:
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
 
+
+    def get_lobby_info(self):
+        return {
+            'lobbyId': self.__lobbyId,
+            'host': {'playerId':self.__host.playerId, 'playerName':self.__host.playerName},
+            'players': [{'playerId':player.playerId, 'playerName':player.playerName} for player in self.__players if player != self.__host],
+            'aiDifficulty': 'not yet implemented',
+            'messages':[]            
+        }
+
     def join(self, player:ClientApi):
         self.__players.append(player)
         self.__ready[player] = False
         if self.__players.count(player) > 1: 
-            self.__notifyAll(f"new player {player.playerName} has joined the lobby.")
-        self.__handleHostGone()
+
+            lobbyInfo = self.get_lobby_info()
+            lobbyInfo['messsages'].append(f'{player.playerName} joined')
+
+            if self.__handleHostGone():
+                lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
+                lobbyInfo['messsages'].append(f'{self.__host.playerName} is the new host') 
+        else:
+            #first player to join is the host
+            self.__host = player
         pass
         
     def leave(self, player:ClientApi):
         self.__players.remove(player)
         self.__ready.pop(player)
         if self.__handleLobbyAbbandoned(): return
-        
-        self.__notifyAll(f"{player.playerName} has left the lobby.")
-        self.__handleHostGone()
+
+        lobbyInfo = self.get_lobby_info()
+        lobbyInfo['messsages'].append(f'{player.playerName} left')
+
+        if self.__handleHostGone():
+            lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
+            lobbyInfo['messsages'].append(f'{self.__host.playerName} is the new host')    
+
+        #Notify all players in lobby about the change
+        p: ClientApi
+        for p in self.__players:
+            p.connection.emit_lobby_update(self.get_lobby_info())
+       
         pass
 
     def toggleReady(self, player:ClientApi):
         ready = ~self.__ready[player]
         self.__ready[player] = ready
-        self.__notifyAll(f"{player.playerName} is {'ready' if ready else 'not ready'}")
+
+        lobbyInfo = self.get_lobby_info()
+        p: ClientApi
+        for p in self.__players:
+            p.connection.emit_lobby_update(lobbyInfo)
         pass
 
     def broadcastMessage(self, sender:ClientApi, message):
@@ -55,12 +87,6 @@ class Lobby:
         p:ClientApi
         for p in self.__players:
             p.connection.emit_SysMessage('game started') #TODO: replace with own emit to transmit initial game info
-        pass
-    
-    def __notifyAll(self, message):
-        p:ClientApi
-        for p in self.__players:
-            p.connection.emit_SysMessage(message)
         pass
 
     def __handleLobbyAbbandoned(self):
@@ -80,7 +106,6 @@ class Lobby:
             #pick first next player and assign as new host
             newHost:ClientApi = next(iter(self.__players))
             self.__host = newHost
-            self.__notifyAll(f"{newHost.playerName} is now host.")
             return True
         return False
     
