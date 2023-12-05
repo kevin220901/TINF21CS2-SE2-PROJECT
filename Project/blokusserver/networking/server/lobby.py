@@ -97,8 +97,8 @@ class Lobby:
         pass
 
     def startGame(self, player:ClientApi):
-        if self.__handleMissingPermission(self, player): return
-        if self.__handleLobbyIsNotReady(self): return
+        if self.__handleMissingPermission(player): return
+        if self.__handleLobbyIsNotReady(): return
         
         p:ClientApi
         for p in self.__players:
