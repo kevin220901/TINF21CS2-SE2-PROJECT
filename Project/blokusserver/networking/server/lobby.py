@@ -11,7 +11,7 @@ class Lobby:
         self.__lobbies = lobbies
         self.__lobbyId = lobbyId
         self.__players = {}
-        self.__canBeJoined:bool = True
+        self.__canBeJoined:bool = True #TODO: redundand information -> replace with validation of playerCount and isPrivate
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
 
@@ -39,7 +39,7 @@ class Lobby:
     def join(self, player:ClientApi):
         self.__players[player] = self.__createPlayerInfo(player)
         
-        if len(self.__players) > 1: 
+        if self.playerCount > 1: 
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} joined')
 

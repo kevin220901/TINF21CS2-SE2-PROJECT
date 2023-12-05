@@ -162,6 +162,10 @@ class ClientApi:
         return False
     
     def __handleLobbyNotJoinable(self, lobby:Lobby):
+        if lobby.playerCount >= NetworkConst.MAX_PLAYERS_PER_LOBBY:
+            self.__conn.emit_SysMessage('lobby full')
+            return True
+
         if lobby.cantBeJoined:
             self.__conn.emit_SysMessage('lobby not joinable')
             return True
