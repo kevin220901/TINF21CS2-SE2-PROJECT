@@ -158,3 +158,8 @@ class Server:
                 client_thread.start()
                 logger.info(f'... client thread {client_thread.ident} started')
                 self.__client_threads.append(client_thread)
+        return
+    
+    def runServerInMainThread(self):
+        self.__threaded_server(self.__host, self.__port, self.__globalStopEvent)
+        return

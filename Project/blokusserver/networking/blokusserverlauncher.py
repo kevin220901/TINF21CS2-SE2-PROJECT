@@ -12,7 +12,7 @@ port = 6666
 stopEvent = threading.Event()
 
 server = Server(host, port, stopEvent)
-server.start()
+
 
 #this loop is required for the server to run in docker, 
 #reason: 
@@ -21,5 +21,4 @@ server.start()
 
 #An alternativ solution could be returning the logic of the serverthread to the main thread. 
 # Final conclusion on how to coop with this problem hast yet to be discussed (or not, lol)
-while not stopEvent.is_set():
-    pass
+server.runServerInMainThread()
