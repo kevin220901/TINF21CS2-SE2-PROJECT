@@ -8,7 +8,7 @@ from network.serverapi import NetworkEventObject
 from qt6networkadapter import PyQt6_Networkadapter
 
 ##################################################
-## Author: Kevin Wagner
+## Author: Kevin Wagner & Luis Eckert
 ##################################################
 
 class SearchLobby:
