@@ -32,7 +32,7 @@ class Lobby:
         return {
             'playerId': player.playerId,
             'playerName': player.playerName,
-            'ready': False,
+            'isReady': False,
             'color': 'not yet implemented'
         }
 
@@ -81,8 +81,8 @@ class Lobby:
         pass
 
     def toggleReady(self, player:ClientApi):
-        newReadyState = not self.__players[player]['ready']
-        self.__players[player]['ready'] = newReadyState
+        newReadyState = not self.__players[player]['isReady']
+        self.__players[player]['isReady'] = newReadyState
 
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
@@ -135,7 +135,7 @@ class Lobby:
             False: if all players are set to ready
         '''
         for p, info in self.__players.items():
-            if info['ready'] == False: return True
+            if info['isReady'] == False: return True
 
         return False
 

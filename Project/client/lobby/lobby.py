@@ -60,10 +60,15 @@ class Lobby:
     def __update_lobby(self, lobbyInfo):
         if lobbyInfo is None: return
         self.player_list.clear()
-        self.player_list.addItem(lobbyInfo['host']['playerName'])
+        lobbyHost = lobbyInfo['host']
+        self.player_list.addItem(lobbyHost['playerName'])
+        if lobbyHost['isReady']:
+            self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
         
         for player in lobbyInfo.get('players'):
             self.player_list.addItem(player['playerName'])
+            if player['isReady']:
+                self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
 
         self.__lobby_layout.addWidget(self.player_list, 0, 0)
         
