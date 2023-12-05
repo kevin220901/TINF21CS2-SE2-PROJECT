@@ -62,8 +62,12 @@ class Lobby:
         self.player_list.clear()
         lobbyHost = lobbyInfo['host']
         self.player_list.addItem(lobbyHost['playerName'])
+
+        #TODO: only the host can start the game -> button enabled else disabled
+
         if lobbyHost['isReady']:
             self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
+            
         
         for player in lobbyInfo.get('players'):
             self.player_list.addItem(player['playerName'])
@@ -157,7 +161,12 @@ class Lobby:
 
 
     def __on_game_started(self, event:NetworkEventObject):
+        
+        self.__lobby.deleteLater()
         #switch to game ui
+        from game.blokusgame import BlokusGame
+        self.lobbymenu = BlokusGame(self.mainWindow, self.__network)
+        self.lobbymenu.gameFrame()
         return
     #<<< NetworkEventHandler
 
@@ -176,11 +185,15 @@ class Lobby:
 
     def __on_start_game_clicked(self):
         #notify server
+        #check if player is host
+        #check all players are ready
+        self.__network.api.startGame()
         pass
 
     def __on_leave_clicked(self):
         #norify server
         self.__network.api.leaveLobby()
+        self.__lobby.deleteLater()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()

@@ -219,3 +219,9 @@ class ServerApi:
         eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
         pass
+
+    def startGame(self):
+        eventId = NetworkEvent.GAME_START
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass

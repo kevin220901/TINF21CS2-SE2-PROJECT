@@ -14,6 +14,7 @@ class Lobby:
         self.__canBeJoined:bool = True #TODO: redundand information -> replace with validation of playerCount and isPrivate
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
+        self.__game: any = None #not yet needed
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
@@ -100,9 +101,12 @@ class Lobby:
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
         
+        self.__canBeJoined = False
+        #TODO: start game
+
         p:ClientApi
         for p in self.__players:
-            p.connection.emit_SysMessage('game started') #TODO: replace with own emit to transmit initial game info
+            p.connection.emit_start_game({'messages':'game started'})
         pass
 
     def __handleLobbyAbbandoned(self):
