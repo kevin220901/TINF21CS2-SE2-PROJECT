@@ -23,6 +23,8 @@ class SearchLobby:
 
         #setup button handlers
         self.search_button.clicked.connect(lambda: self.__network.api.getLobbies())
+        self.return_button.clicked.connect(self.__on_return_clicked)
+
 
         #setup network handlers
         self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.__on_lobbies_get)
@@ -45,7 +47,7 @@ class SearchLobby:
         self.search_layout = QHBoxLayout()
 
         self.search_bar = QLineEdit()
-        self.search_bar.setPlaceholderText("Enter Lobby ID")
+        self.search_bar.setPlaceholderText("Enter Lobby ID here...")
         self.search_bar.textChanged.connect(self.filter_table)
         self.search_layout.addWidget(self.search_bar)
 
@@ -70,6 +72,15 @@ class SearchLobby:
         self.table.setColumnWidth(3, 150) #join button
         
         self.searchable_table_layout.addWidget(self.table)
+
+        self.return_button = QPushButton("Return")
+        self.return_button.setStyleSheet(
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
+
+        # Add the button to the layout
+        self.searchable_table_layout.addWidget(self.return_button)
 
         #add searchabe table to main window
         self.mainWindow.central_layout.addWidget(self.searchable_table, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -128,7 +139,8 @@ class SearchLobby:
         self.__network.api.joinLobby(row['lobbyId'])
         return
     
-    def back_clicked(self):
+    def __on_return_clicked(self):
+        self.searchable_table.deleteLater()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         self.lobbymenu.lobbyMenuFrame()
