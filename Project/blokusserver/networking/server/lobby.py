@@ -10,10 +10,9 @@ class Lobby:
     def __init__(self, lobbyId, lobbies:dict) -> None:
         self.__lobbies = lobbies
         self.__lobbyId = lobbyId
-        self.__players = [ ] #later this might get changed to a dictionary to store mor info. REMEMBER TO update all loops accordingly!
+        self.__players = {}
         self.__canBeJoined:bool = True
         self.__isPrivate: bool = False #not yet needed 
-        self.__ready = {}
         self.__host: ClientApi = None
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
@@ -23,22 +22,29 @@ class Lobby:
     def get_lobby_info(self):
         return {
             'lobbyId': self.__lobbyId,
-            'host': {'playerId':self.__host.playerId, 'playerName':self.__host.playerName},
-            'players': [{'playerId':player.playerId, 'playerName':player.playerName} for player in self.__players if player != self.__host],
+            'host': self.__players[self.__host],
+            'players': [info for player, info in self.__players.items() if player != self.__host],
             'aiDifficulty': 'not yet implemented',
             'messages':[]            
         }
 
+    def __createPlayerInfo(self, player:ClientApi):
+        return {
+            'playerId': player.playerId,
+            'playerName': player.playerName,
+            'ready': False,
+            'color': 'not yet implemented'
+        }
+
     def join(self, player:ClientApi):
-        self.__players.append(player)
-        self.__ready[player] = False
+        self.__players[player] = self.__createPlayerInfo(player)
         
         if len(self.__players) > 1: 
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} joined')
 
             if self.__handleHostGone():
-                lobbyInfo['host'] = {'playerId':self.__host.playerId, 'playerName':self.__host.playerName}
+                lobbyInfo['host'] = self.__players[self.__host]
                 lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
             
             #Notify all players in lobby about the change
@@ -54,8 +60,7 @@ class Lobby:
         pass
         
     def leave(self, player:ClientApi):
-        self.__players.remove(player)
-        self.__ready.pop(player)
+        self.__players.pop(player)
         if self.__handleLobbyAbbandoned(): return
         if self.__host == player:
             self.__host = None
@@ -76,8 +81,8 @@ class Lobby:
         pass
 
     def toggleReady(self, player:ClientApi):
-        ready = ~self.__ready[player]
-        self.__ready[player] = ready
+        newReadyState = not self.__players[player]['ready']
+        self.__players[player]['ready'] = newReadyState
 
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
@@ -129,8 +134,8 @@ class Lobby:
              True: if any one player has not jet been set to ready
             False: if all players are set to ready
         '''
-        for p,ready in self.__ready.items():
-            if ready == False: return True
+        for p, info in self.__players.items():
+            if info['ready'] == False: return True
 
         return False
 

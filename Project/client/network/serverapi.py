@@ -175,9 +175,9 @@ class ServerApi:
         eventData = {'token':self.__auth_token,}
         self.send(eventId, eventData)
 
-    def ready(self):
+    def toggleReady(self):
         eventId = NetworkEvent.LOBBY_READY
-        eventData = {'token':self.__auth_token,}
+        eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
 
     def sendMessage(self, message):

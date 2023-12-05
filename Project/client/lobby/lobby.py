@@ -24,7 +24,7 @@ class Lobby:
         self.__init_ui()
 
         #add button event handler
-        self.button_ready.clicked.connect(self.__on_game_started)
+        self.button_ready.clicked.connect(self.__on_ready_clicked)
         self.button_start_game.clicked.connect(self.__on_start_game_clicked)
         self.button_leave.clicked.connect(self.__on_leave_clicked)
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
@@ -160,7 +160,7 @@ class Lobby:
     #ButtonHandler >>>
     def __on_ready_clicked(self):
         #notify server
-        self.__network.api.ready()
+        self.__network.api.toggleReady()
         return
 
     def __on_send_clicked(self):
