@@ -102,7 +102,7 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         pass
 
-    def emit_start_game(self, gameInfo):
+    def emit_game_start(self, gameInfo):
         eventId = NetworkEvent.GAME_START
         eventData = gameInfo
         self.sendall(eventId, eventData)

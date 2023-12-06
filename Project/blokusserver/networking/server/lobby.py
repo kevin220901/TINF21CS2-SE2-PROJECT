@@ -1,5 +1,7 @@
 from __future__ import annotations
 import uuid
+
+import numpy as np
 from server.logger import *
 
 ##################################################
@@ -100,13 +102,42 @@ class Lobby:
     def startGame(self, player:ClientApi):
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
-        
-        self.__canBeJoined = False
-        #TODO: start game
 
+        gameInfo = {
+            'lobbyId':'',
+            'gameField':[],
+            'currentTurnPlayerId':'',
+            'players':[
+                {
+                    'playerId':'1',
+                    'playerName':'Player 1',
+                    'pieces':[[[1]], [[1, 1, 1]]],
+                    'color':''
+                },
+                {
+                    'playerId':'2',
+                    'playerName':'Player 2',
+                    'pieces':[],
+                    'color':''
+                },
+                {
+                    'playerId':'3',
+                    'playerName':'Player 3',
+                    'pieces':[],
+                    'color':''
+                },
+                {
+                    'playerId':'4',
+                    'playerName':'Player 4',
+                    'pieces':[],
+                    'color':''
+                }
+            ],
+        }
+        
         p:ClientApi
         for p in self.__players:
-            p.connection.emit_start_game({'messages':'game started'})
+            p.connection.emit_game_start(gameInfo)
         pass
 
     def __handleLobbyAbbandoned(self):
