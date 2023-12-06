@@ -15,50 +15,19 @@ from qt6networkadapter import PyQt6_Networkadapter
 ##################################################
 
 class BlokusGame:
-    def __init__(self, mainWindow, network:PyQt6_Networkadapter, gameInfo:dict):
+    def __init__(self, mainWindow, network: PyQt6_Networkadapter, gameInfo: dict):
         self.mainWindow = mainWindow
         self.__network = network
-        self.selectedPiece:GamePiece = None
-        self.ghostPiece:GamePiece = None
-        gameInfo = gameInfo
-        # self.gameInfo = {
-        #     'lobbyId':'',
-        #     'gameField':[],
-        #     'currentTurnPlayerId':'',
-        #     'players':[
-        #         {
-        #             'playerId':'',
-        #             'playerName':'',
-        #             'pieces':[],
-        #             'color':''
-        #         },
-        #         {   
-        #             'playerId':'',
-        #             'playerName':'',
-        #             'pieces':[],
-        #             'color':''
-        #         },
-        #         {   
-        #             'playerId':'',
-        #             'playerName':'',
-        #             'pieces':[],
-        #             'color':''
-        #         },
-        #         {   
-        #             'playerId':'',
-        #             'playerName':'',
-        #             'pieces':[],
-        #             'color':''
-        #         }
-        #     ],
-        # }
+        self.selectedPiece: GamePiece = None
+        self.ghostPiece: GamePiece = None
+        self.gameInfo = gameInfo
         return
 
     def gameFrame(self):
         self.game = QWidget()
         self.game.layout = QHBoxLayout(self.game)
         self.game.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
-        
+
         self.mainWindow.central_layout.addWidget(self.game)
 
         self.__init_piece_repositories()
@@ -66,12 +35,10 @@ class BlokusGame:
         self.__init_chat()
 
         self.display_pieces(self.gameInfo)
-        
+
         pass
 
-    
-
-    def display_pieces(self, gameInfo:dict):
+    def display_pieces(self, gameInfo: dict):
         # Define the shapes of the Blokus pieces
         # piece_shapes = [
         #     np.array([[1]]),  # Single square
@@ -83,7 +50,7 @@ class BlokusGame:
         # Create and display the pieces for each player
         for i, scene in enumerate(self.piecesScenes):
             for j, shape in enumerate(gameInfo['players'][i]['pieces']):
-                piece = GamePiece(self, shape, j*30 , 0, 20, 20)
+                piece = GamePiece(self, np.array(shape), j * 30, 0, 20, 20)
                 scene.addItem(piece)
 
     def __init_piece_repositories(self) -> None:
@@ -125,7 +92,7 @@ class BlokusGame:
         for i in range(20):
             row = []
             for j in range(20):
-                item = GameFieldElement(self, i*20, j*20, 20, 20, QColor(255, 255, 255))
+                item = GameFieldElement(self, i * 20, j * 20, 20, 20, QColor(255, 255, 255))
                 self.scene.addItem(item)
                 row.append(item)
             self.grid.append(row)
@@ -138,7 +105,7 @@ class BlokusGame:
 
         self.chatTitleLabel = QLabel("Chat")
         self.chatWidget.layout.addWidget(self.chatTitleLabel)
-        
+
         self.chat_output = QTextEdit()
         self.chat_output.setReadOnly(True)
 
@@ -147,36 +114,33 @@ class BlokusGame:
         self.chat_input.setPlaceholderText("Enter Message")
 
         self.chat_send_button = QPushButton('Send')
-        #self.chat_send_button.setFixedSize(150, 40)
+        # self.chat_send_button.setFixedSize(150, 40)
         self.chat_send_button.setStyleSheet(
-                "QPushButton:hover { background-color: #70a8ff; }"
-                "QPushButton:pressed { background-color: #1e90ff; }"
-            )
-        
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
+
         self.chat_input_layout.addWidget(self.chat_input)
         self.chat_input_layout.addWidget(self.chat_send_button)
-        
+
         self.chatWidget.layout.addWidget(self.chat_output)
         self.chatWidget.layout.addLayout(self.chat_input_layout)
 
         self.game.layout.addWidget(self.chatWidget)
         return
 
-
-
-    def placeSelectedPiece(self, piece, ghost, pos:QPointF):
+    def placeSelectedPiece(self, piece, ghost, pos: QPointF):
         if piece is not None:
             if piece.isPlaced: return
             grid_x = int(pos.x() // 20) * 20
             grid_y = int(pos.y() // 20) * 20
-            
+
             # Place the selected piece at this location
             piece.setPos(grid_x, grid_y)
 
             for item in piece.childItems():
                 item.setPen(QPen(QColor(0, 0, 0), 0))  # Remove border
-            
-            
+
             del self.selectedPiece
             self.selectedPiece = None  # Deselect the piece
 
@@ -190,15 +154,16 @@ class BlokusGame:
             piece.isPlaced = True
             self.scene.addItem(piece)
         return
-    
+
 
 class GameFieldElement(QGraphicsRectItem):
     def __init__(self, game, x, y, w, h, color):
         super().__init__(x, y, w, h)
         self.setBrush(QBrush(color))
         self.game = game
-        return 
-    
+        return
+
+
 class GamePiece(QGraphicsItemGroup):
     def __init__(self, game, shape, x, y, width, height, parent=None):
         super().__init__(parent)
@@ -215,14 +180,14 @@ class GamePiece(QGraphicsItemGroup):
         for i in range(shape.shape[0]):
             for j in range(shape.shape[1]):
                 if shape[i][j] == 1:
-                    rect = QGraphicsRectItem(i*width, j*height, width, height)
+                    rect = QGraphicsRectItem(i * width, j * height, width, height)
                     rect.setBrush(QBrush(QColor(255, 0, 0)))  # Set color to red
                     self.addToGroup(rect)
 
         # Set the position of the group
         self.setPos(x, y)
         return
-    
+
     def mousePressEvent(self, event):
         if self.isPlaced: return
         if self.game.selectedPiece is self:
@@ -256,15 +221,15 @@ class GamePiece(QGraphicsItemGroup):
                 for item in self.childItems():
                     item.setPen(QPen(QColor(0, 0, 255), 2))  # Add blue border
         return
-    
+
     def clone(self):
         # Create a new GamePiece with the same properties
         clone = GamePiece(self.game, self.shape, self.x, self.y, self.width, self.height)
         return clone
-    
+
 
 class GameScene(QGraphicsScene):
-    def __init__(self, game:BlokusGame, parent=None):
+    def __init__(self, game: BlokusGame, parent=None):
         super().__init__(parent)
         self.game = game
 
@@ -277,17 +242,18 @@ class GameScene(QGraphicsScene):
                 grid_y = int(pos.y() // 20) * 20
 
                 self.game.ghostPiece.setPos(grid_x, grid_y)
-        return 
-    
+        return
+
     def mousePressEvent(self, event):
         if self.game.ghostPiece:
             # Place the piece at the current position of the ghost piece
-            self.game.placeSelectedPiece(self.game.selectedPiece, 
-                                         self.game.ghostPiece, 
-                                         event.scenePos())   
+            self.game.placeSelectedPiece(self.game.selectedPiece,
+                                         self.game.ghostPiece,
+                                         event.scenePos())
         if self.game.selectedPiece is not None:
             self.game.selectedPiece.isPlaced = True
         return super().mousePressEvent(event)
+
 
 class GameView(QGraphicsView):
     def __init__(self, scene, game, parent=None):
@@ -303,7 +269,7 @@ class GameView(QGraphicsView):
         if self.game.selectedPiece is not None and self.game.ghostPiece is not None:
             self.game.ghostPiece.setVisible(True)  # Show the ghost piece
         return super().enterEvent(event)
-    
+
 
 class GhostPiece(GamePiece):
     def __init__(self, game, shape, x, y, width, height, parent=None):
@@ -315,8 +281,8 @@ class GhostPiece(GamePiece):
 
         def mousePressEvent(self, event):
             return
-        
+
         def mouseMoveEvent(self, event):
             return
-        
+
         return
