@@ -286,3 +286,4 @@ class GhostPiece(GamePiece):
             return
 
         return
+    pass
