@@ -119,7 +119,7 @@ class BlokusGame:
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
-
+        #random comment to test git
         self.chat_input_layout.addWidget(self.chat_input)
         self.chat_input_layout.addWidget(self.chat_send_button)
 
