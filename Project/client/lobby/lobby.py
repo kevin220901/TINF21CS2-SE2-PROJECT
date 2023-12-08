@@ -161,11 +161,9 @@ class Lobby:
 
 
     def __on_game_started(self, event:NetworkEventObject):
-        
         self.__lobby.deleteLater()
-        #switch to game ui
         from game.blokusgame import BlokusGame
-        self.lobbymenu = BlokusGame(self.mainWindow, self.__network)
+        self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
         self.lobbymenu.gameFrame()
         return
     #<<< NetworkEventHandler
