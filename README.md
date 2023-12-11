@@ -7,6 +7,12 @@ Project Advanced Software Engineering
 - Cynthia Winkler als Entwicklerin
 - Kai Pistol als Entwickler
 
+## Aufgaben für Complition
+- Spieler dynamisch im Spiel (Ai wird reingeschrieben, aber der Zug wird erstmal übersprungen bis die Logic dahinter steht)
+- game-logic - Netzwerk - UI müssen kommunizieren
+	- Überarbeitung der Logic, dass das funktioniert
+- (AI)
+
 ## Documentation
 - Attached is the link to the documentation
   https://www.overleaf.com/3233951352xjzcndvycpys
