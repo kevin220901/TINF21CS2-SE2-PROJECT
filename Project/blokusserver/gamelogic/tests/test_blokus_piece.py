@@ -1,10 +1,8 @@
 import numpy as np
 from unittest import TestCase
 from numpy.testing import assert_array_equal
-import pieces
-from blokuspiece import BlokusPiece
-import numpy.testing
-from game import Game
+from ..blokuspiece import BlokusPiece
+from ..game import Game
 
 
 class Test_Blokus_Piece(TestCase):

@@ -1,6 +1,6 @@
 import numpy as np
-from blokuspiece import BlokusPiece
-from gameeventcodes import GameEventCodes
+from .blokuspiece import BlokusPiece
+from .gameeventcodes import GameEventCodes
 
 
 class Game:
