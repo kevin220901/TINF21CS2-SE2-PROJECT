@@ -170,11 +170,3 @@ class Game:
             self.__event = (GameEventCodes.NO_CORNER_FIRST_PIECE, "Das erste Piece liegt in keiner Ecke")
             return False
 
-
-
-
-test_feld = Game(20)
-
-test_feld.placePieceByKey("5_2", 0, 0, 1)
-
-test_feld.print()
