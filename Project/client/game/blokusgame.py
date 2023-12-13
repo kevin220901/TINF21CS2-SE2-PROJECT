@@ -6,6 +6,8 @@ from PyQt6.QtCore import *
 from PyQt6.QtMultimedia import *
 from PyQt6.QtWidgets import QGraphicsSceneMouseEvent
 import numpy as np
+from network.networkevent import NetworkEvent
+from network.serverapi import NetworkEventObject
 
 from qt6networkadapter import PyQt6_Networkadapter
 
@@ -36,7 +38,26 @@ class BlokusGame:
 
         self.display_pieces(self.gameInfo)
 
-        pass
+        #add button event handler
+        self.chat_send_button.clicked.connect(self.__on_send_clicked)
+        ##send message on enter
+        self.chat_input.returnPressed.connect(self.chat_send_button.click)
+
+
+        #add network event handler
+        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        return
+
+
+    def __on_send_clicked(self):
+        message = self.chat_input.text()
+        self.chat_input.clear()
+        self.__network.api.sendMessage(message)
+        return
+    
+    def __on_message(self, event:NetworkEventObject):
+        self.chat_output.append(event.eventData['message'])
+        return
 
     def display_pieces(self, gameInfo: dict):
         # Define the shapes of the Blokus pieces
