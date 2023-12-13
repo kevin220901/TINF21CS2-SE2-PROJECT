@@ -49,7 +49,9 @@ class BlokusGame:
 
         # Create and display the pieces for each player
         for i, scene in enumerate(self.piecesScenes):
-            for j, shape in enumerate(gameInfo['players'][i]['pieces']):
+            playerInfo = self.gameInfo['players'].get(f'{i+1}')
+            if playerInfo is None: continue
+            for j, shape in enumerate(playerInfo['pieces']):
                 piece = GamePiece(self, np.array(shape), j * 30, 0, 20, 20)
                 scene.addItem(piece)
 
@@ -66,7 +68,9 @@ class BlokusGame:
 
         # Add the QGraphicsViews and player name labels to the widgets' layouts
         for i, (layout, view) in enumerate(zip(self.piecesLayouts, self.piecesViews)):
-            playerNameLabel = QLabel(self.gameInfo['players'][i]['playerName'])
+            playerInfo = self.gameInfo['players'].get(f'{i+1}')
+            if playerInfo is None: continue
+            playerNameLabel = QLabel(playerInfo['playerName'])
             layout.addWidget(playerNameLabel)
             layout.addWidget(view)
 

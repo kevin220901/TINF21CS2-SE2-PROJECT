@@ -17,6 +17,7 @@ class Lobby:
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
         self.__game: any = None #not yet needed
+        self.__availablePlayerGameIds = [1,2,3,4]
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
@@ -36,7 +37,9 @@ class Lobby:
             'playerId': player.playerId,
             'playerName': player.playerName,
             'isReady': False,
-            'color': 'not yet implemented'
+            'color': 'not yet implemented',
+            'pieces': [],
+            'gamePlayerId': self.__availablePlayerGameIds.pop(0)
         }
 
     def join(self, player:ClientApi):
@@ -63,16 +66,22 @@ class Lobby:
         pass
         
     def leave(self, player:ClientApi):
-        self.__players.pop(player)
+        leavingPlayer = self.__players.pop(player)
+        #make the players game id available again
+        self.__availablePlayerGameIds.append(leavingPlayer['gamePlayerId'])
+
         if self.__handleLobbyAbbandoned(): return
+        #handle host leaving the lobby
         if self.__host == player:
             self.__host = None
         
         if self.__handleHostGone():
+            #
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} left')
             lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
         else:
+            #
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} left')
 
@@ -104,35 +113,12 @@ class Lobby:
         if self.__handleLobbyIsNotReady(): return
 
         gameInfo = {
-            'lobbyId':'',
+            'lobbyId':self.__lobbyId,
             'gameField':[],
             'currentTurnPlayerId':'',
-            'players':[
-                {
-                    'playerId':'1',
-                    'playerName':'Player 1',
-                    'pieces':[[[1]], [[1, 1, 1]]],
-                    'color':''
-                },
-                {
-                    'playerId':'2',
-                    'playerName':'Player 2',
-                    'pieces':[],
-                    'color':''
-                },
-                {
-                    'playerId':'3',
-                    'playerName':'Player 3',
-                    'pieces':[],
-                    'color':''
-                },
-                {
-                    'playerId':'4',
-                    'playerName':'Player 4',
-                    'pieces':[],
-                    'color':''
-                }
-            ],
+            'players':{
+                playerInfo.get('gamePlayerId'): playerInfo for player, playerInfo in self.__players.items()
+            },
         }
         
         p:ClientApi
