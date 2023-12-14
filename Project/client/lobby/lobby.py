@@ -159,12 +159,18 @@ class Lobby:
         self.chat_output.append(f'[{event.eventData["from"]}]: {event.eventData["message"]}')
         return
 
+    def cleanup(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
+        self.__network.removeNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
+        self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        return
 
     def __on_game_started(self, event:NetworkEventObject):
-        self.__lobby.deleteLater()
+        self.cleanup()
         from game.blokusgame import BlokusGame
         self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
         self.lobbymenu.gameFrame()
+        self.__lobby.deleteLater()
         return
     #<<< NetworkEventHandler
 

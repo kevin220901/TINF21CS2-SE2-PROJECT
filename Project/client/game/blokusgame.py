@@ -11,6 +11,7 @@ from network.serverapi import NetworkEventObject
 
 from qt6networkadapter import PyQt6_Networkadapter
 
+TILE_SIZE = 21
 
 ##################################################
 ## Author: Kai Pistol
@@ -26,27 +27,68 @@ class BlokusGame:
         return
 
     def gameFrame(self):
-        self.game = QWidget()
-        self.game.layout = QHBoxLayout(self.game)
-        self.game.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        self.blokus_widget = QWidget()
+        self.blokus_widget.layout = QHBoxLayout(self.blokus_widget)
+        self.blokus_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
 
-        self.mainWindow.central_layout.addWidget(self.game)
+        self.left_layout = QVBoxLayout()
+        self.central_layout = QVBoxLayout()
+        self.right_layout = QVBoxLayout()
 
-        self.__init_piece_repositories()
+        self.__init_piece_repositoryA()
+        self.__init_piece_repositoryB()
+        self.blokus_widget.layout.addLayout(self.left_layout)
+
         self.__init_game_field()
         self.__init_chat()
+        self.blokus_widget.layout.addLayout(self.central_layout)
+        
+        self.__init_piece_repositoryC()
+        self.__init_piece_repositoryD()
+        self.blokus_widget.layout.addLayout(self.right_layout)
+
+        self.piecesScenes = [self.pieceRepositorySceneA, self.pieceRepositorySceneB, self.pieceRepositorySceneC, self.pieceRepositorySceneD]
+
+        self.mainWindow.central_layout.addWidget(self.blokus_widget)
 
         self.display_pieces(self.gameInfo)
-
+        
+        #add network event handler
+        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
         #add button event handler
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
         ##send message on enter
         self.chat_input.returnPressed.connect(self.chat_send_button.click)
-
-
-        #add network event handler
-        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         return
+
+    def __init_chat(self):
+        self.chat = QWidget()
+        self.chat_layout = QVBoxLayout(self.chat)
+        
+        self.chat_output = QTextEdit()
+        self.chat_output.setReadOnly(True)
+
+        self.chat_input = QLineEdit()
+        self.chat_input_layout = QHBoxLayout()
+        self.chat_input.setPlaceholderText("Enter Message")
+
+        self.chat_send_button = QPushButton('Send')
+        #self.chat_send_button.setFixedSize(150, 40)
+        self.chat_send_button.setStyleSheet(
+                "QPushButton:hover { background-color: #70a8ff; }"
+                "QPushButton:pressed { background-color: #1e90ff; }"
+            )
+        
+        self.chat_input_layout.addWidget(self.chat_input)
+        self.chat_input_layout.addWidget(self.chat_send_button)
+        
+        self.chat_layout.addWidget(self.chat_output)
+        self.chat_layout.addLayout(self.chat_input_layout)
+
+
+        self.central_layout.addWidget(self.chat)
+        pass
 
 
     def __on_send_clicked(self):
@@ -56,18 +98,17 @@ class BlokusGame:
         return
     
     def __on_message(self, event:NetworkEventObject):
-        self.chat_output.append(event.eventData['message'])
+        self.chat_output.append(f'[{event.eventData["from"]}]: {event.eventData["message"]}')
+        return
+    
+    def __on_game_update(self, event:NetworkEventObject):
+        self.gameInfo = event.eventData
+        # TODO: update game field
+        # TODO: update piece repository
+        self.display_pieces(self.gameInfo)
         return
 
     def display_pieces(self, gameInfo: dict):
-        # Define the shapes of the Blokus pieces
-        # piece_shapes = [
-        #     np.array([[1]]),  # Single square
-        #     np.array([[1, 1]]),  # Line of two squares
-        #     np.array([[1, 1, 1]]),  # Line of three squares
-        #     # ... add more shapes as needed ...
-        # ]
-
         # Create and display the pieces for each player
         for i, scene in enumerate(self.piecesScenes):
             playerInfo = self.gameInfo['players'].get(f'{i+1}')
@@ -75,84 +116,87 @@ class BlokusGame:
             for j, shape in enumerate(playerInfo['pieces']):
                 piece = GamePiece(self, np.array(shape), j * 30, 0, 20, 20)
                 scene.addItem(piece)
+        return
+    
+    def display_player_info(self, gameInfo: dict):
+        #TODO: display player info
+        return
 
-    def __init_piece_repositories(self) -> None:
-        self.piecesLayout = QVBoxLayout()
+    def __init_piece_repositoryA(self)->None:
+        self.pieceRepositoryWidgetA = QWidget()
+        self.pieceRepositoryWidgetA.layout = QVBoxLayout(self.pieceRepositoryWidgetA)
 
-        # Create four widgets for the game pieces
-        self.piecesWidgets = [QWidget() for _ in range(4)]
-        self.piecesLayouts = [QVBoxLayout(widget) for widget in self.piecesWidgets]
-
-        # Create four QGraphicsScenes and QGraphicsViews for the game pieces
-        self.piecesScenes = [QGraphicsScene() for _ in range(4)]
-        self.piecesViews = [QGraphicsView(scene) for scene in self.piecesScenes]
-
-        # Add the QGraphicsViews and player name labels to the widgets' layouts
-        for i, (layout, view) in enumerate(zip(self.piecesLayouts, self.piecesViews)):
-            playerInfo = self.gameInfo['players'].get(f'{i+1}')
-            if playerInfo is None: continue
-            playerNameLabel = QLabel(playerInfo['playerName'])
-            layout.addWidget(playerNameLabel)
-            layout.addWidget(view)
+        self.pieceRepositorySceneA = QGraphicsScene()
+        self.pieceRepositoryViewA = QGraphicsView(self.pieceRepositorySceneA)
+        playerNameLabelA = QLabel('Player A')
+        self.pieceRepositoryWidgetA.layout.addWidget(playerNameLabelA)
+        self.pieceRepositoryWidgetA.layout.addWidget(self.pieceRepositoryViewA)
 
         # Add the widgets to the main window's layout
-        for widget in self.piecesWidgets:
-            self.piecesLayout.addWidget(widget)
+        self.left_layout.addWidget(self.pieceRepositoryWidgetA)
+        return
+    
 
-        self.game.layout.addLayout(self.piecesLayout)
+    def __init_piece_repositoryB(self)->None:
+        self.pieceRepositoryWidgetB = QWidget()
+        self.pieceRepositoryWidgetB.layout = QVBoxLayout(self.pieceRepositoryWidgetB)
 
+        self.pieceRepositorySceneB = QGraphicsScene()
+        self.pieceRepositoryViewB = QGraphicsView(self.pieceRepositorySceneB)
+        playerNameLabelB = QLabel('Player B')
+        self.pieceRepositoryWidgetB.layout.addWidget(playerNameLabelB)
+        self.pieceRepositoryWidgetB.layout.addWidget(self.pieceRepositoryViewB)
+
+        self.left_layout.addWidget(self.pieceRepositoryWidgetB)
+        return
+    
+    def __init_piece_repositoryC(self)->None:
+        self.pieceRepositoryWidgetC = QWidget()
+        self.pieceRepositoryWidgetC.layout = QVBoxLayout(self.pieceRepositoryWidgetC)
+
+        self.pieceRepositorySceneC = QGraphicsScene()
+        self.pieceRepositoryViewC = QGraphicsView(self.pieceRepositorySceneC)
+        playerNameLabelC = QLabel('Player C')
+        self.pieceRepositoryWidgetC.layout.addWidget(playerNameLabelC)
+        self.pieceRepositoryWidgetC.layout.addWidget(self.pieceRepositoryViewC)
+
+        self.right_layout.addWidget(self.pieceRepositoryWidgetC)
+        return
+    
+    def __init_piece_repositoryD(self)->None:
+        self.pieceRepositoryWidgetD = QWidget()
+        self.pieceRepositoryWidgetD.layout = QVBoxLayout(self.pieceRepositoryWidgetD)
+
+        self.pieceRepositorySceneD = QGraphicsScene()
+        self.pieceRepositoryViewD = QGraphicsView(self.pieceRepositorySceneD)
+        playerNameLabelD = QLabel('Player D')
+        self.pieceRepositoryWidgetD.layout.addWidget(playerNameLabelD)
+        self.pieceRepositoryWidgetD.layout.addWidget(self.pieceRepositoryViewD)
+        
+        self.right_layout.addWidget(self.pieceRepositoryWidgetD)
         return
 
     def __init_game_field(self) -> None:
-        self.scene = GameScene(self)
-        self.view = GameView(self.scene, self)
-        self.view.setMouseTracking(True)
+        self.game_scene = GameScene(self)
+        self.game_view = GameView(self.game_scene, self)
+        self.game_view.setMouseTracking(True)
         # Disable scroll bars
-        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        # Add the QGraphicsView to the main window's layout
-        self.game.layout.addWidget(self.view, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.grid = []
+        self.game_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.game_view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        # create game grid
+        self.game_grid = []
         for i in range(20):
             row = []
             for j in range(20):
-                item = GameFieldElement(self, i * 20, j * 20, 20, 20, QColor(255, 255, 255))
-                self.scene.addItem(item)
+                item = GameFieldElement(self, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, QColor(255, 255, 255))
+                self.game_scene.addItem(item)
                 row.append(item)
-            self.grid.append(row)
-
+            self.game_grid.append(row)
+        
+        self.central_layout.addWidget(self.game_view)
         return
 
-    def __init_chat(self):
-        self.chatWidget = QWidget()
-        self.chatWidget.layout = QVBoxLayout(self.chatWidget)
-
-        self.chatTitleLabel = QLabel("Chat")
-        self.chatWidget.layout.addWidget(self.chatTitleLabel)
-
-        self.chat_output = QTextEdit()
-        self.chat_output.setReadOnly(True)
-
-        self.chat_input = QLineEdit()
-        self.chat_input_layout = QHBoxLayout()
-        self.chat_input.setPlaceholderText("Enter Message")
-
-        self.chat_send_button = QPushButton('Send')
-        # self.chat_send_button.setFixedSize(150, 40)
-        self.chat_send_button.setStyleSheet(
-            "QPushButton:hover { background-color: #70a8ff; }"
-            "QPushButton:pressed { background-color: #1e90ff; }"
-        )
-
-        self.chat_input_layout.addWidget(self.chat_input)
-        self.chat_input_layout.addWidget(self.chat_send_button)
-
-        self.chatWidget.layout.addWidget(self.chat_output)
-        self.chatWidget.layout.addLayout(self.chat_input_layout)
-
-        self.game.layout.addWidget(self.chatWidget)
-        return
 
     def placeSelectedPiece(self, piece, ghost, pos: QPointF):
         if piece is not None:
@@ -171,13 +215,13 @@ class BlokusGame:
 
             # Remove the ghost piece
             if ghost is not None:
-                self.scene.removeItem(ghost)
+                self.game_scene.removeItem(ghost)
                 del ghost
                 ghost = None
 
             # Add the piece to the game grid scene
             piece.isPlaced = True
-            self.scene.addItem(piece)
+            self.game_scene.addItem(piece)
         return
 
 
