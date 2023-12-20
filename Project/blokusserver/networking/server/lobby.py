@@ -1,8 +1,10 @@
 from __future__ import annotations
+from typing import Dict
 import uuid
 
 import numpy as np
 from server.logger import *
+
 
 ##################################################
 ## Author: Luis Eckert
@@ -12,39 +14,20 @@ class Lobby:
     def __init__(self, lobbyId, lobbies:dict) -> None:
         self.__lobbies = lobbies
         self.__lobbyId = lobbyId
-        self.__players = {}
+        self.__players: Dict[ClientApi,any] = {}
         self.__canBeJoined:bool = True #TODO: redundand information -> replace with validation of playerCount and isPrivate
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
-        self.__game: any = None #not yet needed
-        self.__availablePlayerGameIds = [1,2,3,4]
+        self.__game = GameWrapper(self.__lobbyId)
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
+        return
 
 
-    def get_lobby_info(self):
-        return {
-            'lobbyId': self.__lobbyId,
-            'host': self.__players[self.__host],
-            'players': [info for player, info in self.__players.items() if player != self.__host],
-            'aiDifficulty': 'not yet implemented',
-            'messages':[]            
-        }
-
-    def __createPlayerInfo(self, player:ClientApi):
-        return {
-            'playerId': player.playerId,
-            'playerName': player.playerName,
-            'isReady': False,
-            'color': 'not yet implemented',
-            'pieces': [],
-            'gamePlayerId': self.__availablePlayerGameIds.pop(0)
-        }
 
     def join(self, player:ClientApi):
-        self.__players[player] = self.__createPlayerInfo(player)
-        
+        self.__players[player] = None
         if self.playerCount > 1: 
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} joined')
@@ -66,9 +49,9 @@ class Lobby:
         pass
         
     def leave(self, player:ClientApi):
-        leavingPlayer = self.__players.pop(player)
-        #make the players game id available again
-        self.__availablePlayerGameIds.append(leavingPlayer['gamePlayerId'])
+        leavingPlayer:ClientApi = self.__players.pop(player)
+
+        self.__handleLeaveRunnigGame(player)
 
         if self.__handleLobbyAbbandoned(): return
         #handle host leaving the lobby
@@ -93,9 +76,6 @@ class Lobby:
         pass
 
     def toggleReady(self, player:ClientApi):
-        newReadyState = not self.__players[player]['isReady']
-        self.__players[player]['isReady'] = newReadyState
-
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
         for p in self.__players:
@@ -112,22 +92,31 @@ class Lobby:
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
 
-        gameInfo = {
-            'lobbyId':self.__lobbyId,
-            'gameField':[],
-            'currentTurnPlayerId':'',
-            'players':{
-                playerInfo.get('gamePlayerId'): playerInfo for player, playerInfo in self.__players.items()
-            },
-        }
+        for player, info in self.__players.items():
+            self.__game.add_player(player)
+
+        self.__game.start_game()
         
         p:ClientApi
         for p in self.__players:
-            p.connection.emit_game_start(gameInfo)
+            p.connection.emit_game_start(self.__game.get_game_info())
         pass
+
+    def get_lobby_info(self):
+        return {
+            'lobbyId': self.__lobbyId,
+            'host': self.__host.get_player_Info(),
+            'players': [player.get_player_Info() for player, info in self.__players.items() if player != self.__host],
+            'aiDifficulty': 'not yet implemented',
+            'messages':[]            
+        }
+
+# Helper Methods
 
     def __handleLobbyAbbandoned(self):
         if self.playerCount == 0: 
+                if self.__game: del self.__game
+                
                 self.__lobbies.pop(self.__lobbyId)
                 logger.info(f"lobby '{self.__lobbyId}' abbandoned")
                 return True
@@ -155,16 +144,20 @@ class Lobby:
              True: if any one player has not jet been set to ready
             False: if all players are set to ready
         '''
+        p:ClientApi
         for p, info in self.__players.items():
-            if info['isReady'] == False: return True
+            if p.isReady == False: return True
 
         return False
 
-    def getLobbyInfo(self):
-        return {
-            'lobbyId': self.__lobbyId,
-            'aiDifficulty': 'not yet implemented'            
-        }
+    def __handleLeaveRunnigGame(self, player:ClientApi):
+        if self.__game:
+            self.__game.remove_player(player)
+            logger.info(f"game '{self.__lobbyId}' abbandoned")
+        return
+    
+
+#Properties
 
     @property
     def lobbyId(self) -> str:
@@ -184,3 +177,5 @@ class Lobby:
 
 
 from server.clientapi import ClientApi
+from server.game_wrapper import GameWrapper
+from gamelogic.game import Game

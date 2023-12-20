@@ -18,10 +18,12 @@ class Login:
         self.mainWindow = mainWindow
         self.__network = network
 
-        self.__network.addNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
-        
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        return 
+
     # Initilize Login Frame and Widget
-    def loginFrame(self):
+    def __init_ui(self):
         login_widget = QWidget()
         login_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         login_widget.setFixedSize(500, 200)
@@ -71,9 +73,6 @@ class Login:
         button_layout.addWidget(self.mainWindow.back_button)
         button_layout.addWidget(self.mainWindow.login_button)
         
-        
-        
-
         # Set Layout
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
         grid_layout.addLayout(label_input_layout2, 1, 0, 1, 1)
@@ -84,7 +83,17 @@ class Login:
         # Add Button Functions
         self.mainWindow.login_button.clicked.connect(self.check_login)
         self.mainWindow.back_button.clicked.connect(self.back)
-        
+
+        return
+    
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
+        return
+    
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
+        return
+    
     # Check Login Data and User Login for Game Menu
     #TODO Implementierung Login Function
     def check_login(self):
@@ -92,25 +101,18 @@ class Login:
         password = self.mainWindow.password_input.text()
 
         self.__network.api.login(username, password)
-        #api.events.login.connect(self.__on_connect)
-        #send Auth Request to socket server 
-        #api.login(username, password)
-
-        #print("Username:", username)
-        #print("Password:", password)
-        
-    
+        return
     
     def __on_login(self, eventObj:NetworkEventObject):
-        print(eventObj)
+        self.mainWindow.showAlert("Login Successful")
+
+        self.__unregisterNetworkEvents()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
         pass
 
     # Add Back Button Function
     def back(self):
-        self.__network.removeNetworkEventHandler(NetworkEvent.LOGIN_SUCCESS, self.__on_login)
+        self.__unregisterNetworkEvents()
         from menu import Menu
         self.menu = Menu(self.mainWindow, self.__network)
-        self.menu.menuFrame()

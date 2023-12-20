@@ -15,20 +15,18 @@ class SearchLobby:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+
+        self.__init_ui()
+        self.__registerNetworkEvents()
         return
 
-    def searchLobbyFrame(self):
+    def __init_ui(self):
         #setup searchable table
         self.__init_searchable_table()
 
         #setup button handlers
         self.search_button.clicked.connect(lambda: self.__network.api.getLobbies())
         self.return_button.clicked.connect(self.__on_return_clicked)
-
-
-        #setup network handlers
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.__on_lobbies_get)
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_JOIN, self.__on_lobby_join)
 
         #request available lobbies
         self.__network.api.getLobbies()
@@ -118,16 +116,27 @@ class SearchLobby:
                 self.table.hideRow(i)
         return
 
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.__on_lobbies_get)
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_JOIN, self.__on_lobby_join)
+        return
+    
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOBBIES_GET, self.__on_lobbies_get)
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOBBY_JOIN, self.__on_lobby_join)
+        return
+
     #network handlers >>>
     def __on_lobby_join(self, event:NetworkEventObject):
+        self.mainWindow.showAlert("Lobbies refreshed")
+        self.__unregisterNetworkEvents()
         self.searchable_table.deleteLater()
         from lobby.lobby import Lobby
         self.lobby = Lobby(self.mainWindow, self.__network, event.eventData)
-        self.lobby.lobbyFrame()
         pass
 
     def __on_lobbies_get(self, event:NetworkEventObject):
-        print(f'{str(event)}')
+        self.mainWindow.showAlert("Lobbies refreshed")
         self.__updateTable(event.eventData)
         return
     #network handlers <<<
@@ -140,10 +149,10 @@ class SearchLobby:
         return
     
     def __on_return_clicked(self):
+        self.__unregisterNetworkEvents()
         self.searchable_table.deleteLater()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
         pass
     #button handlers <<<
 

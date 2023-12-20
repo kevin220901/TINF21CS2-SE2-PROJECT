@@ -20,7 +20,10 @@ class ClientApi:
         self.lobbies:dict = lobbies
         self.__auth_token = None
         self.__stopEvent = stopEvent
-
+        self.__gamePlayerId = None
+        self.__color = 'not yet implemented'
+        self.__isReady = False
+        return
 
     
 
@@ -140,8 +143,9 @@ class ClientApi:
 
     def toggleReady(self):
         if self.__handleNotInLobby(): return
+        self.__isReady = not self.__isReady
         self.__currentLobby.toggleReady(self)
-        pass
+        return
     
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
@@ -178,8 +182,13 @@ class ClientApi:
             return True
         return False
     
-    
-    
+    def get_player_Info(self) -> dict:
+        return {
+            'playerId': self.playerId,
+            'playerName': self.playerName,
+            'isReady': self.isReady,
+            'color': 'red'
+        }
 
     @property
     def playerName(self):
@@ -211,6 +220,20 @@ class ClientApi:
     @property
     def connection(self):
         return self.__conn
+
+    @property
+    def gamePlayerId(self)->int:
+        return self.__gamePlayerId
+    
+    @gamePlayerId.setter
+    def gamePlayerId(self, id) -> None:
+        self.__gamePlayerId = id
+        return
+    
+    @property
+    def isReady(self)->bool:
+        return self.__isReady
+    
 
     
 from socket import socket

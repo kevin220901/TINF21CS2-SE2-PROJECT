@@ -16,12 +16,12 @@ class Lobby:
         self.mainWindow = mainWindow
         self.__network = network
         self.__lobbyInfo = lobbyInfo
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        self.__registerUIEvents()
         return
     
-    def lobbyFrame(self):
-
-        #setup lobby ui
-        self.__init_ui()
+    def __registerUIEvents(self):
 
         #add button event handler
         self.button_ready.clicked.connect(self.__on_ready_clicked)
@@ -30,13 +30,6 @@ class Lobby:
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
         ##send message on enter
         self.chat_input.returnPressed.connect(self.chat_send_button.click)
-
-
-        #add network event handler
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
-        self.__network.addNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
-        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
-        
         return
 
     def __init_ui(self):
@@ -147,7 +140,6 @@ class Lobby:
 
     #NetworkEventHandler >>> 
     def __on_lobby_update(self, event:NetworkEventObject):
-        print(event.eventData)
         self.__lobbyInfo = event.eventData
         self.__update_lobby(self.__lobbyInfo)
         #add payer to list
@@ -159,17 +151,23 @@ class Lobby:
         self.chat_output.append(f'[{event.eventData["from"]}]: {event.eventData["message"]}')
         return
 
-    def cleanup(self):
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
+        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        return
+
+    def __unregisterNetworkEvents(self):
         self.__network.removeNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
         self.__network.removeNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
         self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         return
 
     def __on_game_started(self, event:NetworkEventObject):
-        self.cleanup()
+        self.mainWindow.showAlert(f"Game started")
+        self.__unregisterNetworkEvents()
         from game.blokusgame import BlokusGame
         self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
-        self.lobbymenu.gameFrame()
         self.__lobby.deleteLater()
         return
     #<<< NetworkEventHandler
@@ -196,11 +194,12 @@ class Lobby:
 
     def __on_leave_clicked(self):
         #norify server
+        self.mainWindow.showAlert("You left the lobby")
+        self.__unregisterNetworkEvents()
         self.__network.api.leaveLobby()
         self.__lobby.deleteLater()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
         return
     #<<< ButtonHandler
 

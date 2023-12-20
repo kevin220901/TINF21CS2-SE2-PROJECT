@@ -27,3 +27,6 @@ class BlokusPiece:
 
     def print(self):
         print(self.__form)
+
+    def serialize(self):
+        return self.__form.tolist()

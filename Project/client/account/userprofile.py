@@ -14,8 +14,11 @@ class UserProfile:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        return
 
-    def userProfileFrame(self):
+    def __init_ui(self):
         userProfile_widget = QWidget()
         userProfile_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         userProfile_widget.setFixedSize(700, 400)
@@ -101,6 +104,15 @@ class UserProfile:
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
         self.__network.api.requestProfile()
 
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
+        pass
+
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
+        pass
 
     def __onProfileReadSuccess(self, event:NetworkEventObject):
         self.mainWindow.username_input.setText(event.eventData['username'])
@@ -108,6 +120,7 @@ class UserProfile:
         pass
 
     def __onProfileUpdateSuccess(self, event:NetworkEventObject):
+        self.mainWindow.showAlert("Profile Updated")
         self.__network.api.requestProfile()
         pass
 
@@ -121,13 +134,12 @@ class UserProfile:
 
     #Add Back Button Function
     def back(self):
+        self.__unregisterNetworkEvents()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
         pass
 
     def delete_profile(self):
         from account.deleteprofile import DeleteProfile
         self.deleteProfile = DeleteProfile(self.mainWindow, self.__network)
-        self.deleteProfile.deleteProfileFrame()
         pass
