@@ -98,6 +98,10 @@ class Server:
                         eventDataLength = int.from_bytes(recieved[:2], 'big')
 
                         state = 1
+
+                        #check if the client provided a valid eventId
+                        if eventId not in events:
+                            raise Exception(f'invalid eventId')  
                     else:
                         recieved = sock.recv(eventDataLength)
                         if not recieved:
