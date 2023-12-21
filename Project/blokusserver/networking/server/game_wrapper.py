@@ -24,7 +24,7 @@ class GameWrapper:
     def remove_player(self, player:ClientApi):
         self.__availablePlayerGameIds.append(player.gamePlayerId)
         player.gamePlayerId = None
-        del self.__players[player]
+        self.__players.pop(player)
         return
     
     def start_game(self):
