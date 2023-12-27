@@ -50,6 +50,9 @@ class Game:
     def print(self):
         print(self.__feld)
 
+    def getAvailablePieces(self, spielerID:int):
+        return list(self.__availeblePieces[spielerID].keys())
+
     @property
     def getFeld(self):
         return self.__feld
