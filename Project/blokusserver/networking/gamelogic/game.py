@@ -3,6 +3,11 @@ from .blokuspiece import BlokusPiece
 from .gameeventcodes import GameEventCodes
 
 
+class BlokusException(Exception):
+    def init(self, args: object) -> None:
+        super().init(args)
+
+
 class Game:
     def __init__(self, fieldsize:int):
         self.__fieldsize = fieldsize #für fieldsize <10 kann es zu Problemen geben, weil die firstPieces übereinander liegen können, für das eigentliche Spiel aber unrelevant, da fieldsize = 20
@@ -63,7 +68,7 @@ class Game:
             if self.__placePiece(piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
         else:
-            self.__event = (GameEventCodes.SAME_PIECE, "Das Piece wurde bereits platziert")
+            raise BlokusException("Das Piece wurde bereits platziert")
 
     def __placePiece(self, piece:BlokusPiece, start_x, start_y, spielerID:int):
         if self.__isFirstPiece[spielerID] == True:
@@ -106,7 +111,7 @@ class Game:
 
         #Out-of-Bounds
         if (start_x + len(form[0])) > self.__fieldsize or (start_y + len(form)) > self.__fieldsize or start_x < 0 or start_y < 0: #Out-of-bounds
-            self.__event = (GameEventCodes.PIECE_OUT_OFF_BOUNDS, "Die Eingabe liegt nicht im Feld")
+            raise BlokusException("Die Eingabe liegt nicht im Feld")
             return False
 
         for y in range(len(form)):
@@ -114,26 +119,26 @@ class Game:
 
                 # Ist an der Stelle schon ein Piece?
                 if self.__feld[y + start_y, x + start_x] > 0: # Überprüfung ob an er Stelle schon ein Piece liegt, egal welcher Farbe (>0 = irgend ein piece
-                    self.__event = (GameEventCodes.SPACE_OCCUPIED, "An der Stelle liegt schon ein Piece")
+                    raise BlokusException("An der Stelle liegt schon ein Piece")
                     return False
 
         #Liegt es Seite an Seite zu einem anderen Piece der gleichen Farbe? Soll es nicht!
                 if form[y][x] == 1:
                     if (x + start_x + 1) < self.__fieldsize:
                         if (self.__feld[y + start_y, x + start_x + 1] == spielerID): #gucke eins nach rechts und guck ob da nen piece ist, wenn ja, brich ab
-                            self.__event = (GameEventCodes.PIECE_NEXT_TO_PIECE, "Das piece berührt mit einer Seite ein anderes Piece")
+                            raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
                     if (x + start_x - 1) >= 0:
                         if (self.__feld[y + start_y, x + start_x - 1] == spielerID): #gucke eins nach links und guck ob da nen piece ist
-                            self.__event = (GameEventCodes.PIECE_NEXT_TO_PIECE, "Das piece berührt mit einer Seite ein anderes Piece")
+                            raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
 
                     if (y + start_y + 1) < self.__fieldsize:
                         if (self.__feld[y + start_y + 1, x + start_x] == spielerID): #gucke eins nach unten und guck ob da nen piece ist
-                            self.__event = (GameEventCodes.PIECE_NEXT_TO_PIECE, "Das piece berührt mit einer Seite ein anderes Piece")
+                            raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
                     if (self.__feld[y + start_y - 1, x + start_x] == spielerID): #gucke eins nach oben und guck ob da nen piece ist
-                        self.__event = (GameEventCodes.PIECE_NEXT_TO_PIECE, "Das piece berührt mit einer Seite ein anderes Piece")
+                        raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                         return False
 
         #Eckt es an ein anderes an? Soll es!
@@ -151,14 +156,14 @@ class Game:
                         if (self.__feld[y + start_y + 1, x + start_x + 1] == spielerID): #gucke ob Ecke unten rechts ne 1 ist, wenn ja = gut
                             ecke = True
         if ecke == False:
-            self.__event = (GameEventCodes.NO_CORNER_PIECE, "Das Piece muss mit einer Ecke an einer anderen liegen")
+            raise BlokusException("Das Piece muss mit einer Ecke an einer anderen liegen")
         return ecke
 
 
     def __validateFirstPiece(self, piece:BlokusPiece, start_x, start_y):
         form = piece.getForm()
         if (start_x + len(form[0])) > self.__fieldsize or (start_y + len(form)) > self.__fieldsize or start_x < 0 or start_y < 0: #Out-of-bounds
-            self.__event = (GameEventCodes.PIECE_OUT_OFF_BOUNDS, "Die Eingabe liegt nicht im Feld")
+            raise BlokusException("Die Eingabe liegt nicht im Feld")
             return False
 
         if (form[0][0] == 1) and (start_x == 0) and (start_y == 0): # Test für Ecke oben links / die Form hat immer den Wert 1, deswegen wird auf 1 geprüft und nicht die eigentliche Spielerzahl
@@ -170,6 +175,6 @@ class Game:
         elif (form[-1][-1] == 1) and ((start_x + len(form[0])) == self.__fieldsize) and ((start_y + len(form)) == self.__fieldsize): # Test für Ecke unten rechts
             return True
         else:
-            self.__event = (GameEventCodes.NO_CORNER_FIRST_PIECE, "Das erste Piece liegt in keiner Ecke")
+            raise BlokusException("Das erste Piece liegt in keiner Ecke")
             return False
 
