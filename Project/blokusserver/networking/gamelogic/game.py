@@ -22,7 +22,7 @@ class Game:
         return {
             "1_0": BlokusPiece(np.array([[1]])),
             "2_0": BlokusPiece(np.array([[1, 1]])),
-            "3_0": BlokusPiece(np.array([1, 1, 1])),
+            "3_0": BlokusPiece(np.array([[1, 1, 1]])),
             "3_1": BlokusPiece(np.array([[0, 1], [1, 1]])),
             "4_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 0]])),
             "4_1": BlokusPiece(np.array([[1, 1], [1, 1]])),
