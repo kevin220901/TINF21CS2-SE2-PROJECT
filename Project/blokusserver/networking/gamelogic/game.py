@@ -1,7 +1,5 @@
 import numpy as np
 from .blokuspiece import BlokusPiece
-from .gameeventcodes import GameEventCodes
-
 
 class BlokusException(Exception):
     def init(self, args: object) -> None:
@@ -19,7 +17,6 @@ class Game:
             3: self.__createPieces(),
             4: self.__createPieces()
         }
-        self.__event = (int, str)
 
     def __createPieces(self):
         return {
@@ -68,7 +65,6 @@ class Game:
             piece.rotate(rotation)
         if flip != 0:
             piece.flip(flip)
-            
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
             if self.__placePiece(piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
