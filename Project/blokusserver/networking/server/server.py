@@ -20,10 +20,12 @@ from server.servereventhandler_register import ServerEventHandler_Register
 from server.servereventhandler_profileread import ServerEventHandler_ProfileRead
 from server.servereventhandler_profileupdate import ServerEventHandler_ProfileUpdate
 from server.servereventhandler_profiledelete import ServerEventHandler_ProfileDelete
+from server.servereventhandler_gameplacepiece import ServerEventHandler_GamePlacePiece
 from server.clientapi import ClientApi
 from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
 from common import constants as NetworkConst
+import traceback    
 
 ##################################################
 ## Author: Luis Eckert
@@ -69,7 +71,7 @@ class Server:
             NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(api),                      
             NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(api),                     
             NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(api),                      
-            NetworkEvent.GAME_MOVE.value: ServerEventHandler(api),                        
+            NetworkEvent.GAME_MOVE.value: ServerEventHandler_GamePlacePiece(api),                        
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(api),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
@@ -121,12 +123,13 @@ class Server:
                         state = 0
                 except socket.error as e:
                     localStopEvent.set()
-                    logger.critical(str(e))
+
+                    logger.critical(f'{str(e)} \n {traceback.format_exc()}')
                     #TODO:flush the recieve buffer to ensure the server does not hickup
                     break
 
         except Exception as e:
-            logger.critical(str(e))
+            logger.critical(f'{str(e)} \n {traceback.format_exc()}')
         finally:          
             #api.leaveLobby() #TODO: fix bug!!
             if api.currentLobby:

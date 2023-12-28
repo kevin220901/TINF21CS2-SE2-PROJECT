@@ -23,6 +23,7 @@ class ClientApi:
         self.__gamePlayerId = None
         self.__color = 'not yet implemented'
         self.__isReady = False
+        self.__currentGame:GameWrapper = None
         return
 
     
@@ -147,6 +148,17 @@ class ClientApi:
         self.__currentLobby.toggleReady(self)
         return
     
+    def startGame(self):
+        if self.__handleNotInLobby(): return
+        game = self.__currentLobby.startGame(self)
+        return
+    
+    def placePiece(self, pieceId, rotation, x, y):
+        if self.__handleNotInLobby(): return
+        self.__currentGame.place_piece(self, pieceId, x, y, rotation)
+        return
+
+    
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
             self.__conn.emit_SysMessage('allready in a lobby')
@@ -191,34 +203,43 @@ class ClientApi:
         }
 
     @property
-    def playerName(self):
+    def playerName(self)->str:
         return self.__playerName
     
     @property
-    def playerId(self):
+    def playerId(self)->str:
         return self.__playerId
     
     @property
-    def currentLobbyId(self):
+    def currentLobbyId(self)->str:
         if not self.__currentLobby: return ''   #TODO:This does not seem appropriate
         return self.__currentLobby.lobbyId
 
     @property
-    def currentLobby(self):
+    def currentLobby(self)->Lobby:
         return self.__currentLobby
     
     @property
-    def hasAuthToken(self):
+    def currentGame(self)->GameWrapper:
+        return self.__currentGame
+    
+    @currentGame.setter
+    def currentGame(self, game:GameWrapper)->None:
+        self.__currentGame = game
+        return
+
+    @property
+    def hasAuthToken(self)->bool:
         if not self.__auth_token:
             return False
         return True
     
     @property
-    def authToken(self):
+    def authToken(self) -> str:
         return self.__auth_token
     
     @property
-    def connection(self):
+    def connection(self)->ClientSocketWrapper:
         return self.__conn
 
     @property
@@ -239,5 +260,5 @@ class ClientApi:
 from socket import socket
 from server.lobby import Lobby
 from server.clientsocketwrapper import ClientSocketWrapper
-from common.socketwrapper import SocketWrapper
-from common.networkevent import NetworkEvent
+from server.game_wrapper import GameWrapper
+

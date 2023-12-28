@@ -3,6 +3,7 @@ from typing import Dict
 from server.clientapi import ClientApi
 from gamelogic import Game, BlokusPiece
 import numpy as np
+from server.logger import *
 
 
 class GameWrapper:
@@ -28,9 +29,30 @@ class GameWrapper:
         return
     
     def start_game(self):
+        #TODO: handle turn management
         self.__currentPlayerTurn = list(self.__players.keys())[0]
         return
     
+    def place_piece(self, player:ClientApi, pieceId:str, x:int, y:int, rotation:int, flip:int):
+        #TODO: check if player is current turn player
+        #TODO: Rotation and flipping currently is not being used
+        #TODO: instead of using the gamePlayerId, a player object should be used
+        try:
+            
+            self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, rotation=rotation, flip=flip)
+            
+        # except BlokusException as e:
+        #     logger.info(f"piece could not be placed:")
+        #     logger.error(e)
+        except Exception as e:
+            logger.critical(e)
+
+        #TODO: determine player next turn
+        #TODO: handle placement error/invalid placement
+        p:ClientApi
+        for p in self.__players:
+            p.connection.emit_game_update(self.get_game_info())
+        return
 
 
     # Helper Methods
@@ -45,7 +67,7 @@ class GameWrapper:
 
     def __get_player_info(self, player:ClientApi):
         playerInfo = player.get_player_Info()
-        playerInfo['pieces'] = [key for key in self.__players[player].keys()]
+        playerInfo['pieces'] = self.__game.getAvailablePieces(player.gamePlayerId)
         playerInfo['gamePlayerId'] = player.gamePlayerId
         return playerInfo
 

@@ -5,6 +5,14 @@ class BlokusPiece:
         self.__formbasic = form
         self.__form = form
 
+    def rotate(self, k:int):
+        self.__form = np.rot90(self.__form, k)
+        return self.__form
+    
+    def flip(self, axis:int):
+        self.__form = np.flip(self.__form, axis)
+        return self.__form
+
     # Drehen gegen den Uhrzeiger
     def rotieren(self):
         rotated = list(zip(*self.__form))[::-1]

@@ -116,7 +116,7 @@ class BlokusGame:
             # self.__display_piece_repository(playerInfo, widget)
         
         # display game field
-        self.__display_game_field(self.gameInfo)
+        self.__display_game_field()
         return
     
     def __registerNetworkEvents(self):
@@ -202,9 +202,12 @@ class BlokusGame:
         On receiving a game update from the server, update the game field and piece repository
         '''
         self.gameInfo = event.eventData
+        #TODO: clear game pieces
         # TODO: update game field
         # TODO: update piece repository
         #self.__display_piece_repository(self.gameInfo)
+        self.__display_game_field()
+
         return
     
     
@@ -218,10 +221,22 @@ class BlokusGame:
         widget.playerNameLabelText = playerInfo.get('playerName')
         return
     
-    def __display_game_field(self, gameInfo: dict)->None:
-        '''
-        not implemented yet
-        '''
+    def __display_game_field(self)->None:
+        newGameField = self.gameInfo['gameField']
+        for i in range(len(self.game_grid)):
+            for j in range(len(self.game_grid)):
+                if newGameField[i][j] == self.game_grid[i][j]: continue
+                if newGameField[i][j] == 0: 
+                    self.game_grid[i][j].color = QColor(255, 255, 255)
+                else:
+                    gamePlayerId = str(int(newGameField[i][j]))
+
+                    color = self.gameInfo['players'][gamePlayerId]['color']
+                    self.game_grid[i][j].color = QColor(color)
+                    self.game_grid[i][j].setPen(QPen(QColor(0, 0, 0), 2))
+
+                
+
         return
 
     def __init_game_field(self) -> None:
@@ -238,10 +253,10 @@ class BlokusGame:
         
         # create game grid
         self.game_grid = []
-        for i in range(GAME_FIELD_SIZE):
+        for y in range(GAME_FIELD_SIZE):
             row = []
-            for j in range(GAME_FIELD_SIZE):
-                item = GameFieldElement(self, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, QColor(255, 255, 255))
+            for x in range(GAME_FIELD_SIZE):
+                item = GameFieldElement(self, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, QColor(255, 255, 255))
                 self.field_scene.addItem(item)
                 row.append(item)
             self.game_grid.append(row)
@@ -253,7 +268,7 @@ class BlokusGame:
         return
 
 
-    def placeSelectedPiece(self, piece, ghost, pos: QPointF)->None:
+    def placeSelectedPiece(self, piece:GamePiece, ghost:GhostPiece, pos: QPointF)->None:
         '''
         Places the selected piece at the given position
 
@@ -267,19 +282,28 @@ class BlokusGame:
         '''
         if piece is not None:
             if piece.isPlaced: return
-            grid_x = int(pos.x() // TILE_SIZE) * TILE_SIZE
-            grid_y = int(pos.y() // TILE_SIZE) * TILE_SIZE
+
+            field_x = int(pos.x() // TILE_SIZE)
+            field_y = int(pos.y() // TILE_SIZE)
+            grid_x = field_x * TILE_SIZE
+            grid_y = field_y * TILE_SIZE
+
+            newPiece = piece.clone()
 
             # Place the selected piece at this location
-            piece.setPos(grid_x, grid_y)
+            newPiece.setPos(grid_x, grid_y)
 
-            del self.selectedPiece
-            self.selectedPiece = None  # Deselect the piece
+            self.selectedPiece.setVisible(False)
+            # self.selectedPiece = None  # Deselect the piece
             self.ghostPiece = None
 
             # Add the piece to the game grid scene
-            piece.isPlaced = True
-            self.field_scene.addItem(piece)
+            # newPiece.isPlaced = True
+            # self.field_scene.addItem(newPiece)
+
+            # notify the server about the placement
+            
+            self.__network.api.placePiece(newPiece.piece_id, field_x, field_y, newPiece.rotation, newPiece.flip)
         return
 
 
@@ -293,12 +317,21 @@ class GameFieldElement(QGraphicsRectItem):
         self.game = game
         return
 
+    @property
+    def color(self):
+        return self.brush().color()
+    
+    @color.setter
+    def color(self, color):
+        self.setBrush(QBrush(QColor(color)))
+        self.update()
+        return
 
 class GamePiece(QGraphicsItemGroup):
     '''
     Represents a single game piece (blokus piece)
     '''
-    def __init__(self, game:BlokusGame, shape, x, y, width, height, rotation=0, flip=0, parent=None, color=QColor('lightgray')):
+    def __init__(self, piece_id:str, game:BlokusGame, shape, x, y, width, height, rotation=0, flip=0, parent=None, color=QColor('lightgray')):
         '''
         Initializes the game piece
         
@@ -322,6 +355,7 @@ class GamePiece(QGraphicsItemGroup):
         self.isPlaced = False
         self.__flip = flip
         self.__color = color
+        self.__piece_id = piece_id
 
         #rotete the shape before the piece is constructed
         self.__init_placement()
@@ -334,6 +368,18 @@ class GamePiece(QGraphicsItemGroup):
     @property
     def color(self):
         return self.__color
+    
+    @property
+    def piece_id(self):
+        return self.__piece_id
+    
+    @property
+    def flip(self) -> int: #TODO: maby a bool would be better suited
+        return self.__flip
+    
+    @property
+    def rotation(self) -> int:
+        return self.__rotation
     
     @color.setter
     def color(self, color: QColor):
@@ -414,7 +460,16 @@ class GamePiece(QGraphicsItemGroup):
         Creates a deep copy of the game piece
         '''
         # Create a new GamePiece with the same properties
-        clone = GamePiece(self.game, self.shape_array, self.x, self.y, self.width, self.height)
+        clone = GamePiece(self.piece_id,
+                          self.game, 
+                          self.shape_array, 
+                          self.x, 
+                          self.y, 
+                          self.width, 
+                          self.height, 
+                          color=self.color,
+                          rotation=self.rotation,
+                          flip=self.flip)
         return clone
 
 
@@ -513,7 +568,7 @@ class GhostPiece(GamePiece):
     The ghost piece is not selectable and not movable.
     '''
     def __init__(self, game:BlokusGame, shape, x, y, width, height, parent=None, color=QColor('lightgray')):
-        super().__init__(game, shape, x, y, width, height, parent=parent, color=color)
+        super().__init__('', game, shape, x, y, width, height, parent=parent, color=color)
         self.setOpacity(0.5)  # Make the ghost piece semi-transparent
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, False)
@@ -562,27 +617,27 @@ class PlayerAreaWidget(QWidget):
         o = TILE_SIZE//2 #the min spacing between the pieces
         p = TILE_SIZE #the size of the pieces
         self.__piece_objects:Dict[str:GamePiece] = {
-            "1_0": GamePiece(self.__game, np.array([[1]]), 7*p, 0, p, p),
-            "2_0": GamePiece(self.__game, np.array([[1, 1]]), 10*p+o, 2*p+o, p, p),
-            "3_0": GamePiece(self.__game, np.array([[1, 1, 1]]), 0, 11*p+o, p, p),
-            "3_1": GamePiece(self.__game, np.array([[0, 1], [1, 1]]), 9*p, 10*p, p, p, rotation=1, flip=1),
-            "4_0": GamePiece(self.__game, np.array([[0, 1], [1, 1], [1, 0]]), 3*p+o, 10*p+o, p, p, rotation=1, flip=1),
-            "4_1": GamePiece(self.__game, np.array([[1, 1], [1, 1]]), 0, 3*p+2*o, p, p),
-            "4_2": GamePiece(self.__game, np.array([[0, 1, 0], [1, 1, 1]]), 5*p+o, 5, p, p, rotation=1, flip=1), 
-            "4_3": GamePiece(self.__game, np.array([[1, 1, 1], [0, 0, 1]]), 10*p+o, 9*p+o, p, p, rotation=3), 
-            "4_4": GamePiece(self.__game, np.array([[1, 1, 1, 1]]), 2*p+o, 5*p, p, p),
-            "5_0": GamePiece(self.__game, np.array([[0, 1], [1, 1], [1, 1]]), 0, 8*p, p, p, flip=1),
-            "5_1": GamePiece(self.__game, np.array([[0, 1], [0, 1], [1, 1], [1, 0]]), 6*p+o, 8*p, p, p, rotation=2, flip=1),
-            "5_2": GamePiece(self.__game, np.array([[1, 1, 1, 1], [0, 0, 0, 1]]), 8*p+o, 0, p, p),
-            "5_3": GamePiece(self.__game, np.array([[1, 1, 1, 1, 1]]), 0, 0, p, p),
-            "5_4": GamePiece(self.__game, np.array([[1, 1], [1, 0], [1, 1]]), 0, p+o, p, p, rotation=3),
-            "5_5": GamePiece(self.__game, np.array([[0, 1, 1], [0, 1, 0], [1, 1, 0]]), 5*p, 5*p+o, p, p, rotation=1, flip=1 ),
-            "5_6": GamePiece(self.__game, np.array([[0, 1, 1], [1, 1, 0], [1, 0, 0]]), 9*p+o, 4*p, p, p, rotation=0, flip=0),
-            "5_7": GamePiece(self.__game, np.array([[0, 0, 1], [0, 0, 1], [1, 1, 1]]), 3*p+o, p+o, p, p, flip=1),
-            "5_8": GamePiece(self.__game, np.array([[0, 0, 1], [1, 1, 1], [0, 0, 1]]), 3*p, 8*p, p, p, rotation=2),
-            "5_9": GamePiece(self.__game, np.array([[0, 1, 0], [0, 1, 1], [1, 1, 0]]), 9*p, 6*p+o, p, p, rotation=3, flip=1),
-            "5_10": GamePiece(self.__game, np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]), 7*p, 2*p, p, p),
-            "5_11": GamePiece(self.__game, np.array([[0, 1, 0, 0], [1, 1, 1, 1]]), o, 6*p+o, p, p, rotation=2, flip=1),
+            "1_0": GamePiece('1_0',self.__game, np.array([[1]]), 7*p, 0, p, p),
+            "2_0": GamePiece('2_0',self.__game, np.array([[1, 1]]), 10*p+o, 2*p+o, p, p),
+            "3_0": GamePiece('3_0',self.__game, np.array([[1, 1, 1]]), 0, 11*p+o, p, p),
+            "3_1": GamePiece('3_1',self.__game, np.array([[0, 1], [1, 1]]), 9*p, 10*p, p, p, rotation=1, flip=1),
+            "4_0": GamePiece('4_0',self.__game, np.array([[0, 1], [1, 1], [1, 0]]), 3*p+o, 10*p+o, p, p, rotation=1, flip=1),
+            "4_1": GamePiece('4_1',self.__game, np.array([[1, 1], [1, 1]]), 0, 3*p+2*o, p, p),
+            "4_2": GamePiece('4_2',self.__game, np.array([[0, 1, 0], [1, 1, 1]]), 5*p+o, 5, p, p, rotation=1, flip=1), 
+            "4_3": GamePiece('4_3',self.__game, np.array([[1, 1, 1], [0, 0, 1]]), 10*p+o, 9*p+o, p, p, rotation=3), 
+            "4_4": GamePiece('4_4',self.__game, np.array([[1, 1, 1, 1]]), 2*p+o, 5*p, p, p),
+            "5_0": GamePiece('5_0',self.__game, np.array([[0, 1], [1, 1], [1, 1]]), 0, 8*p, p, p, flip=1),
+            "5_1": GamePiece('5_1',self.__game, np.array([[0, 1], [0, 1], [1, 1], [1, 0]]), 6*p+o, 8*p, p, p, rotation=2, flip=1),
+            "5_2": GamePiece('5_2',self.__game, np.array([[1, 1, 1, 1], [0, 0, 0, 1]]), 8*p+o, 0, p, p),
+            "5_3": GamePiece('5_3',self.__game, np.array([[1, 1, 1, 1, 1]]), 0, 0, p, p),
+            "5_4": GamePiece('5_4',self.__game, np.array([[1, 1], [1, 0], [1, 1]]), 0, p+o, p, p, rotation=3),
+            "5_5": GamePiece('5_5',self.__game, np.array([[0, 1, 1], [0, 1, 0], [1, 1, 0]]), 5*p, 5*p+o, p, p, rotation=1, flip=1 ),
+            "5_6": GamePiece('5_6',self.__game, np.array([[0, 1, 1], [1, 1, 0], [1, 0, 0]]), 9*p+o, 4*p, p, p, rotation=0, flip=0),
+            "5_7": GamePiece('5_7',self.__game, np.array([[0, 0, 1], [0, 0, 1], [1, 1, 1]]), 3*p+o, p+o, p, p, flip=1),
+            "5_8": GamePiece('5_8',self.__game, np.array([[0, 0, 1], [1, 1, 1], [0, 0, 1]]), 3*p, 8*p, p, p, rotation=2),
+            "5_9": GamePiece('5_9',self.__game, np.array([[0, 1, 0], [0, 1, 1], [1, 1, 0]]), 9*p, 6*p+o, p, p, rotation=3, flip=1),
+            "5_10": GamePiece('5_10',self.__game, np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]), 7*p, 2*p, p, p),
+            "5_11": GamePiece('5_11',self.__game, np.array([[0, 1, 0, 0], [1, 1, 1, 1]]), o, 6*p+o, p, p, rotation=2, flip=1),
         }
         return
 

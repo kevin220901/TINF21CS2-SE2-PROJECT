@@ -87,7 +87,7 @@ class Lobby:
             p.connection.emit_Message(sender.playerName, message)
         pass
 
-    def startGame(self, player:ClientApi):
+    def startGame(self, player:ClientApi) -> GameWrapper:
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
 
@@ -95,13 +95,14 @@ class Lobby:
 
         for player, info in self.__players.items():
             self.__game.add_player(player)
+            player.currentGame = self.__game
 
         self.__game.start_game()
         
         p:ClientApi
         for p in self.__players:
             p.connection.emit_game_start(self.__game.get_game_info())
-        pass
+        return self.__game
 
     def get_lobby_info(self):
         return {

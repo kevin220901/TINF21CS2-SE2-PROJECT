@@ -62,8 +62,13 @@ class Game:
     def getFeld(self):
         return self.__feld
 
-    def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int):
+    def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int, rotation:int=0, flip:int=0):
         piece = self.__availeblePieces[spielerID][pieceKey]
+        if rotation != 0:
+            piece.rotate(rotation)
+        if flip != 0:
+            piece.flip(flip)
+            
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
             if self.__placePiece(piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
