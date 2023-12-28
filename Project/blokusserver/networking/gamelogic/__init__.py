@@ -1,3 +1,2 @@
-from .game import Game
+from .game import Game, BlokusException
 from .blokuspiece import BlokusPiece
-from .gameeventcodes import GameEventCodes
