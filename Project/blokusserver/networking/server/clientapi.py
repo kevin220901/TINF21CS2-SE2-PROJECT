@@ -23,7 +23,7 @@ class ClientApi:
         self.__gamePlayerId = None
         self.__color = 'not yet implemented'
         self.__isReady = False
-        self.__currentGame:GameWrapper = None
+        self.__currentGame:GameAdapter = None
         return
 
     
@@ -220,11 +220,11 @@ class ClientApi:
         return self.__currentLobby
     
     @property
-    def currentGame(self)->GameWrapper:
+    def currentGame(self)->GameAdapter:
         return self.__currentGame
     
     @currentGame.setter
-    def currentGame(self, game:GameWrapper)->None:
+    def currentGame(self, game:GameAdapter)->None:
         self.__currentGame = game
         return
 
@@ -260,5 +260,5 @@ class ClientApi:
 from socket import socket
 from server.lobby import Lobby
 from server.clientsocketwrapper import ClientSocketWrapper
-from server.game_wrapper import GameWrapper
+from server.game_adapter import GameAdapter
 

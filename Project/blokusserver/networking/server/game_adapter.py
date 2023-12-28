@@ -6,7 +6,7 @@ import numpy as np
 from server.logger import *
 
 
-class GameWrapper:
+class GameAdapter:
 
     def __init__(self, lobbyId:str) -> None:
         self.__lobbyId = lobbyId

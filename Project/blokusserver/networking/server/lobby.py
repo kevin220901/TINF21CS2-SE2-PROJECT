@@ -18,7 +18,7 @@ class Lobby:
         self.__canBeJoined:bool = True #TODO: redundand information -> replace with validation of playerCount and isPrivate
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
-        self.__game:GameWrapper = None
+        self.__game:GameAdapter = None
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
@@ -87,11 +87,11 @@ class Lobby:
             p.connection.emit_Message(sender.playerName, message)
         pass
 
-    def startGame(self, player:ClientApi) -> GameWrapper:
+    def startGame(self, player:ClientApi) -> GameAdapter:
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
 
-        self.__game = GameWrapper(self.__lobbyId)
+        self.__game = GameAdapter(self.__lobbyId)
 
         for player, info in self.__players.items():
             self.__game.add_player(player)
@@ -179,5 +179,5 @@ class Lobby:
 
 
 from server.clientapi import ClientApi
-from server.game_wrapper import GameWrapper
+from server.game_adapter import GameAdapter
 from gamelogic.game import Game
