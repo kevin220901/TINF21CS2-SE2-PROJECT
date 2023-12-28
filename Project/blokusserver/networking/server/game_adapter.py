@@ -7,6 +7,10 @@ from server.logger import *
 
 
 class GameAdapter:
+    '''
+    This class serves as an adapter between the game logic and the server.
+    Its purpose is to decouple the game logic from the server. So developers can work independently on the game logic and the server.
+    '''
 
     def __init__(self, lobbyId:str) -> None:
         self.__lobbyId = lobbyId
