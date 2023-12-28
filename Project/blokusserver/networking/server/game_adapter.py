@@ -1,4 +1,5 @@
 
+import traceback
 from typing import Dict
 from server.clientapi import ClientApi
 from gamelogic import Game, BlokusPiece, BlokusException
@@ -50,7 +51,7 @@ class GameAdapter:
             player.connection.emit_game_update(self.get_game_info())
             logger.debug(e)
         except Exception as e:
-            logger.critical(e)
+            logger.critical(f'{str(e)} \n {traceback.format_exc()}')
 
         #TODO: determine player next turn
         #TODO: handle placement error/invalid placement
