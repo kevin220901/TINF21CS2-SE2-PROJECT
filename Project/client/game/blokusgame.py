@@ -44,7 +44,7 @@ class BlokusGame:
     @property
     def ghostPiece(self):
         return self.__ghostPiece
-    
+
     @ghostPiece.setter
     def ghostPiece(self, piece: GhostPiece | None):
         if piece is None:
@@ -59,6 +59,24 @@ class BlokusGame:
 
         self.__ghostPiece = piece
         return
+
+    # @property
+    # def selectedPiece(self):
+    #     return self.__selectedPiece
+    
+    # @selectedPiece.setter
+    # def selectedPiece(self, piece: GamePiece | None):
+    #     if piece is None:
+    #         if self.__selectedPiece is not None:
+    #             self.__selectedPiece.setPen(QPen(QColor(0, 0, 0), 2))
+    #     else:
+    #         if self.__selectedPiece is not None:
+    #             self.__selectedPiece.setPen(QPen(QColor(0, 0, 0), 2))
+
+    #         piece.setPen(QPen(QColor(0, 0, 255), 2))
+
+    #     self.__selectedPiece = piece
+    #     return
 
     def __init_ui(self):
         # main widget
@@ -90,7 +108,8 @@ class BlokusGame:
     	
         # create a plyaer area widget for each player
         for i in range(4):
-            playerInfo = self.gameInfo['players'].get(f'{i+1}')
+            
+            playerInfo = self.gameInfo['players'].get(f'{i+1}')     # players is a dict so the key is a string. therefore the i+1 is converted to a string
             if not playerInfo: 
                 widget = PlayerAreaWidget(self)
             else:
@@ -112,6 +131,7 @@ class BlokusGame:
         for i, widget in enumerate(self.player_area_widgets):
             playerInfo = self.gameInfo['players'].get(f'{i+1}')
             self.__display_player_info(playerInfo, widget)
+            self.__display_player_available_pieces(playerInfo, widget)
             
             # self.__display_piece_repository(playerInfo, widget)
         
@@ -207,8 +227,8 @@ class BlokusGame:
         #TODO: clear game pieces
         # TODO: update game field
         # TODO: update piece repository
-        #self.__display_piece_repository(self.gameInfo)
-        self.__display_game_field()
+        self.__display_game_info()
+        # self.__display_game_field()
         return
     
     def __on_game_invalid_placement(self, event:NetworkEventObject)->None:
@@ -227,6 +247,7 @@ class BlokusGame:
         - player name
         '''
         if not playerInfo: return
+        # TODO: check if the a players color has changed and update if needed
         widget.playerNameLabelText = playerInfo.get('playerName')
         return
     
@@ -243,8 +264,24 @@ class BlokusGame:
                     color = self.gameInfo['players'][gamePlayerId]['color']
                     self.game_grid[i][j].color = QColor(color)
                     self.game_grid[i][j].setPen(QPen(QColor(0, 0, 0), 2))
+        return
+    
+    def __display_player_available_pieces(self, playerInfo: dict, widget: PlayerAreaWidget)->None:
+        '''
+        Shows or hides the given players available pieces. 
+        Does nothing if the playerInfo is None
 
-                
+
+        Parameters: 
+            playerInfo (dict): the player info dict
+            widget (PlayerAreaWidget): the widget to display the pieces in
+
+        Returns:
+            None
+        '''
+        if not playerInfo: return
+        availablePieces = playerInfo.get('pieces')
+        widget.update_available_pieces(availablePieces)
 
         return
 
@@ -277,42 +314,32 @@ class BlokusGame:
         return
 
 
-    def placeSelectedPiece(self, piece:GamePiece, ghost:GhostPiece, pos: QPointF)->None:
+    def placeSelectedPiece(self, pos: QPointF)->None:
         '''
         Places the selected piece at the given position
 
         Parameters:
-            piece (GamePiece): the piece to place
-            ghost (GhostPiece): the ghost piece
             pos (QPointF): the position to place the piece at
 
         Returns:
             None
         '''
-        if piece is not None:
-            if piece.isPlaced: return
-
+        if self.selectedPiece is not None:
+            if self.selectedPiece.isPlaced: return
+            
+            # calculate the grid local position of the mouse
             field_x = int(pos.x() // TILE_SIZE)
             field_y = int(pos.y() // TILE_SIZE)
-            grid_x = field_x * TILE_SIZE
-            grid_y = field_y * TILE_SIZE
-
-            newPiece = piece.clone()
-
-            # Place the selected piece at this location
-            newPiece.setPos(grid_x, grid_y)
-
-            self.selectedPiece.setVisible(False)
-            # self.selectedPiece = None  # Deselect the piece
-            self.ghostPiece = None
-
-            # Add the piece to the game grid scene
-            # newPiece.isPlaced = True
-            # self.field_scene.addItem(newPiece)
-
-            # notify the server about the placement
             
-            self.__network.api.placePiece(newPiece.piece_id, field_x, field_y, newPiece.rotation, newPiece.flip)
+            self.__network.api.placePiece(self.selectedPiece.piece_id, 
+                                          field_x, 
+                                          field_y, 
+                                          self.selectedPiece.rotation, 
+                                          self.selectedPiece.flip)
+            
+            self.selectedPiece.setVisible(False)
+            self.selectedPiece = None  # Deselect the piece
+            self.ghostPiece = None
         return
 
 
@@ -517,13 +544,11 @@ class GameScene(QGraphicsScene):
         Handles the mouse press event for the game scene:
         - if there is a ghost piece, place the selected piece at the ghost piece's position
         '''
-        if self.game.ghostPiece:
+        if self.game.ghostPiece:    #TODO: why does the placement depend on the ghost piece? -> check this and leave a comment
             # Place the piece at the current position of the ghost piece
-            self.game.placeSelectedPiece(self.game.selectedPiece,
-                                         self.game.ghostPiece,
-                                         event.scenePos())
-        if self.game.selectedPiece is not None:
-            self.game.selectedPiece.isPlaced = True
+            self.game.placeSelectedPiece(event.scenePos())
+        # if self.game.selectedPiece is not None:
+        #     self.game.selectedPiece.isPlaced = True
         return super().mousePressEvent(event)
 
 
@@ -600,8 +625,9 @@ class GhostPiece(GamePiece):
 class PlayerAreaWidget(QWidget):
     def __init__(self, game: BlokusGame, parent=None, color: QColor = QColor('lightgray')):
         super().__init__(parent=parent)
-        self.__game = game
-        self.__color = color
+        self.__game:BlokusGame = game
+        self.__color:QColor = color
+        self.__piece_objects:Dict[str:GamePiece]
 
         self.__init_ui()
         return
@@ -620,12 +646,25 @@ class PlayerAreaWidget(QWidget):
         self.__display_piece_repository()
         return
     
+    def update_available_pieces(self, availablePieces: list):
+        '''
+        Updates the available pieces in the piece repository
+        '''
+
+        for key in self.__piece_objects.keys():
+            if key in availablePieces:
+                # piece is available
+                self.__piece_objects[key].setVisible(True)
+            else:
+                # piece is not available
+                self.__piece_objects[key].setVisible(False)
+        return
 
     def __init_piece_objects(self):
         #TODO: refactor hard coded values and move them somewhere else
-        o = TILE_SIZE//2 #the min spacing between the pieces
+        o = TILE_SIZE//2 #used as spacing between the pieces
         p = TILE_SIZE #the size of the pieces
-        self.__piece_objects:Dict[str:GamePiece] = {
+        self.__piece_objects = {
             "1_0": GamePiece('1_0',self.__game, np.array([[1]]), 7*p, 0, p, p),
             "2_0": GamePiece('2_0',self.__game, np.array([[1, 1]]), 10*p+o, 2*p+o, p, p),
             "3_0": GamePiece('3_0',self.__game, np.array([[1, 1, 1]]), 0, 11*p+o, p, p),
@@ -673,3 +712,14 @@ class PlayerAreaWidget(QWidget):
     @playerNameLabelText.setter
     def playerNameLabelText(self, text:str):
         self.__nameLabel.setText(text)
+
+    @property
+    def color(self) -> QColor:
+        return self.__color
+    
+    @color.setter
+    def color(self, color: QColor):
+        self.__color = color
+        for piece in self.__piece_objects.values():
+            piece.color = color
+        return
