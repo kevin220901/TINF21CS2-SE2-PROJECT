@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from .blokuspiece import BlokusPiece
 
 class BlokusException(Exception):
@@ -43,6 +44,9 @@ class Game:
             "5_11": BlokusPiece(np.array([[0, 1, 0, 0], [1, 1, 1, 1]]))
         }
 
+    def printPiece(self, spielerID:int, pieceKey:str):
+        print(self.__availeblePieces[spielerID][pieceKey].getForm())
+
     def __deleteAvaileblePiece(self, spielerID:int, pieceKey:str):
         del self.__availeblePieces[spielerID][pieceKey]
 
@@ -59,14 +63,18 @@ class Game:
     def getFeld(self):
         return self.__feld
 
+    def clonePiece(self, spielerID:int, pieceKey:str):
+        pass
+
     def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int, rotation:int=0, flip:int=0):
         piece = self.__availeblePieces[spielerID][pieceKey]
-        if rotation != 0:
-            piece.rotate(rotation)
-        if flip != 0:
-            piece.flip(flip)
+        cloned_piece = copy.copy(piece)
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
-            if self.__placePiece(piece, start_x, start_y, spielerID) == True:
+            if rotation != 0:
+                cloned_piece.rotate(rotation)
+            if flip != 0:
+                cloned_piece.flip(flip)
+            if self.__placePiece(cloned_piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
         else:
             raise BlokusException("Das Piece wurde bereits platziert")
