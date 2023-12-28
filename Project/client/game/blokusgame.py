@@ -108,14 +108,22 @@ class BlokusGame:
         return
 
     def __display_game_info(self):
-        widget: PlayerAreaWidget
+        '''
+        Displays the game info in the ui.
+        - player info
+            - player name
+            - available pieces
+            - color (not implemented yet)
+        - game field
+        '''
+
+        player_area: PlayerAreaWidget
         # display player info in corresponding widget
-        for i, widget in enumerate(self.player_area_widgets):
+        for i, player_area in enumerate(self.player_area_widgets):
             playerInfo = self.gameInfo['players'].get(f'{i+1}')
-            self.__display_player_info(playerInfo, widget)
-            self.__display_player_available_pieces(playerInfo, widget)
+            self.__display_player_info(playerInfo, player_area)
+            self.__display_player_available_pieces(playerInfo, player_area)
             
-            # self.__display_piece_repository(playerInfo, widget)
         
         # display game field
         self.__display_game_field()
@@ -129,6 +137,7 @@ class BlokusGame:
         self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
+        # TODO: add network event handler for invalid action
         return
     
     def __unregisterNetworkEvents(self):
@@ -206,11 +215,7 @@ class BlokusGame:
         On receiving a game update from the server, update the game field and piece repository
         '''
         self.gameInfo = event.eventData
-        #TODO: clear game pieces
-        # TODO: update game field
-        # TODO: update piece repository
         self.__display_game_info()
-        # self.__display_game_field()
         return
     
     def __on_game_invalid_placement(self, event:NetworkEventObject)->None:
