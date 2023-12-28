@@ -126,6 +126,7 @@ class BlokusGame:
         #add network event handler
         self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
         return
     
     def __unregisterNetworkEvents(self):
@@ -134,6 +135,7 @@ class BlokusGame:
         '''
         self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.removeNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
+        self.__network.removeNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
         return
 
     def __init_ui_handlers(self):
@@ -207,7 +209,14 @@ class BlokusGame:
         # TODO: update piece repository
         #self.__display_piece_repository(self.gameInfo)
         self.__display_game_field()
-
+        return
+    
+    def __on_game_invalid_placement(self, event:NetworkEventObject)->None:
+        '''
+        On receiving a game invalid placement from the server, display the message as Alert
+        '''
+        message = event.eventData
+        self.mainWindow.alertWidget.showAlert(message)
         return
     
     

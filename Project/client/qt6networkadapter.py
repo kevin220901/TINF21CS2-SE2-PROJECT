@@ -52,7 +52,7 @@ class QNetworkEventSignals(QObject):
     lobby_browser = pyqtSignal(NetworkEventObject)
     game_start = pyqtSignal(NetworkEventObject)
     game_update = pyqtSignal(NetworkEventObject)
-    game_invalid_move = pyqtSignal(NetworkEventObject)
+    game_invalid_placement = pyqtSignal(NetworkEventObject)
     game_end = pyqtSignal(NetworkEventObject)
     registration_success = pyqtSignal(NetworkEventObject)
     profile_read = pyqtSignal(NetworkEventObject)
@@ -79,6 +79,7 @@ class QNetworkThread(QThread):
             #NetworkEvent.LOBBY_JOIN.value: self.eventSignals.lobby_new_host,
             NetworkEvent.GAME_START.value: self.eventSignals.game_start,
             NetworkEvent.GAME_UPDATE.value: self.eventSignals.game_update,
+            NetworkEvent.GAME_INVALID_PLACEMENT.value: self.eventSignals.game_invalid_placement,
             NetworkEvent.REGISTRATION_SUCCESS.value: self.eventSignals.registration_success,
             NetworkEvent.PROFILE_READ.value: self.eventSignals.profile_read,
             NetworkEvent.PROFILE_DELETE.value: self.eventSignals.profile_delete,
