@@ -60,24 +60,6 @@ class BlokusGame:
         self.__ghostPiece = piece
         return
 
-    # @property
-    # def selectedPiece(self):
-    #     return self.__selectedPiece
-    
-    # @selectedPiece.setter
-    # def selectedPiece(self, piece: GamePiece | None):
-    #     if piece is None:
-    #         if self.__selectedPiece is not None:
-    #             self.__selectedPiece.setPen(QPen(QColor(0, 0, 0), 2))
-    #     else:
-    #         if self.__selectedPiece is not None:
-    #             self.__selectedPiece.setPen(QPen(QColor(0, 0, 0), 2))
-
-    #         piece.setPen(QPen(QColor(0, 0, 255), 2))
-
-    #     self.__selectedPiece = piece
-    #     return
-
     def __init_ui(self):
         # main widget
         self.blokus_widget = QWidget()
