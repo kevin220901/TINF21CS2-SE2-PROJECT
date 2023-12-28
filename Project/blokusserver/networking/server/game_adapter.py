@@ -1,7 +1,7 @@
 
 from typing import Dict
 from server.clientapi import ClientApi
-from gamelogic import Game, BlokusPiece
+from gamelogic import Game, BlokusPiece, BlokusException
 import numpy as np
 from server.logger import *
 
@@ -45,9 +45,10 @@ class GameAdapter:
             
             self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, rotation=rotation, flip=flip)
             
-        # except BlokusException as e:
-        #     logger.info(f"piece could not be placed:")
-        #     logger.error(e)
+        except BlokusException as e:
+            player.connection.emit_game_invalidPlacement(str(e))
+            player.connection.emit_game_update(self.get_game_info())
+            logger.debug(e)
         except Exception as e:
             logger.critical(e)
 
@@ -66,7 +67,8 @@ class GameAdapter:
             'lobbyId': self.__lobbyId,
             'gameField': self.__game.getFeld.tolist(),
             'currentTurnPlayerId': self.__currentPlayerTurn.gamePlayerId,
-            'players':{player.gamePlayerId: self.__get_player_info(player) for player,value in self.__players.items()}
+            'players':{player.gamePlayerId: self.__get_player_info(player) for player,value in self.__players.items()},
+            'messages':[]
         }
 
     def __get_player_info(self, player:ClientApi):

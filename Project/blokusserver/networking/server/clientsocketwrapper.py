@@ -113,3 +113,9 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = gameInfo
         self.sendall(eventId, eventData)
         return
+    
+    def emit_game_invalidPlacement(self, message)->None:
+        eventId = NetworkEvent.GAME_INVALID_PLACEMENT
+        eventData = message
+        self.sendall(eventId, eventData)
+        return
