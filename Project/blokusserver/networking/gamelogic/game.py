@@ -24,24 +24,51 @@ class Game:
             "1_0": BlokusPiece(np.array([[1]])),
             "2_0": BlokusPiece(np.array([[1, 1]])),
             "3_0": BlokusPiece(np.array([[1, 1, 1]])),
-            "3_1": BlokusPiece(np.array([[0, 1], [1, 1]])),
-            "4_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 0]])),
-            "4_1": BlokusPiece(np.array([[1, 1], [1, 1]])),
-            "4_2": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1]])),
-            "4_3": BlokusPiece(np.array([[1, 1, 1], [0, 0, 1]])),
+            "3_1": BlokusPiece(np.array([[0, 1],
+                                         [1, 1]])),
+            "4_0": BlokusPiece(np.array([[0, 1],
+                                         [1, 1],
+                                         [1, 0]])),
+            "4_1": BlokusPiece(np.array([[1, 1],
+                                         [1, 1]])),
+            "4_2": BlokusPiece(np.array([[0, 1, 0],
+                                         [1, 1, 1]])),
+            "4_3": BlokusPiece(np.array([[1, 1, 1],
+                                         [0, 0, 1]])),
             "4_4": BlokusPiece(np.array([[1, 1, 1, 1]])),
-            "5_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 1]])),
-            "5_1": BlokusPiece(np.array([[0, 1], [0, 1], [1, 1], [1, 0]])),
-            "5_2": BlokusPiece(np.array([[1, 1, 1, 1], [0, 0, 0, 1]])),
+            "5_0": BlokusPiece(np.array([[0, 1],
+                                         [1, 1],
+                                         [1, 1]])),
+            "5_1": BlokusPiece(np.array([[0, 1],
+                                         [0, 1],
+                                         [1, 1],
+                                         [1, 0]])),
+            "5_2": BlokusPiece(np.array([[1, 1, 1, 1],
+                                         [0, 0, 0, 1]])),
             "5_3": BlokusPiece(np.array([[1, 1, 1, 1, 1]])),
-            "5_4": BlokusPiece(np.array([[1, 1], [1, 0], [1, 1]])),
-            "5_5": BlokusPiece(np.array([[0, 1, 1], [0, 1, 0], [1, 1, 0]])),
-            "5_6": BlokusPiece(np.array([[0, 1, 1], [1, 1, 0], [1, 0, 0]])),
-            "5_7": BlokusPiece(np.array([[0, 0, 1], [0, 0, 1], [1, 1, 1]])),
-            "5_8": BlokusPiece(np.array([[0, 0, 1], [1, 1, 1], [0, 0, 1]])),
-            "5_9": BlokusPiece(np.array([[0, 1, 0], [0, 1, 1], [1, 1, 0]])),
-            "5_10": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])),
-            "5_11": BlokusPiece(np.array([[0, 1, 0, 0], [1, 1, 1, 1]]))
+            "5_4": BlokusPiece(np.array([[1, 1],
+                                         [1, 0],
+                                         [1, 1]])),
+            "5_5": BlokusPiece(np.array([[0, 1, 1],
+                                         [0, 1, 0],
+                                         [1, 1, 0]])),
+            "5_6": BlokusPiece(np.array([[0, 1, 1],
+                                         [1, 1, 0],
+                                         [1, 0, 0]])),
+            "5_7": BlokusPiece(np.array([[0, 0, 1],
+                                         [0, 0, 1],
+                                         [1, 1, 1]])),
+            "5_8": BlokusPiece(np.array([[0, 0, 1],
+                                         [1, 1, 1],
+                                         [0, 0, 1]])),
+            "5_9": BlokusPiece(np.array([[0, 1, 0],
+                                         [0, 1, 1],
+                                         [1, 1, 0]])),
+            "5_10": BlokusPiece(np.array([[0, 1, 0],
+                                          [1, 1, 1],
+                                          [0, 1, 0]])),
+            "5_11": BlokusPiece(np.array([[0, 1, 0, 0],
+                                          [1, 1, 1, 1]]))
         }
 
     def printPiece(self, spielerID:int, pieceKey:str):
@@ -62,9 +89,6 @@ class Game:
     @property
     def getFeld(self):
         return self.__feld
-
-    def clonePiece(self, spielerID:int, pieceKey:str):
-        pass
 
     def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int, rotation:int=0, flip:int=0):
         piece = self.__availeblePieces[spielerID][pieceKey]
@@ -137,33 +161,36 @@ class Game:
                         if (self.__feld[y + start_y, x + start_x + 1] == spielerID): #gucke eins nach rechts und guck ob da nen piece ist, wenn ja, brich ab
                             raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
-                    if (x + start_x - 1) >= 0:
+                    if (x + start_x - 1) >= 0: # Soll nur checken wenn es nicht negativ  wird
                         if (self.__feld[y + start_y, x + start_x - 1] == spielerID): #gucke eins nach links und guck ob da nen piece ist
                             raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
-
                     if (y + start_y + 1) < self.__fieldsize:
                         if (self.__feld[y + start_y + 1, x + start_x] == spielerID): #gucke eins nach unten und guck ob da nen piece ist
                             raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
                             return False
-                    if (self.__feld[y + start_y - 1, x + start_x] == spielerID): #gucke eins nach oben und guck ob da nen piece ist
-                        raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
-                        return False
+                    if (y + start_y - 1) >= 0: # Soll nur checken wenn es nicht negativ  wird
+                        if (self.__feld[y + start_y - 1, x + start_x] == spielerID): #gucke eins nach oben und guck ob da nen piece ist
+                            raise BlokusException("Das piece berührt mit einer Seite ein anderes Piece")
+                            return False
 
         #Eckt es an ein anderes an? Soll es!
                 if form[y][x] == 1 and ecke == False: #ToDo: soll es hier auch den Fall für links mit -1 abfangen?
-                    if (self.__feld[y + start_y - 1, x + start_x - 1] == spielerID and ecke == False): #gucke ob Ecke oben links ne 1 ist, wenn ja = gut
-                        ecke = True
-
-                    if ((x + start_x + 1) < self.__fieldsize) and ecke == False:
-                        if (self.__feld[y + start_y - 1, x + start_x + 1] == spielerID): #gucke ob Ecke oben rechts ne 1 ist, wenn ja = gut
+                    if ((y + start_y - 1) >= 0) and ((x + start_x - 1) >= 0):
+                        if (self.__feld[y + start_y - 1, x + start_x - 1] == spielerID and ecke == False): #gucke ob Ecke oben links ne 1 ist, wenn ja = gut
                             ecke = True
 
-                    if ((y + start_y + 1) < self.__fieldsize and (x + start_x + 1) < self.__fieldsize) and ecke == False:
-                        if (self.__feld[y + start_y + 1, x + start_x - 1] == spielerID): #gucke ob Ecke unten links ne 1 ist, wenn ja = gut
-                            ecke = True
-                        if (self.__feld[y + start_y + 1, x + start_x + 1] == spielerID): #gucke ob Ecke unten rechts ne 1 ist, wenn ja = gut
-                            ecke = True
+                    if ((y + start_y - 1) >= 0):
+                        if ((x + start_x + 1) < self.__fieldsize) and ecke == False:
+                            if (self.__feld[y + start_y - 1, x + start_x + 1] == spielerID): #gucke ob Ecke oben rechts ne 1 ist, wenn ja = gut
+                                ecke = True
+
+                    if ((x + start_x - 1) >= 0):
+                        if ((y + start_y + 1) < self.__fieldsize and (x + start_x + 1) < self.__fieldsize) and ecke == False:
+                            if (self.__feld[y + start_y + 1, x + start_x - 1] == spielerID): #gucke ob Ecke unten links ne 1 ist, wenn ja = gut
+                                ecke = True
+                            if (self.__feld[y + start_y + 1, x + start_x + 1] == spielerID): #gucke ob Ecke unten rechts ne 1 ist, wenn ja = gut
+                                ecke = True
         if ecke == False:
             raise BlokusException("Das Piece muss mit einer Ecke an einer anderen liegen")
         return ecke
@@ -176,12 +203,24 @@ class Game:
             return False
 
         if (form[0][0] == 1) and (start_x == 0) and (start_y == 0): # Test für Ecke oben links / die Form hat immer den Wert 1, deswegen wird auf 1 geprüft und nicht die eigentliche Spielerzahl
+            if self.__feld[0][0] != 0:
+                raise BlokusException("Die Ecke oben links ist nicht frei")
+                return False
             return True
         elif (form[0][-1] == 1) and ((start_x + len(form[0])) == self.__fieldsize) and (start_y == 0): # Test für Ecke oben rechts
+            if self.__feld[0][-1] != 0:
+                raise BlokusException("Die Ecke oben rechts ist nicht frei")
+                return False
             return True
         elif (form[-1][0] == 1) and (start_x == 0) and ((start_y + len(form)) == self.__fieldsize): # Test für Ecke unten links
+            if self.__feld[-1][0] != 0:
+                raise BlokusException("Die Ecke unten links ist nicht frei")
+                return False
             return True
         elif (form[-1][-1] == 1) and ((start_x + len(form[0])) == self.__fieldsize) and ((start_y + len(form)) == self.__fieldsize): # Test für Ecke unten rechts
+            if self.__feld[-1][-1] != 0:
+                raise BlokusException("Die Ecke unten rechts ist nicht frei")
+                return False
             return True
         else:
             raise BlokusException("Das erste Piece liegt in keiner Ecke")

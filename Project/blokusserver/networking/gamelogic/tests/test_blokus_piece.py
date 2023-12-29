@@ -63,21 +63,20 @@ class Test_Blokus_Piece(TestCase):
     #Rechts und links dürfen Pieces mit der selben Zahl liegen
     def test_same_piece_left_right(self):
         #arrange
-        piece_1 = BlokusPiece(np.array([[1],[1],[1],[1],[1]]))
         game = Game(6)
 
         expected = np.array([
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 1],
+            [0, 1, 0, 1, 1, 1],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0]
         ])
 
         #act
-        game.placeFirstPiece(piece_1, 5, 0, 1)
-        game.placePieceByKey("5_3", 0, 0, 1, 1)
+        game.placePieceByKey("4_3", 3, 0, 1, 2, 1)
+        game.placePieceByKey("5_5", 0, 0, 1, 0, 1)
 
         #assert
         assert_array_equal(game.getFeld, expected)
@@ -150,7 +149,10 @@ class Test_Blokus_Piece(TestCase):
 
         # act
         game.placePieceByKey("5_3", 0, 0, 1)
-        game.placePieceByKey("5_4", 0, 0, 4)
+        try:
+            game.placePieceByKey("5_4", 0, 0, 4)
+        except BlokusException as e:
+            self.assertEqual(str(e), "Die Ecke oben links ist nicht frei")
 
         #assert
         assert_array_equal(game.getFeld, expected)
@@ -179,7 +181,7 @@ class Test_Blokus_Piece(TestCase):
         # assert
         assert_array_equal(game.getFeld, expected)
 
-    # zwei pieces dürfen nicht übereinander liegen
+    # zwei unterschiedliche Pieces dürfen nebeneinander liegen
     def test_two_diff_pieces_next_each_other(self):
         # arrange
         game = Game(6)
@@ -200,6 +202,7 @@ class Test_Blokus_Piece(TestCase):
         # assert
         assert_array_equal(game.getFeld, expected)
 
+    # zwei Pieces dürfen sich nicht überlappen
     def test_two_pieces_dont_over_each_other(self):
         g = Game(6)
 
@@ -235,22 +238,32 @@ class Test_Blokus_Piece(TestCase):
         #act
         g.placePieceByKey("5_3", 0, 0, 1, 1)
         g.placePieceByKey("4_3", 1, 3, 1, 3)
-        g.placePieceByKey("4_0", 3, 0, 1, 0, 1)
+        g.placePieceByKey("4_0", 2, 0, 1, 0, 1)
+
+        #assert
+        assert_array_equal(g.getFeld, expected)
+
+    def test_pieces_corner_each_other_2(self):
+        g = Game(6)
+
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 1, 1, 1]
+        ])
+
+        #act
+        g.placePieceByKey("5_7", 3, 3, 1)
         try:
-            pass
+            g.placePieceByKey("3_1", 0, 4, 1, 3)
         except BlokusException as e:
-            pass
+            self.assertEqual(str(e), "Das Piece muss mit einer Ecke an einer anderen liegen")
 
         #assert
         print(g.getFeld)
         print(expected)
+
         assert_array_equal(g.getFeld, expected)
-
-
-    # ToDo: Tests für das valiedieren schreiben, sobald die Funktion mit mehreren Farben arbeitet
-    #ToDo: Es dürfen nicht eine Ecke zweimal belegt werden (test steht schon, in Code einarbeiten)
-    #ToDO: Vergleich der Ecken überprüfen: test_pieces_corner_each_other
-'''
-    - liegen alle weiteren Teile mit der entsprechenden Zahl Ecke-an-Ecke
-    '''
-    #ToDo: der überschreibt die pieces aus der Datei(Dictionary) noch = mal überarbeiten

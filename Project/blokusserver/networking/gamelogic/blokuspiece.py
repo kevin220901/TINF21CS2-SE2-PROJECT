@@ -5,19 +5,16 @@ class BlokusPiece:
         self.__formbasic = form
         self.__form = form
 
+    # Drehen gegen den Uhrzeiger
     def rotate(self, k:int):
         self.__form = np.rot90(self.__form, k)
         return self.__form
     
+    # Flip ist an der y-Achse
     def flip(self, axis:int):
         self.__form = np.flip(self.__form, axis)
         return self.__form
 
-    # Drehen gegen den Uhrzeiger
-    def rotieren(self):
-        rotated = list(zip(*self.__form))[::-1]
-        self.__form = np.array(rotated)
-        return self.__form
 
     def xSpiegelung(self):
         self.__form = self.__form[::-1]
