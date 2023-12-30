@@ -1,3 +1,4 @@
+import traceback
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
@@ -164,11 +165,14 @@ class Lobby:
         return
 
     def __on_game_started(self, event:NetworkEventObject):
-        self.mainWindow.showAlert(f"Game started")
-        self.__unregisterNetworkEvents()
-        from game.blokusgame import BlokusGame
-        self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
-        self.__lobby.deleteLater()
+        try:
+            self.mainWindow.showAlert(f"Game started")
+            self.__unregisterNetworkEvents()
+            from game.blokusgame import BlokusGame
+            self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
+            self.__lobby.deleteLater()
+        except Exception as e:
+            print(f'{str(e)} \n {traceback.format_exc()}') #TODO: add logging
         return
     #<<< NetworkEventHandler
 

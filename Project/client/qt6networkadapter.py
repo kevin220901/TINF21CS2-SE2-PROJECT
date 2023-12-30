@@ -91,13 +91,13 @@ class QNetworkThread(QThread):
             event:NetworkEventObject = self.__api.recv()
             self.event_map[event.eventId].emit(event)
             
-        pass
+        return
 
     def stop(self):
         self.__stopEvent.set()
         self.__api.close()
-        pass
-    pass
+        return
+    
 
 
 
