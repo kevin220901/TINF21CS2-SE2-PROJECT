@@ -23,7 +23,25 @@ from qt6networkadapter import PyQt6_Networkadapter
 
 import contextvars
 
+##################################################
+## Author: Kai Pistol, Lusi Eckert
+##################################################
 
+
+'''
+REMARK:
+    Please do not take the developers notes to serious. 
+    Its just their way of dealing with the frustration and euphoria experienced while development. 
+
+    Also a return statement is used after each mehthod to make the code more readable and to make it easier to see where a method ends.
+
+    hth and best regards: the DEVS
+'''
+
+# TODO: This whole document needs to be refactored.
+
+
+# TODO: move the logger to a seperate file
 LOG_FORMAT = "%(message)s"   
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -40,6 +58,63 @@ logger:logging.Logger = logging.getLogger()
 nesting_level_var = contextvars.ContextVar('nesting_level', default=0)
 
 def log_method_call(logAttributes:bool=False):
+    '''
+    This is a decorator, it adds loggig to a method. 
+    When the method is called, the decorator logs the method call and the return value each in seperate entries.
+
+    PARAMETERS:
+        logAttributes (bool): if True, the attributes of the object are logged.
+
+    EXCEPTIONS:
+        This may result in an SerializationError if an attribute of the object is not serializable.
+        To resolve this issue, implement a to_dict() method in the object. or set logAttributes to False ... lol
+
+    EXAMPLES:
+        1.  loggin whitout attributes
+
+            @log_method_call()
+            def your_method(self, ...)->None:
+                ...
+                return
+
+        2.  logging with attributes
+            @log_method_call(logAttributes=True)
+            def your_method(self, ...)->None:
+                ...
+                return
+
+        3.  implementing a to_dict() method in the object
+            class YourClass:
+                def __init__(self, ...)->None:
+                    self.attribute1 = ...
+                    self.attribute2 = ...
+                    self.some_non_serializable_attribute = ...
+                    ...
+                @log_method_call(logAttributes=True)
+                def your_method(self, ...)->None:
+                    ... do stuff wothy of logging ...
+                    return
+                
+                ...
+                def to_dict(self):
+                    return {
+                        'attribute1': self.attribute1,
+                        'attribute2': self.attribute2,
+                        'some_non_serializable_attribute': {
+                            self.some_non_serializable_attribute.attribute1, 
+                            self.some_non_serializable_attribute.attribute2,
+                            ...
+                        }
+                        ...
+                    }
+                ... you get the idea ... have fun xD
+        
+    DEVELOPERS NOTE:
+        The log entries are in json format and are written to the log file. 
+        (While each entry is a valid json object, the whole file is not a valid json object since it expects an 'eof' after the first entry ...
+        ... did not care for now since it works and fullfills its purpose)
+            
+    '''
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -92,21 +167,45 @@ def log_method_call(logAttributes:bool=False):
     return decorator
 
 
-TILE_SIZE = 21
-GAME_FIELD_SIZE = 20 # 20x20 tiles
+# mhhh magic numbers, yummy
+#TODO: move to config file
+TILE_SIZE = 21       # represents the size of one tile in the game field in pixels (width and height)
+GAME_FIELD_SIZE = 20 # represents the size of the game field in tiles (width and height)
 
-##################################################
-## Author: Kai Pistol
-##################################################
+
 
 class PlacePieceEvent:
+    '''
+    This is a plain data structure for the place piece Signal in the GameScene class.
+    All the properties are READ ONLY.
+    '''
     def __init__(self, piece_id:str, x:float, y:float, operations:str) -> None:
-        self.piece_id = piece_id
-        self.x = x
-        self.y = y
-        self.operations = operations
+        self.__piece_id = piece_id
+        self.__x = x
+        self.__y = y
+        self.__operations = operations
+
+    @property  
+    def piece_id(self):
+        return self.__piece_id
+    
+    @property
+    def x(self):
+        return self.__x
+    
+    @property
+    def y(self):
+        return self.__y
+    
+    @property
+    def operations(self):
+        return self.__operations
 
 class PieceClickedEvent:
+    '''
+    This is an othe data structure nedded for the pieceClickedEvent Signal in the GamePiece class.
+    All the properties are READ ONLY.
+    '''
     def __init__(self, piece:GamePiece, mouseEvent:QGraphicsSceneMouseEvent) -> None:
         self._piece = piece
         self._mouseEvent = mouseEvent
@@ -121,10 +220,12 @@ class PieceClickedEvent:
 
 class BlokusGame:
     '''
-    Contains the ui elements for the blokus game
+    This is the Main class of this module, it manages the whole game ui and contains all its ui elements.
     - the game field
-    - the piece repository for each player
-    - the chat
+    - the piece repository for each player: display of the player info and the available pieces
+    - the chat: well its the chat ... 
+    - the selected piece: the piece that is currently selected
+    - the ghost piece: a ghost piece is a copy of the selected piece that is used to visualize the placement of the piece
     '''
     # @log_method_call(logAttributes=False)
     def __init__(self, mainWindow, network: PyQt6_Networkadapter, gameInfo: dict):
@@ -182,6 +283,9 @@ class BlokusGame:
         '''
         Handles the selection and deselection of a piece.
         Also triggers the creation and deletion of the ghost piece.
+
+        DEVELOPERS NOTE:
+            nothing to say here but ... magic ... magic everywhere
         '''
 
         #Case 1: previous piece is None and new piece is None -> do nothing
@@ -235,6 +339,13 @@ class BlokusGame:
     @ghostPiece.setter
     # @log_method_call(logAttributes=False)
     def ghostPiece(self, piece: GhostPiece | None):
+        '''
+        Handles the creation and deletion of the ghost piece.
+        Also addes and removes the ghost piece from the games scene.
+
+        DEVELOPERS NOTE:
+            same note as in the selectedPiece setter ... 
+        '''	
 
         #Case 1: previous piece is None and new piece is None -> do nothing
         #Case 2: previous piece is None and new piece is not None -> create ghost
@@ -350,6 +461,10 @@ class BlokusGame:
     def __unregisterNetworkEvents(self):
         '''
         Removes the network event handlers
+
+        DEVELOPERS NOTE:
+            This is especially needed when the game is closed and the user is redirected to the lobby.
+            Dont want some scary ghostly network event handlers to lurk in the shadows and haunt the lobby. ;)
         '''
         self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.removeNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
@@ -359,10 +474,10 @@ class BlokusGame:
     # @log_method_call(logAttributes=False)
     def __init_ui_handlers(self):
         '''
-        Initializes the ui event handlers like:
+        Initializes the ui event handlers and custom signals like:
         - button clicks 
         - key presses
-        - ...
+        - piece placed
         '''
         #add button event handler
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
@@ -445,7 +560,6 @@ class BlokusGame:
     def __display_player_info(self, playerInfo: dict, widget: PlayerAreaWidget)->None:
         '''
         Displays the player info in the given widget
-        - player name
         '''
         if not playerInfo: return
         # TODO: check if the a players color has changed and update if needed
@@ -552,7 +666,10 @@ class BlokusGame:
 
 class GameFieldElement(QGraphicsRectItem):
     '''
-    Represents a single element in the game field ui
+    This class is used to represent/visualize/render a single tile in the game field.
+    
+    DEVELOPERS NOTE:
+        a field usually consists of more than one tile ... the more u know
     '''
     def __init__(self, game, x, y, w, h, color):
         super().__init__(x, y, w, h)
@@ -572,30 +689,44 @@ class GameFieldElement(QGraphicsRectItem):
 
 class GamePiece(QGraphicsItemGroup):
     '''
-    Represents a single game piece (blokus piece)
+    Represents a single game piece (blokus piece). 
+    It provides custom rendering and mouse event handling.
+
+    DEVELOPERS NOTE:
+        Serves as base class for the GhostPiece just so you know
     '''
 
     class Signals(QObject):
+        '''
+        Since QGraphicsItemGroup is no QObject, it is not possible to define signals in the GamePiece class.
+        This class is a workaround to define signals in the GamePiece class and thus remove the previous dependecy on BlokusGame class.
+        
+        TODO: 
+        Check if this can be refactored. Dependecies may be inconvenient but still less complex then emitting signals and connecting to them.
+        -> code is not as readable as it could and should be
+        '''
         pieceClickedEvent = pyqtSignal(PieceClickedEvent)
 
     # @log_method_call(logAttributes=False)
-    def __init__(self, player_id:int, piece_id:str, shape:np.ndarray, x, y, width, height, operations:str='', parent=None, color=QColor('lightgray')):
+    def __init__(self, player_id:int, piece_id:str, shape_array:np.ndarray, x, y, width, height, operations:str='', parent=None, color=QColor('lightgray')):
         '''
-        Initializes the game piece
+        Initializes the game piece ... who would have thought
         
         Parameters:
-            game (BlokusGame): the game ui instance
-            shape (np.array): the shape of the piece
-            x (int): the x position of the piece
-            y (int): the y position of the piece
-            width (int): the width of the piece
-            height (int): the height of the piece
+            player_id (int): the id of the player the piece belongs to (values 1-4)
+            shape_array (np.array): the shape of the piece (this will be used as base_shape)
+            x (int): the x position of the piece (pixels)
+            y (int): the y position of the piece (pixels)
+            width (int): the width of the piece (pixels)
+            height (int): the height of the piece (pixels)
             parent (QWidget): the parent widget
+            operations (str): sequence of chars {'r', 'x', 'y'} representing the operations that will be applied to the base_shape to get the actual shape_array
+
         '''
         super().__init__(parent)
         # self.__game:BlokusGame = game
-        self.__base_shape_array = shape
-        self.shape_array = shape
+        self.__base_shape_array = shape_array
+        self.shape_array = shape_array
         self.width = width
         self.height = height
         self.isPlaced = False
@@ -611,7 +742,7 @@ class GamePiece(QGraphicsItemGroup):
         #rotete and flip the shape before the piece is constructed
         for o in operations:
             if o == 'r':
-                self.rotate90()
+                self.__rotate90()
             elif o == 'x':
                 self.flipX()
             elif o == 'y':
@@ -619,9 +750,11 @@ class GamePiece(QGraphicsItemGroup):
 
         # Set the position of the group
         self.setPos(x, y)
-        
         return
     
+    '''
+    >>>> Properties
+    '''
     @property
     def signals(self) -> GamePiece.Signals:
         return self._signals
@@ -642,6 +775,9 @@ class GamePiece(QGraphicsItemGroup):
     def isSelected(self):
         return self.__isSelected
     
+    @property
+    def base_shape(self) -> np.array:
+        return self.__base_shape_array
     
     @color.setter
     # @log_method_call(logAttributes=False)
@@ -650,10 +786,6 @@ class GamePiece(QGraphicsItemGroup):
         if self.isVisible():
             self.update()
         return
-    
-    @property
-    def base_shape(self) -> np.array:
-        return self.__base_shape_array
     
     @isSelected.setter
     # @log_method_call(logAttributes=False)
@@ -665,7 +797,14 @@ class GamePiece(QGraphicsItemGroup):
         # self.update()
         return
 
+    '''
+    Properties <<<<
+    '''
+
     def to_dict(self):
+        '''
+        this method is recuires to serialize the object and to avoid a SerializationError when logging the object (see log_method_call decorator)
+        '''
         return {
             'player_id': self.player_id,
             'piece_id': self.piece_id,
@@ -678,9 +817,19 @@ class GamePiece(QGraphicsItemGroup):
             'operations': self.operations
         }
     
-    
+    #TODO: check if this is needed -> (mabye deprecated)
     # @log_method_call(logAttributes=True)
     def shape(self) -> QPainterPath:
+        '''
+        Returns the shape of the piece
+        Needed for for collision detection
+
+        Returns:
+            QPainterPath: the shape of the piece
+
+        DEVELOPERS NOTE:
+            actually i dont know if this method is needed or not ... but I wont deal with that for now
+        '''
         path = QPainterPath()
         for i in range(self.shape_array.shape[0]):  # iterate over rows
             for j in range(self.shape_array.shape[1]):  # iterate over columns
@@ -690,6 +839,15 @@ class GamePiece(QGraphicsItemGroup):
     
     # @log_method_call(logAttributes=True)
     def boundingRect(self)->QRectF:
+        '''
+        Calculates the smalest possible bounding rect for the piece
+
+        Returns:
+            QRectF: the bounding rect of the piece
+
+        DEVELOPERS NOTE:
+            other than the shape method, this method is actually needed ...  
+        '''
         min_x = min_y = float('inf')
         max_x = max_y = float('-inf')
 
@@ -704,6 +862,22 @@ class GamePiece(QGraphicsItemGroup):
     
     # @log_method_call(logAttributes=True)
     def paint(self, painter: QPainter | None, option: QStyleOptionGraphicsItem | None, widget: QWidget | None = ...) -> None:
+        '''
+        This method overrides the paint method of the QGraphicsItemGroup class. 
+        It provides custom redering logic for the piece. 
+
+        Parameters:
+            painter (QPainter): the painter object
+            option (QStyleOptionGraphicsItem): the style options
+            widget (QWidget): the widget
+        
+        Returns:
+            None
+        
+        DEVELOPERS NOTE:
+            No need to call this method yourself since PyQt will do the magic internally. <3
+            If you stil want to force a repaint, call the update() method of the piece
+        '''
         if self.scene() is None:
             return
         painter.setBrush(self.__color)
@@ -721,12 +895,22 @@ class GamePiece(QGraphicsItemGroup):
         return   
     
     # @log_method_call(logAttributes=False)
-    def rotate90(self, times=1) -> None:
+    def __rotate90(self, n_times=1) -> None:
         '''
-        Rotates the piece 90 degrees clockwise
+        Rotates the piece 90 degrees counter clockwise
+
+        Parameters:
+            n_times (int): the number of times the piece will be rotated 90 degrees counter clockwise (default = 1)
+
+        Returns:
+            None
+
+        DEVELOPERS NOTE:
+            Since the rotation was such a pain in the a** we decided to make it private.
+            For now its only called in the constructor of the GamePiece class.
         '''
-        self._operations += 'r'*times
-        self.shape_array = np.rot90(self.shape_array, times)
+        self._operations += 'r'*n_times
+        self.shape_array = np.rot90(self.shape_array, n_times)
         return
     # @log_method_call(logAttributes=False)
     def flipX(self) -> None:
@@ -748,6 +932,9 @@ class GamePiece(QGraphicsItemGroup):
     
     # @log_method_call(logAttributes=False)
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        '''
+        Handles the mouse press event for the game piece and emits the pieceClickedEvent signal:
+        '''
         clickedEvent = PieceClickedEvent(self, event)
         self.signals.pieceClickedEvent.emit(clickedEvent)
         return
@@ -772,7 +959,7 @@ class GamePiece(QGraphicsItemGroup):
     # @log_method_call(logAttributes=False)
     def createGhostPiece(self) -> GhostPiece:
         '''
-        Creates a ghost piece from the game piece
+        Creates a ghost piece from the game piece with identical properties
         '''
         ghost = GhostPiece(self.player_id,
                            self.piece_id,
@@ -808,6 +995,9 @@ class GameScene(QGraphicsScene):
         return
     
     def to_dict(self)->dict:
+        '''
+        this method is recuires to serialize the object and to avoid a SerializationError when logging the object (see log_method_call decorator)
+        '''
         return {
             'game': self._game.to_dict()
         }
@@ -816,7 +1006,7 @@ class GameScene(QGraphicsScene):
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         '''
         Handles the mouse move event for the game scene:
-        - if there is a ghost piece, move it to the mouse position
+            -   Move the ghostPiece to the mouse position and snap the grid
         '''
         if self._game.ghostPiece is not None:
             if self._game.ghostPiece not in self.items(): return
@@ -831,9 +1021,14 @@ class GameScene(QGraphicsScene):
         return
     
     # @log_method_call(logAttributes=True)
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event:QGraphicsSceneMouseEvent)->None:
         '''
         Handles the mouse press event for the game scene:
+        - left button click: 
+            place the selected piece at the ghost piece's position
+        
+        - right button click: 
+            rotate the ghost piece 90 degrees counter clockwise
         '''
 
         super().mousePressEvent(event)
@@ -854,22 +1049,22 @@ class GameScene(QGraphicsScene):
     # @log_method_call(logAttributes=False)
     def __on_left_click(self, event: QGraphicsSceneMouseEvent) -> None:
         '''
-        Handles the mouse press event for the game scene:
-        - if there is a ghost piece, place the selected piece at the ghost piece's position
+        - checks if the ghost piece is valid
+        - places the ghostPiece at mouse position
+        - emits the piecePlacedEvent
+
+        DEVELOPERS NOTE:
+            The ghost isn't really placed, its just used for visualization. 
+            The actual placement is done in the BlokusGame when GAME_UPDATE event is recieved from the server.
         '''
         if self._game.ghostPiece is None: return    #TODO: why does the placement depend on the ghost piece? -> check this and leave a comment
         if self._game.ghostPiece not in self.items(): return
         if self._game.ghostPiece.isVisible() == False: return
 
         piece = self._game.ghostPiece
-        #self._game.selectedPiece = None
-        self._game.selectedPiece.isSelected = False
-        self._game.ghostPiece.setVisible(False)
 
-        # self.game.placeSelectedPiece(piece, event.scenePos())
         pos = event.scenePos()
         pieceEvent = PlacePieceEvent(piece.piece_id, pos.x(), pos.y(), piece.operations)
-        # self.game.selectedPiece = None
         if piece:
             self.piecePlacedEvent.emit(pieceEvent)
         return
@@ -878,7 +1073,7 @@ class GameScene(QGraphicsScene):
     def __on_right_click(self, event: QGraphicsSceneMouseEvent) -> None:
         '''
         Handles the mouse press event for the game scene:
-        - if there is a ghost piece, rotate the ghost piece 90 degrees clockwise
+        - if there is a ghost piece, rotate the ghost piece 90 degrees counter clockwise
         '''
         if self._game.ghostPiece is None: return
         if self._game.ghostPiece not in self.items(): return
@@ -918,25 +1113,35 @@ class GameView(QGraphicsView):
 
     # @log_method_call(logAttributes=True)
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        # Call the original mouseMoveEvent to keep its functionality
+        '''
+        Handles the mouse move event for the game view:
+        -   shows and hides the ghost piece if the mouse is within predifined borders
+
+        DEVELOPERS NOTE:
+            The predefined borders are not working correctly when resizing the window or when the window is NOT maximized.
+        '''
+        # Calling the original mouseMoveEvent to keep its functionality (moving the ghostPiece around)
         super().mouseMoveEvent(event)
         if self.__game.ghostPiece is None: return
         if self.__game.ghostPiece not in self.scene().items(): return
 
         # Get the mouse position in scene coordinates
         mouse_pos = self.mapToScene(event.pos())
+        ghost = self.__game.ghostPiece
 
         # Check if the mouse is inside the GameFieldBorder
         if not self.field_border.contains(mouse_pos):
-            # If it's not, hide the ghost piece
-            ghost = self.__game.ghostPiece
-            if ghost:
-                ghost.setVisible(False)
+            # out of border, hide ghost piece
+            if ghost is None: return
+            if ghost not in self.scene().items(): return
+
+            ghost.setVisible(False)
         else:
-            # If it is, show the ghost piece
-            ghost = self.__game.ghostPiece
-            if ghost:
-                ghost.setVisible(True)
+            # in border, show ghost piece
+            if ghost is None: return
+            if ghost not in self.scene().items(): return
+            
+            ghost.setVisible(True)
         return
 
 class GhostPiece(GamePiece):
@@ -944,7 +1149,8 @@ class GhostPiece(GamePiece):
     Represents a ghost piece that is displayed when a piece is selected.
     
     The ghost piece is used to show the player where the piece will be placed.
-    The ghost piece is not selectable and not movable.
+    The ghost piece is not selectable and does not capture mouse events on its own.
+    it has to be updated from the outside
     '''
     def __init__(self, player_id:int, pieceId:str, shape, x, y, width, height, parent=None, color=QColor('lightgray'), operations:str=''):
         super().__init__(player_id, pieceId,shape, x, y, width, height, parent=parent, color=color, operations=operations)
@@ -968,6 +1174,16 @@ class GhostPiece(GamePiece):
         return
     
     def clone(self):
+        '''
+        Overides the clone method of the GamePiece class
+        
+        Returns:
+            GhostPiece: a (deep) copy of the ghost piece
+
+        DEVELOPERS NOTE:
+            not sure if actually needed ... more things to check later ... more like never lol; 
+            Deadline is coming ... 
+        '''
         newGhost = GhostPiece(self.player_id, 
                               self.piece_id, 
                               self.base_shape, 
@@ -982,6 +1198,12 @@ class GhostPiece(GamePiece):
         
 
 class PlayerAreaWidget(QWidget):
+    '''
+    Represents the player area and its ui elements
+    - player name (Label)
+    - piece repository (QGraphicsView)
+    - available pieces (GamePieces)
+    '''
     def __init__(self, player_id:int, game: BlokusGame, parent=None, color: QColor = QColor('lightgray')):
         super().__init__(parent=parent)
         self.__game:BlokusGame = game
@@ -1009,7 +1231,17 @@ class PlayerAreaWidget(QWidget):
     # @log_method_call(logAttributes=False)
     def update_available_pieces(self, availablePieces: list):
         '''
-        Updates the available pieces in the piece repository
+        Updates the available pieces in the piece repository by showing or hiding the pieces based on the provided list of available pieces
+
+        PARAMETERS:
+            availablePieces (list): the list of available pieces
+        
+        RETURNS:
+            None
+        
+        DEVELOPERS NOTE:
+            This method is called when the game info is updated. It iterates over the internal kept list of pieces
+            The initialization of the pieces has to be kept in sync with the server side implementation since the pieces ids and shapes corresponde
         '''
         piece: GamePiece
         keys = self.__piece_objects.keys()
@@ -1055,6 +1287,17 @@ class PlayerAreaWidget(QWidget):
     # @log_method_call(logAttributes=False)
     def __display_piece_repository(self)->None:
         '''
+        Displays the piece repository in the QGraphicsView by adding the pieces to the scene
+
+        RETURNS:
+            None
+
+        DEVELOPERS NOTE:
+            for each piece in the repository a pieceClickedEvent signal is registered in the BlokusGame class.
+            On handling the signal the selected piece is being managed.
+            Could perhaps be done in a more elegant way ... but deadline is coming ... 
+            ... and the rotation bug was one hell of a bug ... over 20h ... so ... yeah the code got a bit messy on the go 
+            ... long live the refactoring *hurray*
         '''
         for key, piece in self.__piece_objects.items():
             piece.color = self.__color
@@ -1074,11 +1317,7 @@ class PlayerAreaWidget(QWidget):
     def playerNameLabelText(self):
         return self.__nameLabel.text()
 
-    @playerNameLabelText.setter
-    # @log_method_call(logAttributes=False)
-    def playerNameLabelText(self, text:str):
-        self.__nameLabel.setText(text)
-
+    
     @property
     def color(self) -> QColor:
         return self.__color
@@ -1091,5 +1330,9 @@ class PlayerAreaWidget(QWidget):
             piece.color = color
         return
 
+    @playerNameLabelText.setter
+    # @log_method_call(logAttributes=False)
+    def playerNameLabelText(self, text:str):
+        self.__nameLabel.setText(text)
 
 
