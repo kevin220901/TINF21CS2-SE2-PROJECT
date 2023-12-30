@@ -238,8 +238,21 @@ class BlokusGame:
 
         self.__init_ui()
         self.__registerNetworkEvents()
-        self.__init_ui_handlers()
+        self.__register_ui_handlers()
+        self.__add_menu_actions()
         self.__display_game_info()
+        return
+    
+
+    def __add_menu_actions(self):
+        self.mainWindow.leave_game_action.setVisible(True)
+        self.mainWindow.leave_game_action.triggered.connect(self.__on_leave_game)
+        return
+    
+    def __remove_menu_actions(self):
+        self.mainWindow.leave_game_action.setVisible(False)
+        self.mainWindow.leave_game_action.triggered.disconnect(self.__on_leave_game)
+        
         return
     
     def registerPieceClickedEvent(self, piece:GamePiece):
@@ -471,7 +484,7 @@ class BlokusGame:
         return
 
     # @log_method_call(logAttributes=False)
-    def __init_ui_handlers(self):
+    def __register_ui_handlers(self):
         '''
         Initializes the ui event handlers and custom signals like:
         - button clicks 
@@ -484,6 +497,29 @@ class BlokusGame:
         self.chat_input.returnPressed.connect(self.chat_send_button.click)
 
         self.field_scene.piecePlacedEvent.connect(self.__on_place_piece)
+        return
+    
+    def __unregister_ui_handlers(self):
+        '''
+        Removes the ui event handlers
+        '''
+        self.chat_send_button.clicked.disconnect(self.__on_send_clicked)
+        self.chat_input.returnPressed.disconnect(self.chat_send_button.click)
+        self.field_scene.piecePlacedEvent.disconnect(self.__on_place_piece)
+        return
+    
+    def __on_leave_game(self, event=None):
+        self.mainWindow.showAlert("You left the game")
+        self.__unregisterNetworkEvents()
+        self.__unregister_ui_handlers()
+        self.__remove_menu_actions()
+        
+        #TODO: Unregister GamePieces
+        self.__network.api.leaveLobby()
+
+        self.blokus_widget.deleteLater()
+        from lobby.lobbymenu import LobbyMenu
+        self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         return
     
     # @log_method_call(logAttributes=False)
