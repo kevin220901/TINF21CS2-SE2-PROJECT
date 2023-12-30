@@ -13,7 +13,7 @@ Project Advanced Software Engineering
 ```
 docker-compose up -d
 ```
-3. Starte die Anwendung im Projektverzeichnis /Project/client/dist -> Blokus.exe
+3. Starte die Anwendung im Projektverzeichnis /Project/client/ -> Blokus.exe (Lädt ca. 10 - 20 Sekunden)
 
 ## Documentation
 - Attached is the link to the documentation
