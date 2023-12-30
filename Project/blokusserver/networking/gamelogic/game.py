@@ -1,6 +1,5 @@
 import fnmatch
 import random
-
 import numpy as np
 import copy
 from .blokuspiece import BlokusPiece
