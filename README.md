@@ -13,11 +13,7 @@ Project Advanced Software Engineering
 ```
 docker-compose up -d
 ```
-3. Öffne den Container (in Docker-Desktop) : *auth-service* und führe im Container (Exec) aus:
-```
-python manage.py migrate
-```
-4. Starte die Anwendung im Projektverzeichnis /Project/client/dist -> Blokus.exe
+3. Starte die Anwendung im Projektverzeichnis /Project/client/dist -> Blokus.exe
 
 ## Documentation
 - Attached is the link to the documentation
