@@ -4,6 +4,8 @@ import numpy as np
 import copy
 from .blokuspiece import BlokusPiece
 
+# für Push
+
 class BlokusException(Exception):
     def init(self, args: object) -> None:
         super().init(args)
