@@ -15,7 +15,6 @@ class BlokusPiece:
         self.__form = np.flip(self.__form, axis)
         return self.__form
 
-
     def xSpiegelung(self):
         self.__form = self.__form[::-1]
         return self.__form
