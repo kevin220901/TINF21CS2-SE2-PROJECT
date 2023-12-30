@@ -7,7 +7,8 @@ RUN apk add postgresql-dev gcc python3-dev musl-dev --no-cache
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --no-cache-dir
 COPY . /app 
-ENTRYPOINT ["python3"] 
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+COPY init.sh /app/init.sh
+RUN chmod +x /app/init.sh
+ENTRYPOINT ["sh", "/app/init.sh"]
 
 
