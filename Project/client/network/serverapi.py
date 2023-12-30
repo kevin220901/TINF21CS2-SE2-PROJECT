@@ -226,8 +226,14 @@ class ServerApi:
         self.send(eventId, eventData)
         return
 
-    def placePiece(self, pieceId, x, y, rotation, flip):
-        eventId = NetworkEvent.GAME_MOVE
-        eventData = {'token':self.__auth_token, 'pieceId':pieceId, 'x':x, 'y':y, 'rotation':rotation, 'flip':flip}
+    def placePiece(self, pieceId, x, y, operations:str):
+        eventId = NetworkEvent.GAME_PLACE_PIECE
+        eventData = {
+            'token':self.__auth_token, 
+            'pieceId':pieceId, 
+            'x':x, 
+            'y':y, 
+            'operations':operations
+        }
         self.send(eventId, eventData)
         return

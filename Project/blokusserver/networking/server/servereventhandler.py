@@ -24,7 +24,7 @@ class ServerEventHandler:
             return True
         return False
     
-    def _handleShouldBeInLobby(self):
+    def _handleNotInLobby(self):
         if not self._client.currentLobby:
             self._client.connection.emit_SysMessage('not in a lobby')
             return True

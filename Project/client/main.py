@@ -1,5 +1,6 @@
 # Imports
 from __future__ import annotations
+import os
 import sys
 import threading
 import typing
@@ -25,7 +26,7 @@ class BlokusUtility(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.network = PyQt6_Networkadapter(self, 'localhost', 6666)
+        self.network = PyQt6_Networkadapter(self, 'localhost', 6666)    # WARNING hardcoded values
         self.network.addNetworkEventHandler(NetworkEvent.SYSMESSAGE, self.__on_sys_message)
 
         self.initUI()
@@ -39,9 +40,8 @@ class BlokusUtility(QMainWindow):
         self.showAlert(event.eventData["message"], timer_seconds=4)
         return
     
-    def showAlert(self, message, timer_seconds=3):
+    def showAlert(self, message, timer_seconds=2):
         self.alertWidget.showAlert(message, timer_seconds)
-        self.alertWidget.raise_()
         return
 
     def closeEvent(self, a0: QCloseEvent | None) -> None:
@@ -103,17 +103,19 @@ class AlertWidget(QWidget):
         alertBox = AlertBoxWidget(message, parent=self)
         self.layout.addWidget(alertBox)
 
-        # grow the widget
+        # grow the widget to fit multiple alerts
         new_height = self.size().height() + 100
         self.resize(self.size().width(), new_height)
 
         if self.layout.count() == 1:
             self.show()
 
+        # setup the timer for closing the alert
         timer = QTimer(self)
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: self.__on_timeout(alertBox))
         timer.start(1000 * timer_seconds)  # Time in milliseconds
+        self.raise_()   # this enshures the alert widget is on top of all other widgets
         return
     
 
@@ -153,8 +155,15 @@ class AlertBoxWidget(QWidget):
             self.resize(parent.size())
         return
 
+
+def excepthook(type, value, traceback):
+        print(f"Unhandled exception: {value}")
+
+sys.excepthook = excepthook
+
 # Initilize Main Window (Blokus Utility)
 if __name__ == '__main__':
+
     app = QApplication(sys.argv)
     font = app.font()
     font.setPointSize(16)

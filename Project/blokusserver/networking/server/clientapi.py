@@ -153,12 +153,6 @@ class ClientApi:
         game = self.__currentLobby.startGame(self)
         return
     
-    def placePiece(self, pieceId, rotation, x, y):
-        if self.__handleNotInLobby(): return
-        self.__currentGame.place_piece(self, pieceId, x, y, rotation)
-        return
-
-    
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
             self.__conn.emit_SysMessage('allready in a lobby')

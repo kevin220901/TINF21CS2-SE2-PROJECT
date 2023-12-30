@@ -71,7 +71,7 @@ class Server:
             NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(api),                      
             NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(api),                     
             NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(api),                      
-            NetworkEvent.GAME_MOVE.value: ServerEventHandler_GamePlacePiece(api),                        
+            NetworkEvent.GAME_PLACE_PIECE.value: ServerEventHandler_GamePlacePiece(api),                        
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(api),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),

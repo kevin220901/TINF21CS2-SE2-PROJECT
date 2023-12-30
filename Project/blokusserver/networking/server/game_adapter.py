@@ -1,4 +1,5 @@
 
+from ast import Tuple
 import traceback
 from typing import Dict
 from server.clientapi import ClientApi
@@ -38,26 +39,24 @@ class GameAdapter:
         self.__currentPlayerTurn = list(self.__players.keys())[0]
         return
     
-    def place_piece(self, player:ClientApi, pieceId:str, x:int, y:int, rotation:int, flip:int):
+    def place_piece(self, player:ClientApi, pieceId:str, x:int, y:int, operations:bytes):
         #TODO: check if player is current turn player
         #TODO: Rotation and flipping currently is not being used
         #TODO: instead of using the gamePlayerId, a player object should be used
         try:
             
-            self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, rotation=rotation, flip=flip)
-            
+            self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, operations)
+            #TODO: determine player next turn
+            #TODO: handle placement error/invalid placement
+            p:ClientApi
+            for p in self.__players:
+                p.connection.emit_game_update(self.get_game_info())
         except BlokusException as e:
             player.connection.emit_game_invalidPlacement(str(e))
             player.connection.emit_game_update(self.get_game_info())
             logger.debug(e)
         except Exception as e:
             logger.critical(f'{str(e)} \n {traceback.format_exc()}')
-
-        #TODO: determine player next turn
-        #TODO: handle placement error/invalid placement
-        p:ClientApi
-        for p in self.__players:
-            p.connection.emit_game_update(self.get_game_info())
         return
 
 
@@ -77,7 +76,7 @@ class GameAdapter:
         playerInfo['pieces'] = self.__game.getAvailablePieces(player.gamePlayerId)
         playerInfo['gamePlayerId'] = player.gamePlayerId
         return playerInfo
-
+    
     def __createPieces(self):
         return {
             "1_0": BlokusPiece(np.array([[1]])),

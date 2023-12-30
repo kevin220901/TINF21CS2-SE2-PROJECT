@@ -5,3 +5,6 @@ Blokus.drawio:Zone.Identifier
 .idea
 .vscode
 temp.py
+logs/
+.log
+.log.json

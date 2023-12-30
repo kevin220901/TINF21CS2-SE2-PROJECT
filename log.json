@@ -1,0 +1,9 @@
+{
+    "class": "GamePiece",
+    "method": "boundingRect",
+    "thread": "MainThread",
+    "in_timestamp": "2023-12-30T00:46:09.569664",
+    "nesting_level": 0,
+    "nested": [],
+    "out_timestamp": "2023-12-30T00:46:09.569682"
+}

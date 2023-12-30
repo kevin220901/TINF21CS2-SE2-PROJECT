@@ -278,10 +278,19 @@ class Game:
         piece = self.__availeblePieces[spielerID][pieceKey]
         cloned_piece = copy.copy(piece)
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
-            if rotation != 0:
-                cloned_piece.rotate(rotation)
-            if flip != 0:
-                cloned_piece.flip(flip)
+
+            for o in operations:
+                if o == 'r':
+                    cloned_piece.rotate(1)
+                elif o == 'x':
+                    cloned_piece.flip(0)
+                elif o == 'y':
+                    cloned_piece.flip(1)
+                elif o == '':
+                    continue
+                else:
+                    raise BlokusException("Die Operation ist nicht bekannt")
+
             if self.__placePiece(cloned_piece, start_x, start_y, spielerID) == True:
                 self.__deleteAvaileblePiece(spielerID, pieceKey)
         else:

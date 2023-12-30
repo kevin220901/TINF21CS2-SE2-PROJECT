@@ -17,17 +17,12 @@ class ServerEventHandler_GamePlacePiece(ServerEventHandler):
 
     def handleEvent(self, eventData):
         if self._handleIvalidateAuthToken(eventData.get('token')): return
-        
-        if not self._client.currentLobby:
-            self._client.connection.emit_SysMessage('not in a lobby')
-            return
-        
-        if self._handleShouldBeInLobby(): return
-
+        if self._handleNotInLobby(): return
+        # TODO: should be in game
+        logger.info(f"place piece {eventData}")
         self._client.currentGame.place_piece(self._client, 
                                              eventData.get('pieceId'), 
                                              eventData.get('x'), 
                                              eventData.get('y'), 
-                                             eventData.get('rotation'),
-                                             eventData.get('flip'))
+                                             eventData.get('operations'))
         return
