@@ -25,6 +25,7 @@ class Game:
         self.__corners = {"ol": False, "or": False, "ul": False, "ur": False} # corners zum  checken
         self.__temp_poss_place_dict = {}
         self.__ai_possible_places = {}
+        self.__tryed_pieces = []
         self.__ai_possible_places_counter = 0
         self.currentPlayer = 1
 
@@ -144,46 +145,56 @@ class Game:
                 lenght = len(piece_form[0]) - 1
                 height = len(piece_form) - 1
 
+                bew = ""
+
                 if poss_place[2] == "ol": # die Ecke ist oben links über dem Teil, das Teil muss unten rechts dran passen
                     for flip in range(2):
                         for rot in range(4):
                             try:
-                                self.placePieceByKey(piece_key, poss_place[1] - lenght, poss_place[0] - height, spielerID, rot, flip)
+                                self.placePieceByKey(piece_key, poss_place[1] - lenght, poss_place[0] - height, spielerID, bew)
                                 self.__ai_possible_places[spielerID].remove(poss_place)
                                 self.__ai_get_possible_places(spielerID)
                                 return
                             except BlokusException:
                                 continue
+                            bew += "r"
+                        bew += "y"
                 elif poss_place[2] == "or": # die Ecke ist oben rechts über dem Teil, das Teil muss unten links dran passen
                     for flip in range(2):
                         for rot in range(4):
                             try:
-                                self.placePieceByKey(piece_key, poss_place[1], poss_place[0] - height, spielerID, rot, flip)
+                                self.placePieceByKey(piece_key, poss_place[1], poss_place[0] - height, spielerID, bew)
                                 self.__ai_possible_places[spielerID].remove(poss_place)
                                 self.__ai_get_possible_places(spielerID)
                                 return
                             except BlokusException:
                                 continue
+                            bew += "r"
+                        bew += "y"
                 elif poss_place[2] == "ul": # die Ecke ist unten links unter dem Teil, das Teil muss oben rechts dran passen
                     for flip in range(2):
                         for rot in range(4):
                             try:
-                                self.placePieceByKey(piece_key, poss_place[1] - lenght, poss_place[0], spielerID, rot, flip)
+                                self.placePieceByKey(piece_key, poss_place[1] - lenght, poss_place[0], spielerID, bew)
                                 self.__ai_possible_places[spielerID].remove(poss_place)
                                 self.__ai_get_possible_places(spielerID)
                                 return
                             except BlokusException:
                                 continue
+                            bew += "r"
+                        bew += "y"
                 elif poss_place[2] == "ur": # die Ecke ist unten rechts unter dem Teil, das Teil muss oben links dran passen
                     for flip in range(2):
                         for rot in range(4):
                             try:
-                                self.placePieceByKey(piece_key, poss_place[1], poss_place[0], spielerID, rot, flip)
+                                self.placePieceByKey(piece_key, poss_place[1], poss_place[0], spielerID, bew)
                                 self.__ai_possible_places[spielerID].remove(poss_place)
                                 self.__ai_get_possible_places(spielerID)
                                 return
                             except BlokusException:
                                 continue
+                            bew += "r"
+                        bew += "y"
                 else:
                     used_piece_keys.append(piece_key)
 
@@ -264,17 +275,19 @@ class Game:
             start_y = self.__fieldsize - height
 
         # Platzierung des ersten Pieces
-        for rot in range(4):
+        rot = "" # Variable um die Rotation durchführen zu können
+        for r in range(4):
             try:
                 self.placePieceByKey(piece_key, start_x, start_y, spielerID, rot)
                 if self.__corners[corner] == True:
                     break
             except BlokusException:
                 continue
+            rot += "r"
 
 
 
-    def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int, rotation:int=0, flip:int=0):
+    def placePieceByKey(self, pieceKey:str, start_x, start_y, spielerID:int, operations:str = ''):
         piece = self.__availeblePieces[spielerID][pieceKey]
         cloned_piece = copy.copy(piece)
         if self.__isPieceAvaileble(spielerID, pieceKey) == True:
