@@ -454,7 +454,6 @@ class BlokusGame:
         self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
-        # TODO: add network event handler for invalid action
         return
     
     # @log_method_call(logAttributes=False)
@@ -634,7 +633,7 @@ class BlokusGame:
     # @log_method_call(logAttributes=False)
     def __on_place_piece(self, event:PlacePieceEvent)->None:
         '''
-        Places the piece at the given position
+        Notifies the Servere to place the piece
 
         Parameters:
             event (PlacePieceEvent): the event containing the piece id, the position and the operations (rotation and flip)
@@ -658,9 +657,6 @@ class BlokusGame:
                                           field_x, 
                                           field_y, 
                                           event.operations)         # since the ghost piece is used to visualize the placement, its rotation and flip value are used to place the piece 
-            
-            # self.selectedPiece.setVisible(False)
-           
         return
 
 
