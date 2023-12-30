@@ -7,6 +7,14 @@ Project Advanced Software Engineering
 - Cynthia Winkler als Entwicklerin
 - Kai Pistol als Entwickler
 
+## Setup Projekt (unter Windows)
+1. INSTALLIERE und STARTE Docker-Desktop
+2. Öffne CMD (Command Prompt Box) im Projektverzeichnis /Project/blokusserver/ und führe aus:
+```
+docker-compose up -d
+```
+3. Starte die Anwendung im Projektverzeichnis /Project/client/dist -> Blokus.exe
+
 ## Documentation
 - Attached is the link to the documentation
   https://www.overleaf.com/3233951352xjzcndvycpys
