@@ -90,7 +90,31 @@ class ClientApi:
             logger.critical('failed to update profile')
             self.__conn.emit_SysMessage('failed to update profile')
             return False
-        self.__conn.emit_SysMessage('profile updated')
+        self.__conn.emit_profile_updated('profile updated')
+
+        return True
+    
+    def updateProfilePassword(self, token, new_password):
+        data = {'new_password':new_password}
+        response = requests.put(url=NetworkConst.URL_RESTAPI_PROFILE_UPDATE_PASSWORD, 
+                                headers={'Authorization': f'Token {token}'}, 
+                                data=data)
+        
+        if response.status_code == 401:
+            logger.critical(f'access denied for user:{self.playerId}')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+        elif response.status_code != 200:
+            logger.critical(f'failed to update password for user:{self.playerId}')
+            self.__conn.emit_SysMessage('failed to update password')
+            return False
+        response_data = json.loads(response.content)
+
+        self.__auth_token = response_data['token']
+        self.__playerId = response_data['id']
+        self.__playerName = response_data['username']
+        
+        self.__conn.emit_profile_updated_password(self.__auth_token, self.__playerId, self.__playerName)
 
         return True
         
@@ -102,7 +126,7 @@ class ClientApi:
             logger.critical('access denied')
             self.__conn.emit_SysMessage('access denied')
             return False
-        elif response.status_code != 204:
+        elif response.status_code != 200:
             logger.critical('failed to delete profile')
             self.__conn.emit_SysMessage('failed to delete profile')
             return False

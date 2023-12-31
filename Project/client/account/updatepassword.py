@@ -63,17 +63,17 @@ class UpdatePassword:
         pass
 
     def __registerNetworkEvents(self): 
-        self.__network.addNetworkEventHandler(NetworkEvent.UPDATE_PASSWORD, self.__on_updatePasswordSuccess)
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE_PASSWORD, self.__on_updatePasswordSuccess)
         pass
 
     def __unregisterNetworkEvents(self):
-        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_DELETE, self.__on_updatePasswordSuccess)
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_UPDATE_PASSWORD, self.__on_updatePasswordSuccess)
         pass
 
 
     def __on_updatePasswordSuccess(self, event:NetworkEventObject):
         self.mainWindow.showAlert("Password updated")
         self.__unregisterNetworkEvents()
-        from menu import Menu
-        self.menu = Menu(self.mainWindow, self.__network)
+        from lobby.lobbymenu import LobbyMenu
+        self.menu = LobbyMenu(self.mainWindow, self.__network)
         pass

@@ -150,7 +150,7 @@ class ServerApi:
 
                         eventData = json.loads(recieved)
                         
-                        if eventId == NetworkEvent.LOGIN_SUCCESS.value:
+                        if eventId == NetworkEvent.LOGIN_SUCCESS.value or eventId == NetworkEvent.PROFILE_UPDATE_PASSWORD.value:
                             self.__auth_token = eventData['token']
                             self.__account_info = AccountInfo(eventData['id'], eventData['username'])
                         elif eventId == NetworkEvent.PROFILE_DELETE.value:
@@ -255,6 +255,12 @@ class ServerApi:
         self.send(eventId, eventData)
         return
     
+    def updatePassword(self, newPassword):
+        eventId = NetworkEvent.PROFILE_UPDATE_PASSWORD
+        eventData = {'token':self.__auth_token, 'new_password':newPassword}
+        self.send(eventId, eventData)
+        pass
+
 
     @property
     def accout_info(self)->AccountInfo:

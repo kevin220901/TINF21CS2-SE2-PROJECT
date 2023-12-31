@@ -191,7 +191,7 @@ class AlertBoxWidget(QWidget):
 
 
 def excepthook(type, value, traceback):
-        print(f"Unhandled exception: {value}")
+        print(f'Unhandled Exception:\n{str(value)} \n {traceback.format_exc()}') # crash intendet gives more info ... 
 
 sys.excepthook = excepthook
 

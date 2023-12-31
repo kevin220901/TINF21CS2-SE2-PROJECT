@@ -1,6 +1,7 @@
 from rest_framework.authtoken.models import Token
 import logging
 from sys import stdout
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from rest_framework import generics
@@ -91,4 +92,28 @@ class UserProfileView(APIView):
     def delete(self, request):
         user = request.user
         user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
+
+class ChangePasswordView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        new_password = request.data.get('new_password')
+
+        if not new_password:
+            return Response({"new_password": ["This field is required."]}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+        user.set_password(new_password)
+        user.save()
+
+        # invalidate Token an create new one
+        Token.objects.filter(user=user).delete()
+        new_token = Token.objects.create(user=user)
+
+        response_data = {'token': new_token.key, 'id': user.id, 'username': user.username}
+
+        return Response(response_data, status=status.HTTP_200_OK)

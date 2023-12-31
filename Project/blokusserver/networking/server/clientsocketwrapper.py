@@ -97,6 +97,16 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = {}
         self.sendall(eventId, eventData)
         return
+    
+    def emit_profile_updated_password(self, token, id, username)->None:
+        eventId = NetworkEvent.PROFILE_UPDATE_PASSWORD
+        eventData = {
+            'token':token,
+            'id':id,
+            'username':username
+        }
+        self.sendall(eventId, eventData)
+        return
 
     def emit_lobby_update(self, lobbyInfo)->None:
         eventId = NetworkEvent.LOBBY_UPDATE

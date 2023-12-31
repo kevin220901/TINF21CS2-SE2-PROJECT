@@ -36,3 +36,4 @@ class UserWithouPwdSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return super(UserWithouPwdSerializer, self).update(instance, validated_data)
+    

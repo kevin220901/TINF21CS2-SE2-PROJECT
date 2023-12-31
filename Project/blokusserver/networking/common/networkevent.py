@@ -29,6 +29,7 @@ class NetworkEvent(Enum):
     PROFILE_UPDATE = 20
     PROFILE_DELETE = 21
     LOBBY_UPDATE = 22
+    PROFILE_UPDATE_PASSWORD = 23
     
     
 

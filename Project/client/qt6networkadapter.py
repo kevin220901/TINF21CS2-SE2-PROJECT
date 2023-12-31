@@ -58,6 +58,7 @@ class QNetworkEventSignals(QObject):
     profile_read = pyqtSignal(NetworkEventObject)
     profile_delete = pyqtSignal(NetworkEventObject)
     profile_update = pyqtSignal(NetworkEventObject)
+    profile_update_password = pyqtSignal(NetworkEventObject)
     pass
     
     
@@ -83,12 +84,16 @@ class QNetworkThread(QThread):
             NetworkEvent.REGISTRATION_SUCCESS.value: self.eventSignals.registration_success,
             NetworkEvent.PROFILE_READ.value: self.eventSignals.profile_read,
             NetworkEvent.PROFILE_DELETE.value: self.eventSignals.profile_delete,
-            NetworkEvent.PROFILE_UPDATE.value: self.eventSignals.profile_update
+            NetworkEvent.PROFILE_UPDATE.value: self.eventSignals.profile_update,
+            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: self.eventSignals.profile_update_password
         }
     
     def run(self):
         while not self.__stopEvent.is_set():
             event:NetworkEventObject = self.__api.recv()
+            # if event not in self.event_map: continue
+            # for now its helpful that the application crashes when a event is not handled
+            # TODO: add logging later ... lol deadline 
             self.event_map[event.eventId].emit(event)
             
         return
