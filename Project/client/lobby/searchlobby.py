@@ -71,7 +71,7 @@ class SearchLobby:
         
         self.searchable_table_layout.addWidget(self.table)
 
-        self.return_button = QPushButton("Return")
+        self.return_button = QPushButton("Back")
         self.return_button.setStyleSheet(
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
