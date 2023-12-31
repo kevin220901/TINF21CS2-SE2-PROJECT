@@ -165,6 +165,13 @@ class AlertWidget(QWidget):
         new_height = self.size().height() - 100
         self.resize(self.size().width(), new_height)
 
+        if self.layout.count() == 0:
+            self.hide()
+        return
+    
+
+    
+
 class AlertBoxWidget(QWidget):
     clicked = pyqtSignal()
 
