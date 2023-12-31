@@ -23,3 +23,9 @@ class ServerEventHandler:
             self._client.connection.emit_SysMessage('access denied')
             return True
         return False
+    
+    def _handleNotInLobby(self):
+        if not self._client.currentLobby:
+            self._client.connection.emit_SysMessage('not in a lobby')
+            return True
+        return False

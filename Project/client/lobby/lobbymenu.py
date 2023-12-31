@@ -15,9 +15,11 @@ class LobbyMenu:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+
+        self.__init_ui()
         pass
 
-    def lobbyMenuFrame(self):
+    def __init_ui(self):
         self.mainWindow.label = QLabel('Blokus', self.mainWindow)
         self.mainWindow.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mainWindow.central_widget = QWidget(self.mainWindow)
@@ -51,21 +53,23 @@ class LobbyMenu:
         self.mainWindow.button_exit.setMaximumSize(600, 400)
         self.mainWindow.button_exit.clicked.connect(self.exit)
         layout.addWidget(self.mainWindow.button_exit)
+        return
 
     def create_lobby(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
         self.create_lobby = LobbyConfig(self.mainWindow, self.__network)
-        self.create_lobby.lobbyConfigFrame()
+        return
 
     def search_lobby(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
         self.search_lobby = SearchLobby(self.mainWindow, self.__network)
-        self.search_lobby.searchLobbyFrame()
+        return
     
     def my_profile(self):
         self.mainWindow.lobbymenuFrame.deleteLater()
         self.my_profile = UserProfile(self.mainWindow, self.__network)
-        self.my_profile.userProfileFrame()
+        return
 
     def exit(self):
         self.mainWindow.close()
+        return

@@ -1,3 +1,4 @@
+import traceback
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
@@ -16,12 +17,15 @@ class Lobby:
         self.mainWindow = mainWindow
         self.__network = network
         self.__lobbyInfo = lobbyInfo
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        self.__registerUIEvents()
+
+        if self.__lobbyInfo is None:
+            self.__network.api.refresh_lobby()
         return
     
-    def lobbyFrame(self):
-
-        #setup lobby ui
-        self.__init_ui()
+    def __registerUIEvents(self):
 
         #add button event handler
         self.button_ready.clicked.connect(self.__on_ready_clicked)
@@ -30,13 +34,6 @@ class Lobby:
         self.chat_send_button.clicked.connect(self.__on_send_clicked)
         ##send message on enter
         self.chat_input.returnPressed.connect(self.chat_send_button.click)
-
-
-        #add network event handler
-        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
-        self.__network.addNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
-        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
-        
         return
 
     def __init_ui(self):
@@ -61,14 +58,27 @@ class Lobby:
         if lobbyInfo is None: return
         self.player_list.clear()
         lobbyHost = lobbyInfo['host']
-        self.player_list.addItem(lobbyHost['playerName'])
+
+
+        if lobbyHost.get('playerId') == self.__network.api.accout_info.id:
+            self.button_start_game.setEnabled(True)
+            self.player_list.addItem(lobbyHost['playerName'] + ' (YOU)' )
+        else:
+            self.button_start_game.setEnabled(False)
+            self.player_list.addItem(lobbyHost['playerName'])
+
         if lobbyHost['isReady']:
-            self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
+            self.player_list.item(self.player_list.count()-1).setBackground(QColor(lobbyHost['color']))
+            
         
         for player in lobbyInfo.get('players'):
-            self.player_list.addItem(player['playerName'])
+            if player.get('playerId') == self.__network.api.accout_info.id:
+                self.player_list.addItem(player['playerName'] + ' (YOU)' )
+            else:
+                self.player_list.addItem(player['playerName'])
+
             if player['isReady']:
-                self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
+                self.player_list.item(self.player_list.count()-1).setBackground(QColor(player['color']))
 
         self.__lobby_layout.addWidget(self.player_list, 0, 0)
         
@@ -143,7 +153,6 @@ class Lobby:
 
     #NetworkEventHandler >>> 
     def __on_lobby_update(self, event:NetworkEventObject):
-        print(event.eventData)
         self.__lobbyInfo = event.eventData
         self.__update_lobby(self.__lobbyInfo)
         #add payer to list
@@ -155,9 +164,27 @@ class Lobby:
         self.chat_output.append(f'[{event.eventData["from"]}]: {event.eventData["message"]}')
         return
 
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
+        self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        return
+
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOBBY_UPDATE, self.__on_lobby_update)
+        self.__network.removeNetworkEventHandler(NetworkEvent.GAME_START, self.__on_game_started)
+        self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
+        return
 
     def __on_game_started(self, event:NetworkEventObject):
-        #switch to game ui
+        try:
+            self.mainWindow.showAlert(f"Game started")
+            self.__unregisterNetworkEvents()
+            from game.blokusgame import BlokusGame
+            self.lobbymenu = BlokusGame(self.mainWindow, self.__network, event.eventData)
+            self.__lobby.deleteLater()
+        except Exception as e:
+            print(f'{str(e)} \n {traceback.format_exc()}') #TODO: add logging
         return
     #<<< NetworkEventHandler
 
@@ -175,15 +202,26 @@ class Lobby:
         return
 
     def __on_start_game_clicked(self):
-        #notify server
+        for player in self.__lobbyInfo.get('players'):
+            if player.get('playerId') == self.__network.api.accout_info.id:
+                if not player['isReady']:
+                    self.mainWindow.showAlert("You are not ready")
+                    return
+            else:
+                if not player['isReady']:
+                    self.mainWindow.showAlert("Not all players are ready")
+                    return
+        self.__network.api.startGame()
         pass
 
     def __on_leave_clicked(self):
         #norify server
+        self.mainWindow.showAlert("You left the lobby")
+        self.__unregisterNetworkEvents()
         self.__network.api.leaveLobby()
+        self.__lobby.deleteLater()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
         return
     #<<< ButtonHandler
 

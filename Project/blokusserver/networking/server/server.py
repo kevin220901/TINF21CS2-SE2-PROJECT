@@ -20,10 +20,14 @@ from server.servereventhandler_register import ServerEventHandler_Register
 from server.servereventhandler_profileread import ServerEventHandler_ProfileRead
 from server.servereventhandler_profileupdate import ServerEventHandler_ProfileUpdate
 from server.servereventhandler_profiledelete import ServerEventHandler_ProfileDelete
+from server.servereventhandler_gameplacepiece import ServerEventHandler_GamePlacePiece
+from server.servereventhandler_profileupdatepassword import ServerEventHandler_ProfileUpdatePassword
+from server.servereventhandler_lobbyrefresh import ServerEventHandler_LobbyRefresh
 from server.clientapi import ClientApi
 from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
 from common import constants as NetworkConst
+import traceback    
 
 ##################################################
 ## Author: Luis Eckert
@@ -39,6 +43,7 @@ class Server:
                                               args=(self.__host, self.__port, self.__globalStopEvent),
                                               daemon=True)
         self.__client_threads = []
+        self.__loggedInPlayers = set()
 
     def start(self):
         self.__server_handler_thread.start()
@@ -52,12 +57,12 @@ class Server:
     def __threaded_client(self, sock:socket.socket, globalStopEvent:threading.Event, localStopEvent:threading.Event):
         #TODO:instead of returning the playerId a notification is returned indicating the process was successfull
         #sock.sendall(playerId)
-
        
         api = ClientApi(
             conn=sock,
             stopEvent=localStopEvent,
             lobbies=self.__lobbies,
+            loggedInPlayers=self.__loggedInPlayers
         )
 
         api.connection.emit_SysMessage('connected')
@@ -69,7 +74,7 @@ class Server:
             NetworkEvent.LOBBY_LEAVE.value: ServerEventHandler_LobbyLeave(api),                      
             NetworkEvent.LOBBY_READY.value: ServerEventHandler_LobbyReady(api),                     
             NetworkEvent.LOBBIES_GET.value: ServerEventHandler_LobbyBrowse(api),                      
-            NetworkEvent.GAME_MOVE.value: ServerEventHandler(api),                        
+            NetworkEvent.GAME_PLACE_PIECE.value: ServerEventHandler_GamePlacePiece(api),                        
             NetworkEvent.GAME_START.value: ServerEventHandler_GameStart(api),
             NetworkEvent.GAME_FINISH.value: ServerEventHandler(api),                      
             NetworkEvent.MESSAGE.value: ServerEventHandler_ChatMessage(api),
@@ -77,7 +82,9 @@ class Server:
             NetworkEvent.REGISTRATION.value: ServerEventHandler_Register(api),
             NetworkEvent.PROFILE_READ.value: ServerEventHandler_ProfileRead(api),
             NetworkEvent.PROFILE_DELETE.value: ServerEventHandler_ProfileDelete(api),
-            NetworkEvent.PROFILE_UPDATE.value: ServerEventHandler_ProfileUpdate(api)          
+            NetworkEvent.PROFILE_UPDATE.value: ServerEventHandler_ProfileUpdate(api),
+            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: ServerEventHandler_ProfileUpdatePassword(api),
+            NetworkEvent.LOBBY_REFRESH.value: ServerEventHandler_LobbyRefresh(api)          
         }
         
 
@@ -98,6 +105,10 @@ class Server:
                         eventDataLength = int.from_bytes(recieved[:2], 'big')
 
                         state = 1
+
+                        #check if the client provided a valid eventId
+                        if eventId not in events:
+                            raise Exception(f'invalid eventId')  
                     else:
                         recieved = sock.recv(eventDataLength)
                         if not recieved:
@@ -117,16 +128,21 @@ class Server:
                         state = 0
                 except socket.error as e:
                     localStopEvent.set()
-                    logger.critical(str(e))
+
+                    logger.critical(f'{str(e)} \n {traceback.format_exc()}')
                     #TODO:flush the recieve buffer to ensure the server does not hickup
                     break
 
         except Exception as e:
-            logger.critical(str(e))
+            logger.critical(f'{str(e)} \n {traceback.format_exc()}')
         finally:          
             #api.leaveLobby() #TODO: fix bug!!
             if api.currentLobby:
                 api.currentLobby.leave(api)
+
+            if api.playerId in self.__loggedInPlayers:
+                self.__loggedInPlayers.remove(api.playerId)
+                
             sock.close()
             logger.info(f'{api.playerName} disconnected')
             #print(f"{api.playerName} disconnected")

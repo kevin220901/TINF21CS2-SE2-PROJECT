@@ -17,10 +17,12 @@ class Register:
         self.__network = network
         self.mainWindow = mainWindow
 
-        self.__network.addNetworkEventHandler(NetworkEvent.REGISTRATION_SUCCESS, self.__on_registration_successfull)
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        return
 
     # Initilize Register Frame and Widget
-    def registerFrame(self):
+    def __init_ui(self):
         register_widget = QWidget()
         register_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         register_widget.setFixedSize(700, 300)
@@ -96,6 +98,8 @@ class Register:
         #Add Button Functions
         self.mainWindow.register_button.clicked.connect(self.register)
         self.mainWindow.back_button.clicked.connect(self.back)
+        return
+    
 
     # Register User for Blokus Game
     #TODO Implementierung Register Function
@@ -110,15 +114,22 @@ class Register:
         self.__network.api.register(username, password, email)
         pass
 
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.REGISTRATION_SUCCESS, self.__on_registration_successfull)
+        return
+    
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.REGISTRATION_SUCCESS, self.__on_registration_successfull)
+        return
+
     def __on_registration_successfull(self, event):
+        self.mainWindow.showAlert('Registration successful')
         from menu import Menu
         self.menu = Menu(self.mainWindow, self.__network)
-        self.menu.menuFrame()
         pass
     
     #Add Back Button Function
     def back(self):
         from menu import Menu
         self.menu = Menu(self.mainWindow, self.__network)
-        self.menu.menuFrame()
         pass

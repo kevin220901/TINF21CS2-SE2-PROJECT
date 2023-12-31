@@ -19,9 +19,11 @@ class Menu:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+        self.__init_ui()
+        return
 
     # Menu Frame and Widget inside Main Window
-    def menuFrame(self):
+    def __init_ui(self):
         
         # Create Basic Frame and Widget
         self.mainWindow.label = QLabel('Welcome to Blokus', self.mainWindow)
@@ -61,13 +63,11 @@ class Menu:
     def register(self):
         self.mainWindow.menuFrame.deleteLater()
         self.register = Register(self.mainWindow, self.__network)
-        self.register.registerFrame()
 
     # Menu Function Login (Destroy Widget Menu and Create Widget Login inside Main Window)
     def login(self):
         self.mainWindow.menuFrame.deleteLater()
         self.login = Login(self.mainWindow, self.__network)
-        self.login.loginFrame()
         
     # Menu Function Exit (Destroy Main Window)
     def exit(self):

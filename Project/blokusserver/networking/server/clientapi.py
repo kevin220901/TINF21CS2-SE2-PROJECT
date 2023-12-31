@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import threading
+from typing import Set
 import requests
 import common.constants as NetworkConst
 from server.logger import *
@@ -12,7 +13,7 @@ from server.logger import *
 
 
 class ClientApi:
-    def __init__(self, conn:socket, stopEvent:threading.Event, lobbies) -> None:
+    def __init__(self, conn:socket, stopEvent:threading.Event, lobbies, loggedInPlayers:Set) -> None:
         self.__conn = ClientSocketWrapper(conn)
         self.__currentLobby:Lobby = None
         self.__playerId:str = None
@@ -20,7 +21,12 @@ class ClientApi:
         self.lobbies:dict = lobbies
         self.__auth_token = None
         self.__stopEvent = stopEvent
-
+        self.__gamePlayerId = None
+        self.__colorName:str = None # name of the color
+        self.__isReady = False
+        self.__currentGame:GameAdapter = None
+        self.__loggedInPlayers = loggedInPlayers
+        return
 
     
 
@@ -34,11 +40,21 @@ class ClientApi:
         
         response_data = json.loads(response.content)
 
+        player_id:str =  response_data['id']
+
+        if player_id in self.__loggedInPlayers:
+
+            self.__conn.emit_Login_fail('sombody is allready logged in with this account')
+            return False
+        
+        self.__loggedInPlayers.add(player_id)
+
         self.__auth_token = response_data['token']
-        self.__playerId = response_data['id']
+        self.__playerId = player_id
         self.__playerName = response_data['username']
 
-        self.__conn.emit_Login_success(self.__auth_token)
+
+        self.__conn.emit_Login_success(self.__auth_token, self.__playerId, self.__playerName)
 
         return True
 
@@ -86,7 +102,31 @@ class ClientApi:
             logger.critical('failed to update profile')
             self.__conn.emit_SysMessage('failed to update profile')
             return False
-        self.__conn.emit_SysMessage('profile updated')
+        self.__conn.emit_profile_updated('profile updated')
+
+        return True
+    
+    def updateProfilePassword(self, token, new_password):
+        data = {'new_password':new_password}
+        response = requests.put(url=NetworkConst.URL_RESTAPI_PROFILE_UPDATE_PASSWORD, 
+                                headers={'Authorization': f'Token {token}'}, 
+                                data=data)
+        
+        if response.status_code == 401:
+            logger.critical(f'access denied for user:{self.playerId}')
+            self.__conn.emit_SysMessage('access denied')
+            return False
+        elif response.status_code != 200:
+            logger.critical(f'failed to update password for user:{self.playerId}')
+            self.__conn.emit_SysMessage('failed to update password')
+            return False
+        response_data = json.loads(response.content)
+
+        self.__auth_token = response_data['token']
+        self.__playerId = response_data['id']
+        self.__playerName = response_data['username']
+        
+        self.__conn.emit_profile_updated_password(self.__auth_token, self.__playerId, self.__playerName)
 
         return True
         
@@ -98,7 +138,7 @@ class ClientApi:
             logger.critical('access denied')
             self.__conn.emit_SysMessage('access denied')
             return False
-        elif response.status_code != 204:
+        elif response.status_code != 200:
             logger.critical('failed to delete profile')
             self.__conn.emit_SysMessage('failed to delete profile')
             return False
@@ -135,13 +175,22 @@ class ClientApi:
     def leaveLobby(self):
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
+        # cleanup after leaving the lobby
         self.__currentLobby = None
+        self.__colorName = None
+        self.__isReady = False
         pass
 
-    def toggleReady(self):
+    def toggleReady(self, emitUpdate=True):
         if self.__handleNotInLobby(): return
-        self.__currentLobby.toggleReady(self)
-        pass
+        self.__isReady = not self.__isReady
+        self.__currentLobby.toggleReady(self,emitUpdate)
+        return
+    
+    def startGame(self):
+        if self.__handleNotInLobby(): return
+        game = self.__currentLobby.startGame(self)
+        return
     
     def __handleAllreadyInLobby(self) -> bool:
         if self.__currentLobby:
@@ -178,43 +227,79 @@ class ClientApi:
             return True
         return False
     
-    
-    
+    def get_player_Info(self) -> dict:
+        return {
+            'playerId': self.playerId,  # TODO: should be named id or user_id
+            'playerName': self.playerName,
+            'isReady': self.isReady,
+            'color': self.colorName
+        }
 
     @property
-    def playerName(self):
+    def playerName(self)->str:
         return self.__playerName
     
     @property
-    def playerId(self):
+    def playerId(self)->str:
         return self.__playerId
     
     @property
-    def currentLobbyId(self):
+    def currentLobbyId(self)->str:
         if not self.__currentLobby: return ''   #TODO:This does not seem appropriate
         return self.__currentLobby.lobbyId
 
     @property
-    def currentLobby(self):
+    def currentLobby(self)->Lobby:
         return self.__currentLobby
     
     @property
-    def hasAuthToken(self):
+    def currentGame(self)->GameAdapter:
+        return self.__currentGame
+    
+    @currentGame.setter
+    def currentGame(self, game:GameAdapter)->None:
+        self.__currentGame = game
+        return
+
+    @property
+    def hasAuthToken(self)->bool:
         if not self.__auth_token:
             return False
         return True
     
     @property
-    def authToken(self):
+    def authToken(self) -> str:
         return self.__auth_token
     
     @property
-    def connection(self):
+    def connection(self)->ClientSocketWrapper:
         return self.__conn
+
+    @property
+    def gamePlayerId(self)->int:
+        return self.__gamePlayerId
+    
+    @gamePlayerId.setter
+    def gamePlayerId(self, id) -> None:
+        self.__gamePlayerId = id
+        return
+    
+    @property
+    def isReady(self)->bool:
+        return self.__isReady
+    
+    @property
+    def colorName(self)->str:
+        return self.__colorName
+    
+    @colorName.setter
+    def colorName(self, colorName:str)->None:
+        self.__colorName = colorName
+        return
 
     
 from socket import socket
 from server.lobby import Lobby
 from server.clientsocketwrapper import ClientSocketWrapper
-from common.socketwrapper import SocketWrapper
-from common.networkevent import NetworkEvent
+from server.game_adapter import GameAdapter
+

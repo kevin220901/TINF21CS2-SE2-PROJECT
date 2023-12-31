@@ -1,6 +1,11 @@
 from __future__ import annotations
+import random
+from typing import Dict
 import uuid
+
+import numpy as np
 from server.logger import *
+
 
 ##################################################
 ## Author: Luis Eckert
@@ -10,35 +15,21 @@ class Lobby:
     def __init__(self, lobbyId, lobbies:dict) -> None:
         self.__lobbies = lobbies
         self.__lobbyId = lobbyId
-        self.__players = {}
+        self.__players: Dict[ClientApi,any] = {}
         self.__canBeJoined:bool = True #TODO: redundand information -> replace with validation of playerCount and isPrivate
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
+        self.__game:GameAdapter = None
+        self.__colors = ['red', 'skyblue', 'palegreen', 'gold']
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
+        return
 
 
-    def get_lobby_info(self):
-        return {
-            'lobbyId': self.__lobbyId,
-            'host': self.__players[self.__host],
-            'players': [info for player, info in self.__players.items() if player != self.__host],
-            'aiDifficulty': 'not yet implemented',
-            'messages':[]            
-        }
-
-    def __createPlayerInfo(self, player:ClientApi):
-        return {
-            'playerId': player.playerId,
-            'playerName': player.playerName,
-            'isReady': False,
-            'color': 'not yet implemented'
-        }
 
     def join(self, player:ClientApi):
-        self.__players[player] = self.__createPlayerInfo(player)
-        
+        self.__players[player] = None
         if self.playerCount > 1: 
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} joined')
@@ -61,17 +52,25 @@ class Lobby:
         
     def leave(self, player:ClientApi):
         self.__players.pop(player)
+
+        self.__handleLeaveRunnigGame(player)
         if self.__handleLobbyAbbandoned(): return
+        #handle host leaving the lobby
         if self.__host == player:
             self.__host = None
         
         if self.__handleHostGone():
+            #
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} left')
             lobbyInfo['messages'].append(f'{self.__host.playerName} is the new host')
         else:
+            #
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} left')
+
+        if player.isReady:
+            self.__colors.append(player.colorName)
 
         #Notify all players in lobby about the change
         p: ClientApi
@@ -80,10 +79,19 @@ class Lobby:
        
         pass
 
-    def toggleReady(self, player:ClientApi):
-        newReadyState = not self.__players[player]['isReady']
-        self.__players[player]['isReady'] = newReadyState
+    def toggleReady(self, player:ClientApi, emitUpdate=True):
+        # on ready assign random color from list of available colors
+        # else add color to list of available colors
+        if player.isReady:
+            playerColor = random.choice(self.__colors)
+            self.__colors.remove(playerColor)
 
+            player.colorName = playerColor
+        else:
+            self.__colors.append(player.colorName)
+            player.colorName = None
+
+        if not emitUpdate: return
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
         for p in self.__players:
@@ -96,17 +104,48 @@ class Lobby:
             p.connection.emit_Message(sender.playerName, message)
         pass
 
-    def startGame(self, player:ClientApi):
+    def startGame(self, player:ClientApi) -> GameAdapter:
         if self.__handleMissingPermission(player): return
         if self.__handleLobbyIsNotReady(): return
+
+        self.__game = GameAdapter(self.__lobbyId)
+
+        for player, info in self.__players.items():
+            self.__game.add_player(player)
+            player.currentGame = self.__game
+
+        self.__game.start_game()
         
         p:ClientApi
         for p in self.__players:
-            p.connection.emit_SysMessage('game started') #TODO: replace with own emit to transmit initial game info
-        pass
+            p.connection.emit_game_start(self.__game.get_game_info())
+        return self.__game
+    
+    def end_game(self):
+        winner = self.__game.winners
+        self.__game = None
+        p:ClientApi
+        for p in self.__players:
+            p.toggleReady(emitUpdate=False)
+            p.connection.emit_game_finish([w.get_player_Info() for w in winner])
+        self.__game = None
+        return
+
+    def get_lobby_info(self):
+        return {
+            'lobbyId': self.__lobbyId,
+            'host': self.__host.get_player_Info(),
+            'players': [player.get_player_Info() for player, info in self.__players.items() if player != self.__host],
+            'aiDifficulty': 'not yet implemented',
+            'messages':[]            
+        }
+
+# Helper Methods
 
     def __handleLobbyAbbandoned(self):
         if self.playerCount == 0: 
+                if self.__game: del self.__game
+                
                 self.__lobbies.pop(self.__lobbyId)
                 logger.info(f"lobby '{self.__lobbyId}' abbandoned")
                 return True
@@ -134,16 +173,20 @@ class Lobby:
              True: if any one player has not jet been set to ready
             False: if all players are set to ready
         '''
+        p:ClientApi
         for p, info in self.__players.items():
-            if info['isReady'] == False: return True
+            if p.isReady == False: return True
 
         return False
 
-    def getLobbyInfo(self):
-        return {
-            'lobbyId': self.__lobbyId,
-            'aiDifficulty': 'not yet implemented'            
-        }
+    def __handleLeaveRunnigGame(self, player:ClientApi):
+        if self.__game:
+            self.__game.remove_player(player)
+            logger.info(f"game '{self.__lobbyId}' abbandoned")
+        return
+    
+
+#Properties
 
     @property
     def lobbyId(self) -> str:
@@ -163,3 +206,5 @@ class Lobby:
 
 
 from server.clientapi import ClientApi
+from server.game_adapter import GameAdapter
+from gamelogic.game import Game

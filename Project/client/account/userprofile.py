@@ -14,8 +14,11 @@ class UserProfile:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        return
 
-    def userProfileFrame(self):
+    def __init_ui(self):
         userProfile_widget = QWidget()
         userProfile_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         userProfile_widget.setFixedSize(700, 400)
@@ -26,15 +29,9 @@ class UserProfile:
         
         self.mainWindow.username_label = QLabel("Username                   :")
         self.mainWindow.email_label = QLabel("E-Mail                         :")
-        self.mainWindow.color_choice_label = QLabel("Preffered Color           :")
         self.mainWindow.username_input = QLineEdit()
         self.mainWindow.email_input = QLineEdit()
-        self.mainWindow.color_choice = QComboBox()
-        self.mainWindow.color_choice.addItem("Blue")
-        self.mainWindow.color_choice.addItem("Green")
-        self.mainWindow.color_choice.addItem("Orange")
-        self.mainWindow.color_choice.addItem("Red")
-        self.mainWindow.color_choice.addItem("Yellow")
+        
         
         # Add Button for Save Function
         self.mainWindow.save_button = QPushButton("Save")
@@ -56,6 +53,12 @@ class UserProfile:
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
+        
+        self.mainWindow.update_password_button = QPushButton("Update Password")
+        self.mainWindow.update_password_button.setStyleSheet(
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
 
          # Layout for Label and Input inside of Grid Layout
         label_input_layout = QHBoxLayout()
@@ -67,10 +70,6 @@ class UserProfile:
         label_input_layout2.addWidget(self.mainWindow.email_label)
         label_input_layout2.addWidget(self.mainWindow.email_input)
         
-        select_box_layout = QHBoxLayout()
-        select_box_layout.addWidget(self.mainWindow.color_choice_label)
-        select_box_layout.addWidget(self.mainWindow.color_choice)
-        self.mainWindow.color_choice.setMinimumWidth(455)
         
         spacer_layout = QHBoxLayout()
         spacer = QSpacerItem(QSpacerItem(40, 60, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
@@ -80,6 +79,8 @@ class UserProfile:
         button_layout.addWidget(self.mainWindow.back_button)
         button_layout.addWidget(self.mainWindow.save_button)
         button_layout.addWidget(self.mainWindow.delete_profile_button)
+        button_layout.addWidget(self.mainWindow.update_password_button)
+        
         
         #back_button_layout = QHBoxLayout()
         #back_button_layout.addWidget(self.mainWindow.back_button)
@@ -87,7 +88,6 @@ class UserProfile:
         # Set Layout
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
         grid_layout.addLayout(label_input_layout2, 1, 0, 1, 1)
-        grid_layout.addLayout(select_box_layout, 2, 0, 1, 1)
         grid_layout.addLayout(spacer_layout, 3, 0, 1, 1)
         grid_layout.addLayout(button_layout, 4, 0, 1, 1)
         
@@ -96,11 +96,21 @@ class UserProfile:
         self.mainWindow.save_button.clicked.connect(self.save)
         self.mainWindow.back_button.clicked.connect(self.back)
         self.mainWindow.delete_profile_button.clicked.connect(self.delete_profile)
+        self.mainWindow.update_password_button.clicked.connect(self.update_password)
 
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
         self.__network.api.requestProfile()
 
+    def __registerNetworkEvents(self):
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
+        pass
+
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
+        pass
 
     def __onProfileReadSuccess(self, event:NetworkEventObject):
         self.mainWindow.username_input.setText(event.eventData['username'])
@@ -108,6 +118,7 @@ class UserProfile:
         pass
 
     def __onProfileUpdateSuccess(self, event:NetworkEventObject):
+        self.mainWindow.showAlert("Profile Updated")
         self.__network.api.requestProfile()
         pass
 
@@ -121,13 +132,20 @@ class UserProfile:
 
     #Add Back Button Function
     def back(self):
+        self.__unregisterNetworkEvents()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
+        pass
+    
+    def update_password(self):
+        from account.updatepassword import UpdatePassword
+        self.updatePassword = UpdatePassword(self.mainWindow, self.__network)
         pass
 
     def delete_profile(self):
         from account.deleteprofile import DeleteProfile
         self.deleteProfile = DeleteProfile(self.mainWindow, self.__network)
-        self.deleteProfile.deleteProfileFrame()
-        pass
+        pass     
+    
+    
+       

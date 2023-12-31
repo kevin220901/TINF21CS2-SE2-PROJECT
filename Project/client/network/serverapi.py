@@ -3,6 +3,7 @@ import json
 import queue
 import socket
 import threading
+import traceback
 
 import network.constants as NetworkConst
 from network.networkevent import NetworkEvent
@@ -25,15 +26,26 @@ class NetworkEventObject:
     def __str__(self) -> str:
         return f"'eventID':'{self.eventId}', 'eventData':'{self.eventData}'"
 
+class AccountInfo:
+    def __init__(self, id, username) -> None:
+        self.__id = id
+        self.__username = username
 
+    @property
+    def id(self):
+        return self.__id
+    
+    @property
+    def username(self):
+        return self.__username
 
 class ServerApi:
-
     def __init__(self, host, port) -> None:
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.port = port
         self.address = (self.host, self.port)
+        self.__account_info:AccountInfo = None
         self.__auth_token = None
 
         #move the actual connection to a public mthod to enable easier connect retries
@@ -138,10 +150,14 @@ class ServerApi:
 
                         eventData = json.loads(recieved)
                         
-                        if eventId == NetworkEvent.LOGIN_SUCCESS.value:
+                        if eventId == NetworkEvent.LOGIN_SUCCESS.value or eventId == NetworkEvent.PROFILE_UPDATE_PASSWORD.value:
                             self.__auth_token = eventData['token']
+                            self.__account_info = AccountInfo(eventData['id'], eventData['username'])
                         elif eventId == NetworkEvent.PROFILE_DELETE.value:
                             self.__auth_token = None
+                            self.__account_info = None
+                        elif eventId == NetworkEvent.PROFILE_READ.value:
+                            self.__account_info = AccountInfo(eventData['id'], eventData['username'])
 
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
@@ -149,7 +165,8 @@ class ServerApi:
 
                 except Exception as e:
                     self.__auth_token = None
-                    print(e)
+                    self.__account_info = None
+                    print(f'{str(e)} \n {traceback.format_exc()}')
                     self.__stopEvent.set()
                     #self.sock.close()
                     break
@@ -219,3 +236,38 @@ class ServerApi:
         eventData = {'token':self.__auth_token}
         self.send(eventId, eventData)
         pass
+
+    def startGame(self):
+        eventId = NetworkEvent.GAME_START
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        return
+
+    def placePiece(self, pieceId, x, y, operations:str):
+        eventId = NetworkEvent.GAME_PLACE_PIECE
+        eventData = {
+            'token':self.__auth_token, 
+            'pieceId':pieceId, 
+            'x':x, 
+            'y':y, 
+            'operations':operations
+        }
+        self.send(eventId, eventData)
+        return
+    
+    def updatePassword(self, newPassword):
+        eventId = NetworkEvent.PROFILE_UPDATE_PASSWORD
+        eventData = {'token':self.__auth_token, 'new_password':newPassword}
+        self.send(eventId, eventData)
+        pass
+
+    def refresh_lobby(self):
+        eventId = NetworkEvent.LOBBY_REFRESH
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass
+
+
+    @property
+    def accout_info(self)->AccountInfo:
+        return self.__account_info

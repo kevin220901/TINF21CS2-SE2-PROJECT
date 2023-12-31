@@ -1,4 +1,11 @@
-Blokus.drawio.Zone.Identifier
 .$Blokus.drawio.bkp
 __pycache__/
 .env
+Blokus.drawio:Zone.Identifier
+.idea
+.vscode
+temp.py
+logs/
+*.log
+*.log.json
+build/

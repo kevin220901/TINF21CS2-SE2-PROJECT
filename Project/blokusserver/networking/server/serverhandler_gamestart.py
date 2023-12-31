@@ -15,7 +15,9 @@ class ServerEventHandler_GameStart(ServerEventHandler):
 
     def handleEvent(self, eventData):
         if self._handleIvalidateAuthToken(eventData.get('token')): return
-        self._client.currentLobby.startGame(self._client)
+        if self._handleNotInLobby(): return
+
+        self._client.startGame()
         
         pass
     

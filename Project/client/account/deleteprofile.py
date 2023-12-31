@@ -17,8 +17,12 @@ class DeleteProfile:
         self.__network = network
         self.__popup:QDialog = None
 
-    def deleteProfileFrame(self):
-        self.__popup = QDialog()
+        self.__init_ui()
+        self.__registerNetworkEvents()
+        return
+
+    def __init_ui(self):
+        self.__popup = QDialog(self.mainWindow)
         self.__popup.setWindowTitle("Delete Profile")
         self.__popup.setFixedSize(600, 250)
         layout = QGridLayout()
@@ -40,17 +44,25 @@ class DeleteProfile:
         layout.addLayout(h_layout)
         self.__popup.setLayout(layout)
         self.__popup.exec()
-
-        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_DELETE, self.__on_profileDeleteSuccess)
+        return
     
     def delete_profile(self):
         self.__network.api.deleteProfile()
         self.__popup.close()
         pass
 
+    def __registerNetworkEvents(self): 
+        self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_DELETE, self.__on_profileDeleteSuccess)
+        pass
+
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.PROFILE_DELETE, self.__on_profileDeleteSuccess)
+        pass
+
 
     def __on_profileDeleteSuccess(self, event:NetworkEventObject):
+        self.mainWindow.showAlert("Profile deleted")
+        self.__unregisterNetworkEvents()
         from menu import Menu
         self.menu = Menu(self.mainWindow, self.__network)
-        self.menu.menuFrame()
         pass

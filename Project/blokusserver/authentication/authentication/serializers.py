@@ -32,7 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserWithouPwdSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email']  
+        fields = ['id', 'username', 'email']  
 
     def update(self, instance, validated_data):
         return super(UserWithouPwdSerializer, self).update(instance, validated_data)
+    

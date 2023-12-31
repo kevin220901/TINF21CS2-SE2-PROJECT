@@ -15,9 +15,11 @@ class LobbyConfig:
     def __init__(self, mainWindow, network:PyQt6_Networkadapter):
         self.mainWindow = mainWindow
         self.__network = network
+        self.__registerNetworkEvents()
+        self.__init_ui()
         pass
 
-    def lobbyConfigFrame(self):
+    def __init_ui(self):
         self.lobbyConfig_widget = QWidget(self.mainWindow)
         self.lobbyConfig_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
         self.lobbyConfig_widget.setFixedSize(700, 400)
@@ -73,13 +75,22 @@ class LobbyConfig:
         self.mainWindow.create_lobby_button.clicked.connect(self.lobby_create)
         self.mainWindow.back_button.clicked.connect(self.back)
 
+        pass
+    
+    def __registerNetworkEvents(self):
         self.__network.addNetworkEventHandler(NetworkEvent.LOBBY_CREATE, self.__on_lobby_created)
         pass
 
+    def __unregisterNetworkEvents(self):
+        self.__network.removeNetworkEventHandler(NetworkEvent.LOBBY_CREATE, self.__on_lobby_created)
+        pass
+
+
     def __on_lobby_created(self, event:NetworkEventObject):
+        self.mainWindow.showAlert("Lobby created")
+        self.__unregisterNetworkEvents()
         from lobby.lobby import Lobby
         self.lobby = Lobby(self.mainWindow, self.__network, event.eventData)
-        self.lobby.lobbyFrame()
         pass
         
     def lobby_create(self):
@@ -91,7 +102,7 @@ class LobbyConfig:
 
     
     def back(self):
+        self.__unregisterNetworkEvents()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        self.lobbymenu.lobbyMenuFrame()
-        pass
+        
