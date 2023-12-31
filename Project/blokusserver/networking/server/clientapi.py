@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import threading
+from typing import Set
 import requests
 import common.constants as NetworkConst
 from server.logger import *
@@ -12,7 +13,7 @@ from server.logger import *
 
 
 class ClientApi:
-    def __init__(self, conn:socket, stopEvent:threading.Event, lobbies) -> None:
+    def __init__(self, conn:socket, stopEvent:threading.Event, lobbies, loggedInPlayers:Set) -> None:
         self.__conn = ClientSocketWrapper(conn)
         self.__currentLobby:Lobby = None
         self.__playerId:str = None
@@ -24,6 +25,7 @@ class ClientApi:
         self.__colorName:str = None # name of the color
         self.__isReady = False
         self.__currentGame:GameAdapter = None
+        self.__loggedInPlayers = loggedInPlayers
         return
 
     
@@ -38,9 +40,19 @@ class ClientApi:
         
         response_data = json.loads(response.content)
 
+        player_id:str =  response_data['id']
+
+        if player_id in self.__loggedInPlayers:
+
+            self.__conn.emit_Login_fail('sombody is allready logged in with this account')
+            return False
+        
+        self.__loggedInPlayers.add(player_id)
+
         self.__auth_token = response_data['token']
-        self.__playerId = response_data['id']
+        self.__playerId = player_id
         self.__playerName = response_data['username']
+
 
         self.__conn.emit_Login_success(self.__auth_token, self.__playerId, self.__playerName)
 

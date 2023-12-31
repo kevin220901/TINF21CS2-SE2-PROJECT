@@ -43,8 +43,8 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         return
 
-    def emit_Login_fail(self)->None:
-        self.emit_SysMessage('access denied')
+    def emit_Login_fail(self, message='access denied')->None:
+        self.emit_SysMessage(message)
         return
 
     def emit_LobbyCreate_success(self, lobbyInfo)->None:

@@ -42,6 +42,7 @@ class Server:
                                               args=(self.__host, self.__port, self.__globalStopEvent),
                                               daemon=True)
         self.__client_threads = []
+        self.__loggedInPlayers = set()
 
     def start(self):
         self.__server_handler_thread.start()
@@ -55,12 +56,12 @@ class Server:
     def __threaded_client(self, sock:socket.socket, globalStopEvent:threading.Event, localStopEvent:threading.Event):
         #TODO:instead of returning the playerId a notification is returned indicating the process was successfull
         #sock.sendall(playerId)
-
        
         api = ClientApi(
             conn=sock,
             stopEvent=localStopEvent,
             lobbies=self.__lobbies,
+            loggedInPlayers=self.__loggedInPlayers
         )
 
         api.connection.emit_SysMessage('connected')
@@ -136,6 +137,10 @@ class Server:
             #api.leaveLobby() #TODO: fix bug!!
             if api.currentLobby:
                 api.currentLobby.leave(api)
+
+            if api.playerId in self.__loggedInPlayers:
+                self.__loggedInPlayers.remove(api.playerId)
+                
             sock.close()
             logger.info(f'{api.playerName} disconnected')
             #print(f"{api.playerName} disconnected")
