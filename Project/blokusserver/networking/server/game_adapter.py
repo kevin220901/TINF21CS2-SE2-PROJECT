@@ -65,9 +65,10 @@ class GameAdapter:
                 self.winners.append(player)
             else:
                 self.__change_turn()
-                p:ClientApi
-                for p in self.__players:
-                    p.connection.emit_game_update(self.get_game_info())
+                
+            p:ClientApi
+            for p in self.__players:
+                p.connection.emit_game_update(self.get_game_info())
            
         except BlokusException as e:
             player.connection.emit_game_invalidPlacement(str(e))
@@ -99,29 +100,29 @@ class GameAdapter:
         return playerInfo
     
     def __createPieces(self):
-        #TODO: Refactor, only the keys are needed
+        #TODO: Refactor, redundand is now handledb by game internally
         return {
-            "1_0": BlokusPiece(np.array([[1]])),
-            "2_0": BlokusPiece(np.array([[1, 1]])),
-            "3_0": BlokusPiece(np.array([1, 1, 1])),
-            "3_1": BlokusPiece(np.array([[0, 1], [1, 1]])),
-            "4_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 0]])),
-            "4_1": BlokusPiece(np.array([[1, 1], [1, 1]])),
-            "4_2": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1]])),
-            "4_3": BlokusPiece(np.array([[1, 1, 1], [0, 0, 1]])),
-            "4_4": BlokusPiece(np.array([[1, 1, 1, 1]])),
-            "5_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 1]])),
-            "5_1": BlokusPiece(np.array([[0, 1], [0, 1], [1, 1], [1, 0]])),
-            "5_2": BlokusPiece(np.array([[1, 1, 1, 1], [0, 0, 0, 1]])),
-            "5_3": BlokusPiece(np.array([[1, 1, 1, 1, 1]])),
-            "5_4": BlokusPiece(np.array([[1, 1], [1, 0], [1, 1]])),
-            "5_5": BlokusPiece(np.array([[0, 1, 1], [0, 1, 0], [1, 1, 0]])),
-            "5_6": BlokusPiece(np.array([[0, 1, 1], [1, 1, 0], [1, 0, 0]])),
-            "5_7": BlokusPiece(np.array([[0, 0, 1], [0, 0, 1], [1, 1, 1]])),
-            "5_8": BlokusPiece(np.array([[0, 0, 1], [1, 1, 1], [0, 0, 1]])),
-            "5_9": BlokusPiece(np.array([[0, 1, 0], [0, 1, 1], [1, 1, 0]])),
-            "5_10": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])),
-            "5_11": BlokusPiece(np.array([[0, 1, 0, 0], [1, 1, 1, 1]]))
+            # "1_0": BlokusPiece(np.array([[1]])),
+            # "2_0": BlokusPiece(np.array([[1, 1]])),
+            # "3_0": BlokusPiece(np.array([1, 1, 1])),
+            # "3_1": BlokusPiece(np.array([[0, 1], [1, 1]])),
+            # "4_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 0]])),
+            # "4_1": BlokusPiece(np.array([[1, 1], [1, 1]])),
+            # "4_2": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1]])),
+            # "4_3": BlokusPiece(np.array([[1, 1, 1], [0, 0, 1]])),
+            # "4_4": BlokusPiece(np.array([[1, 1, 1, 1]])),
+            # "5_0": BlokusPiece(np.array([[0, 1], [1, 1], [1, 1]])),
+            # "5_1": BlokusPiece(np.array([[0, 1], [0, 1], [1, 1], [1, 0]])),
+            # "5_2": BlokusPiece(np.array([[1, 1, 1, 1], [0, 0, 0, 1]])),
+            # "5_3": BlokusPiece(np.array([[1, 1, 1, 1, 1]])),
+            # "5_4": BlokusPiece(np.array([[1, 1], [1, 0], [1, 1]])),
+            # "5_5": BlokusPiece(np.array([[0, 1, 1], [0, 1, 0], [1, 1, 0]])),
+            # "5_6": BlokusPiece(np.array([[0, 1, 1], [1, 1, 0], [1, 0, 0]])),
+            # "5_7": BlokusPiece(np.array([[0, 0, 1], [0, 0, 1], [1, 1, 1]])),
+            # "5_8": BlokusPiece(np.array([[0, 0, 1], [1, 1, 1], [0, 0, 1]])),
+            # "5_9": BlokusPiece(np.array([[0, 1, 0], [0, 1, 1], [1, 1, 0]])),
+            # "5_10": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])),
+            # "5_11": BlokusPiece(np.array([[0, 1, 0, 0], [1, 1, 1, 1]]))
         }
     
 

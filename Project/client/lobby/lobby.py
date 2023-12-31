@@ -58,16 +58,25 @@ class Lobby:
         if lobbyInfo is None: return
         self.player_list.clear()
         lobbyHost = lobbyInfo['host']
-        self.player_list.addItem(lobbyHost['playerName'])
 
-        #TODO: only the host can start the game -> button enabled else disabled
+
+        if lobbyHost.get('playerId') == self.__network.api.accout_info.id:
+            self.button_start_game.setEnabled(True)
+            self.player_list.addItem(lobbyHost['playerName'] + ' (YOU)' )
+        else:
+            self.button_start_game.setEnabled(False)
+            self.player_list.addItem(lobbyHost['playerName'])
 
         if lobbyHost['isReady']:
             self.player_list.item(self.player_list.count()-1).setBackground(QColor(lobbyHost['color']))
             
         
         for player in lobbyInfo.get('players'):
-            self.player_list.addItem(player['playerName'])
+            if player.get('playerId') == self.__network.api.accout_info.id:
+                self.player_list.addItem(player['playerName'] + ' (YOU)' )
+            else:
+                self.player_list.addItem(player['playerName'])
+
             if player['isReady']:
                 self.player_list.item(self.player_list.count()-1).setBackground(QColor(player['color']))
 
@@ -193,9 +202,15 @@ class Lobby:
         return
 
     def __on_start_game_clicked(self):
-        #notify server
-        #check if player is host
-        #check all players are ready
+        for player in self.__lobbyInfo.get('players'):
+            if player.get('playerId') == self.__network.api.accout_info.id:
+                if not player['isReady']:
+                    self.mainWindow.showAlert("You are not ready")
+                    return
+            else:
+                if not player['isReady']:
+                    self.mainWindow.showAlert("Not all players are ready")
+                    return
         self.__network.api.startGame()
         pass
 

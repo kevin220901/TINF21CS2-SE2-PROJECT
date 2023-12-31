@@ -181,10 +181,10 @@ class ClientApi:
         self.__isReady = False
         pass
 
-    def toggleReady(self):
+    def toggleReady(self, emitUpdate=True):
         if self.__handleNotInLobby(): return
         self.__isReady = not self.__isReady
-        self.__currentLobby.toggleReady(self)
+        self.__currentLobby.toggleReady(self,emitUpdate)
         return
     
     def startGame(self):

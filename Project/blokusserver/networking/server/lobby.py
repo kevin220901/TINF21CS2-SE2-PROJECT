@@ -90,6 +90,7 @@ class Lobby:
         else:
             self.__colors.append(player.colorName)
             player.colorName = None
+
         if not emitUpdate: return
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
@@ -125,7 +126,7 @@ class Lobby:
         self.__game = None
         p:ClientApi
         for p in self.__players:
-            p.currentLobby.toggleReady(emitUpdate=False)
+            p.toggleReady(emitUpdate=False)
             p.connection.emit_game_finish([w.get_player_Info() for w in winner])
         self.__game = None
         return

@@ -642,15 +642,14 @@ class BlokusGame():
     
     def __on_game_finish(self, event:NetworkEventObject)->None:
         self.__unregisterNetworkEvents()
-        self.__unregisterNetworkEvents()
         self.__remove_menu_actions()
 
         winners = event.eventData
-        
+
         self.blokus_widget.deleteLater()
 
-        from winnermessage import WinnerMessage
-        winnerMessage = WinnerMessage(self.mainWindow, self.__network)
+        from game.winnermessage import WinnerMessage
+        self.winnerMessage = WinnerMessage(self.mainWindow, self.__network, winners)
 
         return
     
