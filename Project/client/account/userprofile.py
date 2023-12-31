@@ -59,6 +59,12 @@ class UserProfile:
             "QPushButton:hover { background-color: #70a8ff; }"
             "QPushButton:pressed { background-color: #1e90ff; }"
         )
+        
+        self.mainWindow.update_password_button = QPushButton("Update Password")
+        self.mainWindow.update_password_button.setStyleSheet(
+            "QPushButton:hover { background-color: #70a8ff; }"
+            "QPushButton:pressed { background-color: #1e90ff; }"
+        )
 
          # Layout for Label and Input inside of Grid Layout
         label_input_layout = QHBoxLayout()
@@ -83,6 +89,8 @@ class UserProfile:
         button_layout.addWidget(self.mainWindow.back_button)
         button_layout.addWidget(self.mainWindow.save_button)
         button_layout.addWidget(self.mainWindow.delete_profile_button)
+        button_layout.addWidget(self.mainWindow.update_password_button)
+        
         
         #back_button_layout = QHBoxLayout()
         #back_button_layout.addWidget(self.mainWindow.back_button)
@@ -99,6 +107,7 @@ class UserProfile:
         self.mainWindow.save_button.clicked.connect(self.save)
         self.mainWindow.back_button.clicked.connect(self.back)
         self.mainWindow.delete_profile_button.clicked.connect(self.delete_profile)
+        self.mainWindow.update_password_button.clicked.connect(self.update_password)
 
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_READ, self.__onProfileReadSuccess)
         self.__network.addNetworkEventHandler(NetworkEvent.PROFILE_UPDATE, self.__onProfileUpdateSuccess)
@@ -138,8 +147,16 @@ class UserProfile:
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
         pass
+    
+    def update_password(self):
+        from account.updatepassword import UpdatePassword
+        self.updatePassword = UpdatePassword(self.mainWindow, self.__network)
+        pass
 
     def delete_profile(self):
         from account.deleteprofile import DeleteProfile
         self.deleteProfile = DeleteProfile(self.mainWindow, self.__network)
-        pass
+        pass     
+    
+    
+       

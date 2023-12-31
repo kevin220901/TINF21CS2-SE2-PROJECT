@@ -12,6 +12,7 @@ from qt6networkadapter import PyQt6_Networkadapter
 
 from menu import Menu
 from settings import Settings
+from how_to_play import HowToPlay
 from network.serverapi import NetworkEventObject, ServerApi, NetworkEvent
 from network import constants as NetworkConst
 
@@ -79,9 +80,14 @@ class BlokusUtility(QMainWindow):
 
         self.join_lobby_action = QAction("Join Lobby", self)
         self.join_lobby_action.setVisible(False)
+        
+        self.settings = QAction("Settings", self)
+        self.settings.setShortcut('Ctrl+S')
+        self.settings.triggered.connect(self.settingsFrame)
 
         self.how_to_play_action = QAction("How to Play", self)
         self.how_to_play_action.setShortcut('Ctrl+H')
+        self.how_to_play_action.triggered.connect(self.how_to_playFrame)
 
         exit_action = QAction("Exit", self)
         exit_action.setShortcut('Ctrl+Q')
@@ -94,6 +100,8 @@ class BlokusUtility(QMainWindow):
         menu.addAction(self.leave_lobby_action)
         menu.addAction(self.leave_game_action)
         menu.addSeparator()
+        menu.addAction(self.settings)
+        menu.addSeparator()
         menu.addAction(exit_action)
         font = menu.font()
         font.setPointSize(10)
@@ -103,6 +111,12 @@ class BlokusUtility(QMainWindow):
     def settingsFrame(self):
         self.settings.settingsFrame()
 
+    pass
+
+    def how_to_playFrame(self):
+        self.how_to_play = HowToPlay(self)
+        self.how_to_play.how_to_playFrame()
+    
     pass
 
 

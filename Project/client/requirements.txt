@@ -1,4 +1,0 @@
-json
-PyQt6
-threading
-queue

@@ -24,7 +24,7 @@ from qt6networkadapter import PyQt6_Networkadapter
 import contextvars
 
 ##################################################
-## Author: Kai Pistol, Lusi Eckert
+## Author: Kai Pistol, Luis Eckert
 ##################################################
 
 
@@ -421,9 +421,11 @@ class BlokusGame:
             
             playerInfo = self.gameInfo['players'].get(f'{i+1}')     # players is a dict so the key is a string. therefore the i+1 is converted to a string
             if not playerInfo: 
-                widget = PlayerAreaWidget(i+1, self)
+                widget = PlayerAreaWidget(-1, self, False)
             else:
-                widget = PlayerAreaWidget(i+1, self, color=QColor(playerInfo.get('color')))
+                playerId = playerInfo.get('playerId')
+                isSelf = playerId == self.__network.api.accout_info.id
+                widget = PlayerAreaWidget(playerInfo.get('playerId'), self, isSelf, color=QColor(playerInfo.get('color')))
 
             # add the widget to the coresponding layouts
             if i < 2:
@@ -1236,12 +1238,13 @@ class PlayerAreaWidget(QWidget):
     - piece repository (QGraphicsView)
     - available pieces (GamePieces)
     '''
-    def __init__(self, player_id:int, game: BlokusGame, parent=None, color: QColor = QColor('lightgray')):
+    def __init__(self, player_id:int, game: BlokusGame, isSelf:bool, parent=None, color: QColor = QColor('lightgray')):
         super().__init__(parent=parent)
         self.__game:BlokusGame = game
         self.__color:QColor = color
         self.__piece_objects:Dict[str:GamePiece]
         self.player_id = player_id
+        self.__isSelf = isSelf
 
         self.__init_ui()
         return
@@ -1334,7 +1337,8 @@ class PlayerAreaWidget(QWidget):
         for key, piece in self.__piece_objects.items():
             piece.color = self.__color
             self.scene.addItem(piece)
-            self.__game.registerPieceClickedEvent(piece)
+            if self.__isSelf:
+                self.__game.registerPieceClickedEvent(piece)
         return
 
     @property

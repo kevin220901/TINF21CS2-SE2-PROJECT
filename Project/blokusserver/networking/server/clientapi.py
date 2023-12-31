@@ -42,7 +42,7 @@ class ClientApi:
         self.__playerId = response_data['id']
         self.__playerName = response_data['username']
 
-        self.__conn.emit_Login_success(self.__auth_token)
+        self.__conn.emit_Login_success(self.__auth_token, self.__playerId, self.__playerName)
 
         return True
 
@@ -190,7 +190,7 @@ class ClientApi:
     
     def get_player_Info(self) -> dict:
         return {
-            'playerId': self.playerId,
+            'playerId': self.playerId,  # TODO: should be named id or user_id
             'playerName': self.playerName,
             'isReady': self.isReady,
             'color': 'red'

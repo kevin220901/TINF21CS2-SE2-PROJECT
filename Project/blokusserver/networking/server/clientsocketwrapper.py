@@ -33,10 +33,12 @@ class ClientSocketWrapper(SocketWrapper):
         self.sendall(eventId, eventData)
         return
 
-    def emit_Login_success(self, token)->None:
+    def emit_Login_success(self, token, id, username)->None:
         eventId = NetworkEvent.LOGIN_SUCCESS
         eventData = {
-            'token':token
+            'token':token,
+            'id':id,
+            'username':username
         }
         self.sendall(eventId, eventData)
         return
