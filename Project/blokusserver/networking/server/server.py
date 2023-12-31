@@ -22,6 +22,7 @@ from server.servereventhandler_profileupdate import ServerEventHandler_ProfileUp
 from server.servereventhandler_profiledelete import ServerEventHandler_ProfileDelete
 from server.servereventhandler_gameplacepiece import ServerEventHandler_GamePlacePiece
 from server.servereventhandler_profileupdatepassword import ServerEventHandler_ProfileUpdatePassword
+from server.servereventhandler_lobbyrefresh import ServerEventHandler_LobbyRefresh
 from server.clientapi import ClientApi
 from server.serverhandler_chatmessage import ServerEventHandler_ChatMessage
 from common.networkevent import NetworkEvent
@@ -82,7 +83,8 @@ class Server:
             NetworkEvent.PROFILE_READ.value: ServerEventHandler_ProfileRead(api),
             NetworkEvent.PROFILE_DELETE.value: ServerEventHandler_ProfileDelete(api),
             NetworkEvent.PROFILE_UPDATE.value: ServerEventHandler_ProfileUpdate(api),
-            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: ServerEventHandler_ProfileUpdatePassword(api)          
+            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: ServerEventHandler_ProfileUpdatePassword(api),
+            NetworkEvent.LOBBY_REFRESH.value: ServerEventHandler_LobbyRefresh(api)          
         }
         
 

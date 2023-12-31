@@ -24,4 +24,7 @@ class ServerEventHandler_GamePlacePiece(ServerEventHandler):
                                              eventData.get('x'), 
                                              eventData.get('y'), 
                                              eventData.get('operations'))
+        
+        if self._client.currentGame.hasEnded:
+            self._client.currentLobby.end_game()
         return

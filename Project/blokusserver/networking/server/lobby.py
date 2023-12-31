@@ -79,7 +79,7 @@ class Lobby:
        
         pass
 
-    def toggleReady(self, player:ClientApi):
+    def toggleReady(self, player:ClientApi, emitUpdate=True):
         # on ready assign random color from list of available colors
         # else add color to list of available colors
         if player.isReady:
@@ -90,7 +90,7 @@ class Lobby:
         else:
             self.__colors.append(player.colorName)
             player.colorName = None
-
+        if not emitUpdate: return
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
         for p in self.__players:
@@ -119,6 +119,16 @@ class Lobby:
         for p in self.__players:
             p.connection.emit_game_start(self.__game.get_game_info())
         return self.__game
+    
+    def end_game(self):
+        winner = self.__game.winners
+        self.__game = None
+        p:ClientApi
+        for p in self.__players:
+            p.currentLobby.toggleReady(emitUpdate=False)
+            p.connection.emit_game_finish([w.get_player_Info() for w in winner])
+        self.__game = None
+        return
 
     def get_lobby_info(self):
         return {

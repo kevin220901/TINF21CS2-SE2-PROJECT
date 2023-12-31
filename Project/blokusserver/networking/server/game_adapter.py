@@ -22,6 +22,8 @@ class GameAdapter:
         self.__availablePlayerGameIds = [1,2,3,4]
         self.__currentTurnPlayer:ClientApi = None
         self.__turnOrder:List[ClientApi] = []
+        self.__hasEnded = False
+        self.winners:List[ClientApi] = []
         return
 
     
@@ -56,11 +58,17 @@ class GameAdapter:
 
             self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, operations)
 
-            self.__change_turn()
 
-            p:ClientApi
-            for p in self.__players:
-                p.connection.emit_game_update(self.get_game_info())
+            self.__hasEnded = self.__game.getAvailablePieces(player.gamePlayerId) == []
+                
+            if self.__hasEnded:
+                self.winners.append(player)
+            else:
+                self.__change_turn()
+                p:ClientApi
+                for p in self.__players:
+                    p.connection.emit_game_update(self.get_game_info())
+           
         except BlokusException as e:
             player.connection.emit_game_invalidPlacement(str(e))
             player.connection.emit_game_update(self.get_game_info())
@@ -91,6 +99,7 @@ class GameAdapter:
         return playerInfo
     
     def __createPieces(self):
+        #TODO: Refactor, only the keys are needed
         return {
             "1_0": BlokusPiece(np.array([[1]])),
             "2_0": BlokusPiece(np.array([[1, 1]])),
@@ -114,3 +123,8 @@ class GameAdapter:
             "5_10": BlokusPiece(np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])),
             "5_11": BlokusPiece(np.array([[0, 1, 0, 0], [1, 1, 1, 1]]))
         }
+    
+
+    @property
+    def hasEnded(self):
+        return self.__hasEnded

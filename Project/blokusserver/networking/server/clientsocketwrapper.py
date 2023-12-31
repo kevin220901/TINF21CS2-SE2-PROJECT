@@ -131,3 +131,9 @@ class ClientSocketWrapper(SocketWrapper):
         eventData = message
         self.sendall(eventId, eventData)
         return
+    
+    def emit_game_finish(self, winnerInfo)->None:
+        eventId = NetworkEvent.GAME_FINISH
+        eventData = winnerInfo
+        self.sendall(eventId, eventData)
+        return

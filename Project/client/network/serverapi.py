@@ -261,6 +261,12 @@ class ServerApi:
         self.send(eventId, eventData)
         pass
 
+    def refresh_lobby(self):
+        eventId = NetworkEvent.LOBBY_REFRESH
+        eventData = {'token':self.__auth_token}
+        self.send(eventId, eventData)
+        pass
+
 
     @property
     def accout_info(self)->AccountInfo:

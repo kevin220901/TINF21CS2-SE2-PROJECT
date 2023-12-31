@@ -20,6 +20,9 @@ class Lobby:
         self.__init_ui()
         self.__registerNetworkEvents()
         self.__registerUIEvents()
+
+        if self.__lobbyInfo is None:
+            self.__network.api.refresh_lobby()
         return
     
     def __registerUIEvents(self):

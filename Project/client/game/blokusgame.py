@@ -516,6 +516,7 @@ class BlokusGame():
         self.__network.addNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
         self.__network.addNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
+        self.__network.addNetworkEventHandler(NetworkEvent.GAME_FINISH, self.__on_game_finish)
         return
     
     # @log_method_call(logAttributes=False)
@@ -530,6 +531,7 @@ class BlokusGame():
         self.__network.removeNetworkEventHandler(NetworkEvent.MESSAGE, self.__on_message)
         self.__network.removeNetworkEventHandler(NetworkEvent.GAME_UPDATE, self.__on_game_update)
         self.__network.removeNetworkEventHandler(NetworkEvent.GAME_INVALID_PLACEMENT, self.__on_game_invalid_placement)
+        self.__network.removeNetworkEventHandler(NetworkEvent.GAME_FINISH, self.__on_game_finish)
         return
 
     # @log_method_call(logAttributes=False)
@@ -635,6 +637,20 @@ class BlokusGame():
                 self.mainWindow.showAlert('It is your turn')
             else:
                 self.mainWindow.showAlert(f'It is {currentTurnPlayer.get("playerName")}`s turn')
+
+        return
+    
+    def __on_game_finish(self, event:NetworkEventObject)->None:
+        self.__unregisterNetworkEvents()
+        self.__unregisterNetworkEvents()
+        self.__remove_menu_actions()
+
+        winners = event.eventData
+        
+        self.blokus_widget.deleteLater()
+
+        from winnermessage import WinnerMessage
+        winnerMessage = WinnerMessage(self.mainWindow, self.__network)
 
         return
     

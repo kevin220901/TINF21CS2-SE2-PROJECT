@@ -59,6 +59,7 @@ class QNetworkEventSignals(QObject):
     profile_delete = pyqtSignal(NetworkEventObject)
     profile_update = pyqtSignal(NetworkEventObject)
     profile_update_password = pyqtSignal(NetworkEventObject)
+    game_finish = pyqtSignal(NetworkEventObject)
     pass
     
     
@@ -85,7 +86,8 @@ class QNetworkThread(QThread):
             NetworkEvent.PROFILE_READ.value: self.eventSignals.profile_read,
             NetworkEvent.PROFILE_DELETE.value: self.eventSignals.profile_delete,
             NetworkEvent.PROFILE_UPDATE.value: self.eventSignals.profile_update,
-            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: self.eventSignals.profile_update_password
+            NetworkEvent.PROFILE_UPDATE_PASSWORD.value: self.eventSignals.profile_update_password,
+            NetworkEvent.GAME_FINISH.value: self.eventSignals.game_finish
         }
     
     def run(self):

@@ -105,4 +105,4 @@ class LobbyConfig:
         self.__unregisterNetworkEvents()
         from lobby.lobbymenu import LobbyMenu
         self.lobbymenu = LobbyMenu(self.mainWindow, self.__network)
-        pass
+        
