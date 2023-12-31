@@ -720,13 +720,23 @@ class BlokusGame():
 
 
 class BlokusWidget(QWidget):
+    '''
+    This is the main ui container widget of BlokusGame.
+    
 
+    DEVELOPERS NOTE:
+        This class is only needed to override the keyReleaseEvent method. That triggeres the flipy operation on the selected piece.
+        We could propably move some more logic here but meh ... deadline in less than 6 hours. *sigh*
+    '''
     def __init__(self, game:BlokusGame, parent=None):
         super().__init__(parent)
         self.__game = game
         return
 
     def keyReleaseEvent(self, event: QKeyEvent | None) -> None:
+        '''
+        Handles the 'global' key release events.
+        '''
         if event.key() == Qt.Key.Key_Space:
             piece: GhostPiece = None
             # Get the selected item
@@ -1175,6 +1185,10 @@ class GameView(QGraphicsView):
     '''
     I don't know what exacly the View is for but it is needed for the scene to work ... lol
     The subclassing is needed to customice the mouse events
+
+    DEVELOPERS NOTE:
+        mouse move event enter and leave events are needed to show and hide the ghost piece correctly
+        maby not the most elegant solution but it works so ... well done me :D
     '''
     def __init__(self, scene, game:BlokusGame, parent=None):
         super().__init__(scene, parent)
@@ -1192,6 +1206,25 @@ class GameView(QGraphicsView):
         self.field_border.setRect(0, 0, GAME_FIELD_SIZE * TILE_SIZE, GAME_FIELD_SIZE * TILE_SIZE)
         self.scene().addItem(self.field_border)
         return
+    
+    def enterEvent(self, event: QEvent) -> None:
+        self.setFocus()
+
+        if self.__game.selectedPiece:
+            if self.__game.ghostPiece:
+                if self.__game.ghostPiece in self.scene().items():
+                    if self.__game.ghostPiece.isVisible() == False:
+                        self.__game.ghostPiece.setVisible(True)
+
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        if self.__game.selectedPiece:
+            if self.__game.ghostPiece:
+                if self.__game.ghostPiece in self.scene().items():
+                    if self.__game.ghostPiece.isVisible():
+                        self.__game.ghostPiece.setVisible(False)
+        super().leaveEvent(event)
     
     def to_dict(self)->dict:
         return {
