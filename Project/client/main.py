@@ -149,7 +149,11 @@ class AlertWidget(QWidget):
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: self.__on_timeout(alertBox))
         timer.start(1000 * timer_seconds)  # Time in milliseconds
-        self.raise_()   # this enshures the alert widget is on top of all other widgets
+
+        # Connect the clicked signal to the remove_alert method
+        alertBox.clicked.connect(lambda: self.__on_timeout(alertBox))
+
+        self.raise_()   # this ensures the alert widget is on top of all other widgets
         return
     
 
@@ -161,11 +165,9 @@ class AlertWidget(QWidget):
         new_height = self.size().height() - 100
         self.resize(self.size().width(), new_height)
 
-        if self.layout.count() == 0:
-            self.hide()
-        return
-
 class AlertBoxWidget(QWidget):
+    clicked = pyqtSignal()
+
     def __init__(self, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
@@ -188,6 +190,9 @@ class AlertBoxWidget(QWidget):
         if parent is not None:
             self.resize(parent.size())
         return
+    
+    def mousePressEvent(self, event):
+        self.clicked.emit()
 
 
 def excepthook(type, value, traceback):
