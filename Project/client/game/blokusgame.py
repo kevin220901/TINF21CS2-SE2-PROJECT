@@ -228,6 +228,29 @@ class BlokusGame():
     - the chat: well its the chat ... 
     - the selected piece: the piece that is currently selected
     - the ghost piece: a ghost piece is a copy of the selected piece that is used to visualize the placement of the piece
+
+
+    DEVELOPERS NOTE:
+        here you go, the schema for gameInfo:
+        {
+            "lobbyId": "<string>",
+            "gameField": ["<float>", "<float>", "..."],
+            "currentTurnPlayerId": "<string>",
+            "players": {
+                "<gamePlayerId>": {
+                    "playerId": "<string>",
+                    "playerName": "<string>",
+                    "isReady": "<boolean>",
+                    "color": "<string>",
+                    "pieces": ["<string>", "<string>", "..."],
+                    "gamePlayerId": "<string>"
+                },
+                "...": "..."
+            },
+            "messages": "<list>"
+        }
+
+        hth :)
     '''
     # @log_method_call(logAttributes=False)
     def __init__(self, mainWindow, network: PyQt6_Networkadapter, gameInfo: dict):
@@ -235,7 +258,7 @@ class BlokusGame():
         self.__network = network
         self.__selectedPiece: GamePiece = None
         self.__ghostPiece: GamePiece = None
-        self.gameInfo = gameInfo
+        self.gameInfo = gameInfo    # for more details see DEVELOPER NOTE of BlokusGame::class
 
 
         self.__init_ui()
