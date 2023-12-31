@@ -19,7 +19,7 @@ class Test_Blokus_Piece(TestCase):
             [0, 0, 0, 0, 0, 0]
         ])
         #act
-        g.placePieceByKey("4_0", 0, 0, 1, 1)
+        g.placePieceByKey("4_0", 0, 0, 1, "r")
         #asert
         assert_array_equal(g.getFeld, expected)
 
@@ -56,7 +56,7 @@ class Test_Blokus_Piece(TestCase):
             [0, 0, 0, 0, 0, 0]
         ])
         #act
-        g.placePieceByKey("4_0", 0, 0, 1, 0, 1)
+        g.placePieceByKey("4_0", 0, 0, 1, "y")
         #asert
         assert_array_equal(g.getFeld, expected)
 
@@ -75,8 +75,8 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         #act
-        game.placePieceByKey("4_3", 3, 0, 1, 2, 1)
-        game.placePieceByKey("5_5", 0, 0, 1, 0, 1)
+        game.placePieceByKey("4_3", 3, 0, 1, "rry")
+        game.placePieceByKey("5_5", 0, 0, 1, "y")
 
         #assert
         assert_array_equal(game.getFeld, expected)
@@ -172,7 +172,7 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         # act
-        game.placePieceByKey("5_3", 0, 0, 1, 1)
+        game.placePieceByKey("5_3", 0, 0, 1, "r")
         try:
             game.placePieceByKey("4_3", 1, 0, 1)
         except BlokusException as e:
@@ -197,7 +197,7 @@ class Test_Blokus_Piece(TestCase):
 
         # act
         game.placePieceByKey("5_3", 0, 0, 1)
-        game.placePieceByKey("4_3", 4, 0, 4, 3)
+        game.placePieceByKey("4_3", 4, 0, 4, "rrr")
 
         # assert
         assert_array_equal(game.getFeld, expected)
@@ -215,9 +215,9 @@ class Test_Blokus_Piece(TestCase):
             [0, 0, 0, 0, 0, 0]
         ])
 
-        g.placePieceByKey("4_2", 0, 0, 1, 2)
+        g.placePieceByKey("4_2", 0, 0, 1, "rr")
         try:
-            g.placePieceByKey("5_4", 1, 1, 1, 1)
+            g.placePieceByKey("5_4", 1, 1, 1, "r")
         except BlokusException as e:
             self.assertEqual(str(e), "An der Stelle liegt schon ein Piece")
 
@@ -236,9 +236,9 @@ class Test_Blokus_Piece(TestCase):
         ])
 
         #act
-        g.placePieceByKey("5_3", 0, 0, 1, 1)
-        g.placePieceByKey("4_3", 1, 3, 1, 3)
-        g.placePieceByKey("4_0", 2, 0, 1, 0, 1)
+        g.placePieceByKey("5_3", 0, 0, 1, "r")
+        g.placePieceByKey("4_3", 1, 3, 1, "rrr")
+        g.placePieceByKey("4_0", 2, 0, 1, "y")
 
         #assert
         assert_array_equal(g.getFeld, expected)
@@ -258,7 +258,7 @@ class Test_Blokus_Piece(TestCase):
         #act
         g.placePieceByKey("5_7", 3, 3, 1)
         try:
-            g.placePieceByKey("3_1", 0, 4, 1, 3)
+            g.placePieceByKey("3_1", 0, 4, 1, "rrr")
         except BlokusException as e:
             self.assertEqual(str(e), "Das Piece muss mit einer Ecke an einer anderen liegen")
 
