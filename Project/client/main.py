@@ -170,7 +170,7 @@ class AlertBoxWidget(QWidget):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.container = QWidget(self)
-        self.container.setStyleSheet("background-color: rgba(30, 144, 255, 128); border-radius: 10px; font-weight: bold; border: 2px solid black;")
+        self.container.setStyleSheet("background-color: rgba(100, 200, 255, 128); border-radius: 10px; font-weight: bold; border: 2px solid black;")
         self.container.layout = QVBoxLayout(self.container)
 
 
