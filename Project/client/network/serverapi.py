@@ -3,6 +3,7 @@ import json
 import queue
 import socket
 import threading
+import traceback
 
 import network.constants as NetworkConst
 from network.networkevent import NetworkEvent
@@ -25,15 +26,26 @@ class NetworkEventObject:
     def __str__(self) -> str:
         return f"'eventID':'{self.eventId}', 'eventData':'{self.eventData}'"
 
+class AccountInfo:
+    def __init__(self, id, username) -> None:
+        self.__id = id
+        self.__username = username
 
+    @property
+    def id(self):
+        return self.__id
+    
+    @property
+    def username(self):
+        return self.__username
 
 class ServerApi:
-
     def __init__(self, host, port) -> None:
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.port = port
         self.address = (self.host, self.port)
+        self.__account_info:AccountInfo = None
         self.__auth_token = None
 
         #move the actual connection to a public mthod to enable easier connect retries
@@ -140,8 +152,12 @@ class ServerApi:
                         
                         if eventId == NetworkEvent.LOGIN_SUCCESS.value:
                             self.__auth_token = eventData['token']
+                            self.__account_info = AccountInfo(eventData['id'], eventData['username'])
                         elif eventId == NetworkEvent.PROFILE_DELETE.value:
                             self.__auth_token = None
+                            self.__account_info = None
+                        elif eventId == NetworkEvent.PROFILE_READ.value:
+                            self.__account_info = AccountInfo(eventData['id'], eventData['username'])
 
                         self.__recvQueue.put(NetworkEventObject(eventId, eventData))
                         state = 0
@@ -149,7 +165,8 @@ class ServerApi:
 
                 except Exception as e:
                     self.__auth_token = None
-                    print(e)
+                    self.__account_info = None
+                    print(f'{str(e)} \n {traceback.format_exc()}')
                     self.__stopEvent.set()
                     #self.sock.close()
                     break
@@ -237,3 +254,8 @@ class ServerApi:
         }
         self.send(eventId, eventData)
         return
+    
+
+    @property
+    def accout_info(self)->AccountInfo:
+        return self.__account_info

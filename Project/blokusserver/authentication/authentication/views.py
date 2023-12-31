@@ -61,7 +61,7 @@ class UserLoginView(APIView):
 
         if user and user.check_password(password):
             token, created = Token.objects.get_or_create(user=user)
-            response_data = {'token': token.key}
+            response_data = {'token': token.key, 'id': user.id, 'username': user.username}
             serializer = UserSerializer(instance=user)
             response_data.update(serializer.data)
             return Response(response_data, status=status.HTTP_200_OK)

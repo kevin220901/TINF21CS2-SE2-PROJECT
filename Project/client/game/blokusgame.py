@@ -24,7 +24,7 @@ from qt6networkadapter import PyQt6_Networkadapter
 import contextvars
 
 ##################################################
-## Author: Kai Pistol, Lusi Eckert
+## Author: Kai Pistol, Luis Eckert
 ##################################################
 
 
@@ -245,6 +245,7 @@ class BlokusGame:
     
 
     def __add_menu_actions(self):
+        
         self.mainWindow.leave_game_action.setVisible(True)
         self.mainWindow.leave_game_action.triggered.connect(self.__on_leave_game)
         return

@@ -42,7 +42,7 @@ class ClientApi:
         self.__playerId = response_data['id']
         self.__playerName = response_data['username']
 
-        self.__conn.emit_Login_success(self.__auth_token)
+        self.__conn.emit_Login_success(self.__auth_token, self.__playerId, self.__playerName)
 
         return True
 
