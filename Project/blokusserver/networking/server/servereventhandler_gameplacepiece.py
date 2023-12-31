@@ -19,7 +19,6 @@ class ServerEventHandler_GamePlacePiece(ServerEventHandler):
         if self._handleIvalidateAuthToken(eventData.get('token')): return
         if self._handleNotInLobby(): return
         # TODO: should be in game
-        logger.info(f"place piece {eventData}")
         self._client.currentGame.place_piece(self._client, 
                                              eventData.get('pieceId'), 
                                              eventData.get('x'), 

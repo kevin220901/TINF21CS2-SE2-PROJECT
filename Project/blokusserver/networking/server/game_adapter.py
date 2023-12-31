@@ -1,7 +1,8 @@
 
 from ast import Tuple
+import random
 import traceback
-from typing import Dict
+from typing import Dict, List
 from server.clientapi import ClientApi
 from gamelogic import Game, BlokusPiece, BlokusException
 import numpy as np
@@ -19,35 +20,44 @@ class GameAdapter:
         self.__players:Dict[ClientApi:Dict[str:BlokusPiece]] = {}
         self.__game:Game = Game(20)
         self.__availablePlayerGameIds = [1,2,3,4]
-        self.__currentPlayerTurn:ClientApi = None
+        self.__currentTurnPlayer:ClientApi = None
+        self.__turnOrder:List[ClientApi] = []
         return
 
     
     def add_player(self, player:ClientApi):
         player.gamePlayerId = self.__availablePlayerGameIds.pop(0)
         self.__players[player] = self.__createPieces()
+        self.__turnOrder.append(player)
         return
     
     def remove_player(self, player:ClientApi):
         self.__availablePlayerGameIds.append(player.gamePlayerId)
         player.gamePlayerId = None
         self.__players.pop(player)
+        self.__turnOrder.remove(player)
         return
     
     def start_game(self):
-        #TODO: handle turn management
-        self.__currentPlayerTurn = list(self.__players.keys())[0]
+        random.shuffle(self.__turnOrder)
+        self.__currentTurnPlayer = self.__turnOrder[0]
+        return
+    
+    def __change_turn(self):
+        currentTurn = self.__turnOrder.pop(0)
+        self.__turnOrder.append(currentTurn)
+        self.__currentTurnPlayer = self.__turnOrder[0]
         return
     
     def place_piece(self, player:ClientApi, pieceId:str, x:int, y:int, operations:bytes):
-        #TODO: check if player is current turn player
-        #TODO: Rotation and flipping currently is not being used
-        #TODO: instead of using the gamePlayerId, a player object should be used
         try:
-            
+            if player != self.__currentTurnPlayer:
+                raise BlokusException('it is not your turn')
+
             self.__game.placePieceByKey(pieceId, x, y, player.gamePlayerId, operations)
-            #TODO: determine player next turn
-            #TODO: handle placement error/invalid placement
+
+            self.__change_turn()
+
             p:ClientApi
             for p in self.__players:
                 p.connection.emit_game_update(self.get_game_info())
@@ -57,6 +67,9 @@ class GameAdapter:
             logger.debug(e)
         except Exception as e:
             logger.critical(f'{str(e)} \n {traceback.format_exc()}')
+            # notify players (in this game/lobby) about the error
+            for p in self.__players:
+                p.connection.emit_SysMessage(f'Internal server error occured')
         return
 
 
@@ -66,7 +79,7 @@ class GameAdapter:
         return {
             'lobbyId': self.__lobbyId,
             'gameField': self.__game.getFeld.tolist(),
-            'currentTurnPlayerId': self.__currentPlayerTurn.gamePlayerId,
+            'currentTurnPlayer': self.__currentTurnPlayer.get_player_Info(),
             'players':{player.gamePlayerId: self.__get_player_info(player) for player,value in self.__players.items()},
             'messages':[]
         }

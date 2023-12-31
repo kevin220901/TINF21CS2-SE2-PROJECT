@@ -235,7 +235,12 @@ class BlokusGame():
         {
             "lobbyId": "<string>",
             "gameField": ["<float>", "<float>", "..."],
-            "currentTurnPlayerId": "<string>",
+            "currentTurnPlayer": {
+                    "playerId": "<string>",
+                    "playerName": "<string>",
+                    "isReady": "<boolean>",
+                    "color": "<string>",
+                },
             "players": {
                 "<gamePlayerId>": {
                     "playerId": "<string>",
@@ -259,7 +264,6 @@ class BlokusGame():
         self.__selectedPiece: GamePiece = None
         self.__ghostPiece: GamePiece = None
         self.gameInfo = gameInfo    # for more details see DEVELOPER NOTE of BlokusGame::class
-
 
         self.__init_ui()
         self.__registerNetworkEvents()
@@ -319,6 +323,8 @@ class BlokusGame():
             flipedGhost.setVisible(True)
             self.ghostPiece = flipedGhost
         return
+    
+
 
     def to_dict(self):
         return {
@@ -460,14 +466,14 @@ class BlokusGame():
     	
         # create a plyaer area widget for each player
         for i in range(4):
-            
-            playerInfo = self.gameInfo['players'].get(f'{i+1}')     # players is a dict so the key is a string. therefore the i+1 is converted to a string
+            game_player_id = i+1    # players is a dict with a key ranging from '1' to '4'. 
+            playerInfo = self.gameInfo['players'].get(str(game_player_id))  # dict key is a string therefore str conversion
             if not playerInfo: 
-                widget = PlayerAreaWidget(-1, self, False)
+                widget = PlayerAreaWidget(None, i+1, self, False)
             else:
                 playerId = playerInfo.get('playerId')
                 isSelf = playerId == self.__network.api.accout_info.id
-                widget = PlayerAreaWidget(playerInfo.get('playerId'), self, isSelf, color=QColor(playerInfo.get('color')))
+                widget = PlayerAreaWidget( playerInfo.get('playerId'), game_player_id, self, isSelf, color=QColor(playerInfo.get('color')))
 
             # add the widget to the coresponding layouts
             if i < 2:
@@ -493,9 +499,8 @@ class BlokusGame():
         player_area: PlayerAreaWidget
         # display player info in corresponding widget
         for i, player_area in enumerate(self.player_area_widgets):
-            playerInfo = self.gameInfo['players'].get(f'{i+1}')
-            self.__display_player_info(playerInfo, player_area)
-            self.__display_player_available_pieces(playerInfo, player_area)
+            player_area.update_player_info(self.gameInfo)
+            player_area.update_pieces(self.gameInfo)
             
         
         # display game field
@@ -623,6 +628,14 @@ class BlokusGame():
         '''
         self.gameInfo = event.eventData
         self.__display_game_info()
+
+        currentTurnPlayer:dict = self.gameInfo.get('currentTurnPlayer')
+        if currentTurnPlayer: 
+            if currentTurnPlayer.get('playerId') == self.__network.api.accout_info.id:
+                self.mainWindow.showAlert('It is your turn')
+            else:
+                self.mainWindow.showAlert(f'It is {currentTurnPlayer.get("playerName")}`s turn')
+
         return
     
     # @log_method_call(logAttributes=False)
@@ -632,17 +645,6 @@ class BlokusGame():
         '''
         message = event.eventData
         self.mainWindow.alertWidget.showAlert(message)
-        return
-    
-    
-    # @log_method_call(logAttributes=False)
-    def __display_player_info(self, playerInfo: dict, widget: PlayerAreaWidget)->None:
-        '''
-        Displays the player info in the given widget
-        '''
-        if not playerInfo: return
-        # TODO: check if the a players color has changed and update if needed
-        widget.playerNameLabelText = playerInfo.get('playerName')
         return
     
     # @log_method_call(logAttributes=False)
@@ -660,26 +662,7 @@ class BlokusGame():
                     self.game_grid[i][j].color = QColor(color)
                     self.game_grid[i][j].setPen(QPen(QColor(0, 0, 0), 2))
         return
-    
-    # @log_method_call(logAttributes=False)
-    def __display_player_available_pieces(self, playerInfo: dict, widget: PlayerAreaWidget)->None:
-        '''
-        Shows or hides the given players available pieces. 
-        Does nothing if the playerInfo is None
 
-
-        Parameters: 
-            playerInfo (dict): the player info dict
-            widget (PlayerAreaWidget): the widget to display the pieces in
-
-        Returns:
-            None
-        '''
-        if not playerInfo: return
-        availablePieces = playerInfo.get('pieces')
-        widget.update_available_pieces(availablePieces)
-
-        return
 
     # @log_method_call(logAttributes=False)
     def __init_game_field(self) -> None:
@@ -722,6 +705,12 @@ class BlokusGame():
             None
         '''
         if event:
+            currentTurnPlayer:dict = self.gameInfo.get('currentTurnPlayer')
+            if currentTurnPlayer is None: return
+
+            if currentTurnPlayer.get('playerId') != self.__network.api.accout_info.id:
+                self.mainWindow.showAlert('It is not your turn')
+                return
             # self.selectedPiece = None
 
             if self.__ghostPiece is None: return
@@ -870,7 +859,7 @@ class GamePiece(QGraphicsItemGroup):
         return self._signals
 
     @property
-    def color(self):
+    def color(self) -> QColor:
         return self.__color
 
     @property
@@ -1352,13 +1341,14 @@ class PlayerAreaWidget(QWidget):
     - piece repository (QGraphicsView)
     - available pieces (GamePieces)
     '''
-    def __init__(self, player_id:int, game: BlokusGame, isSelf:bool, parent=None, color: QColor = QColor('lightgray')):
+    def __init__(self, player_id:str, game_player_id:int, game: BlokusGame, isSelf:bool, parent=None, color: QColor = QColor('lightgray')):
         super().__init__(parent=parent)
         self.__game:BlokusGame = game
         self.__color:QColor = color
         self.__piece_objects:Dict[str:GamePiece]
         self.player_id = player_id
         self.__isSelf = isSelf
+        self.__game_player_id = game_player_id
 
         self.__init_ui()
         return
@@ -1378,7 +1368,7 @@ class PlayerAreaWidget(QWidget):
         return
     
     # @log_method_call(logAttributes=False)
-    def update_available_pieces(self, availablePieces: list):
+    def update_pieces(self, gameInfo:dict):
         '''
         Updates the available pieces in the piece repository by showing or hiding the pieces based on the provided list of available pieces
 
@@ -1392,6 +1382,17 @@ class PlayerAreaWidget(QWidget):
             This method is called when the game info is updated. It iterates over the internal kept list of pieces
             The initialization of the pieces has to be kept in sync with the server side implementation since the pieces ids and shapes corresponde
         '''
+        if gameInfo is None: return
+        playerInfo:dict = gameInfo['players'].get(str(self.__game_player_id))
+
+        if playerInfo is None: return
+
+        availablePieces = playerInfo.get('pieces')
+
+        if availablePieces is None:
+            availablePieces = []
+       
+        
         piece: GamePiece
         keys = self.__piece_objects.keys()
         for key in keys:
@@ -1403,6 +1404,30 @@ class PlayerAreaWidget(QWidget):
                 # piece is not available
                 piece.setVisible(False)
         return
+    
+    def update_player_info(self, gameInfo:dict):
+        if gameInfo is None: return
+
+        playerInfo:dict = gameInfo['players'].get(str(self.__game_player_id))
+        if playerInfo is None: return
+
+        currentTurnPlayer = gameInfo.get('currentTurnPlayer')
+
+        # Update displayed player name
+        name = playerInfo.get('playerName')
+        if self.__isSelf:
+            name = f'{name} (You)'
+        
+        self.__nameLabel.setText(name)
+
+        # the current turn player is highlighted with a blue border
+        if currentTurnPlayer.get('playerId') == self.player_id:
+            self.setStyleSheet("border: 4px solid blue;")
+        else:
+            self.setStyleSheet("")
+
+        return
+
     # @log_method_call(logAttributes=False)
     def __init_piece_objects(self):
         #TODO: refactor hard coded values and move them somewhere else
@@ -1448,10 +1473,12 @@ class PlayerAreaWidget(QWidget):
             ... and the rotation bug was one hell of a bug ... over 20h ... so ... yeah the code got a bit messy on the go 
             ... long live the refactoring *hurray*
         '''
+        piece:GamePiece
         for key, piece in self.__piece_objects.items():
             piece.color = self.__color
             self.scene.addItem(piece)
-            if self.__isSelf:
+
+            if self.__isSelf: # only own pieces must be selected
                 self.__game.registerPieceClickedEvent(piece)
         return
 
@@ -1462,10 +1489,7 @@ class PlayerAreaWidget(QWidget):
     @property
     def scene(self)->QGraphicsScene:
         return self.__scene
-    
-    @property
-    def playerNameLabelText(self):
-        return self.__nameLabel.text()
+
 
     
     @property
@@ -1479,14 +1503,4 @@ class PlayerAreaWidget(QWidget):
         for piece in self.__piece_objects.values():
             piece.color = color
         return
-
-    @playerNameLabelText.setter
-    # @log_method_call(logAttributes=False)
-    def playerNameLabelText(self, text:str):
-        new_text = text
-        if self.__isSelf:
-            new_text += ' (YOU)'
-
-        self.__nameLabel.setText(new_text)
-
 
