@@ -400,9 +400,10 @@ class Game:
             for x in range(len(form[y])):
 
                 # Ist an der Stelle schon ein Piece?
-                if self.__feld[y + start_y, x + start_x] > 0: # Überprüfung ob an er Stelle schon ein Piece liegt, egal welcher Farbe (>0 = irgend ein piece
-                    raise BlokusException("An der Stelle liegt schon ein Piece")
-                    return False
+                if form[y][x] == 1:
+                    if self.__feld[y + start_y, x + start_x] > 0: # Überprüfung ob an er Stelle schon ein Piece liegt, egal welcher Farbe (>0 = irgend ein piece
+                        raise BlokusException("An der Stelle liegt schon ein Piece")
+                        return False
 
         #Liegt es Seite an Seite zu einem anderen Piece der gleichen Farbe? Soll es nicht!
                 if form[y][x] == 1:
