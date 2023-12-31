@@ -190,7 +190,7 @@ class ClientApi:
     
     def get_player_Info(self) -> dict:
         return {
-            'playerId': self.playerId,
+            'playerId': self.playerId,  # TODO: should be named id or user_id
             'playerName': self.playerName,
             'isReady': self.isReady,
             'color': 'red'
