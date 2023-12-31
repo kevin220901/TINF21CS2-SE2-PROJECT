@@ -21,7 +21,7 @@ class ClientApi:
         self.__auth_token = None
         self.__stopEvent = stopEvent
         self.__gamePlayerId = None
-        self.__color = 'not yet implemented'
+        self.__colorName:str = None # name of the color
         self.__isReady = False
         self.__currentGame:GameAdapter = None
         return
@@ -163,7 +163,10 @@ class ClientApi:
     def leaveLobby(self):
         if self.__handleNotInLobby(): return
         self.__currentLobby.leave(self)
+        # cleanup after leaving the lobby
         self.__currentLobby = None
+        self.__colorName = None
+        self.__isReady = False
         pass
 
     def toggleReady(self):
@@ -217,7 +220,7 @@ class ClientApi:
             'playerId': self.playerId,  # TODO: should be named id or user_id
             'playerName': self.playerName,
             'isReady': self.isReady,
-            'color': 'red'
+            'color': self.colorName
         }
 
     @property
@@ -273,6 +276,14 @@ class ClientApi:
     def isReady(self)->bool:
         return self.__isReady
     
+    @property
+    def colorName(self)->str:
+        return self.__colorName
+    
+    @colorName.setter
+    def colorName(self, colorName:str)->None:
+        self.__colorName = colorName
+        return
 
     
 from socket import socket

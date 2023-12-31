@@ -915,11 +915,19 @@ class GamePiece(QGraphicsItemGroup):
         if self.scene() is None:
             return
         painter.setBrush(self.__color)
+        
+        brightness = self.__color.lightness()
 
         if self.isSelected:  
-            painter.setPen(QPen(QColor(0, 0, 255), 2))  
+            if brightness < 128:
+                # color is dark -> use lighter border color as higthlight
+                painter.setPen(QPen(self.__color.lighter(250), 4)) 
+
+            else:   
+                # color is light -> use darker border color as higthlight
+                painter.setPen(QPen(self.__color.darker(250), 4))
         else:
-            painter.setPen(QPen(QColor(0, 0, 0), 2))  
+            painter.setPen(QPen(QColor(0, 0, 0), 2))
 
         # Draw the piece
         for i in range(self.shape_array.shape[0]):

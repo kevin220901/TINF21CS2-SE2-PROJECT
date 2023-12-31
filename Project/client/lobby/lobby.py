@@ -60,13 +60,13 @@ class Lobby:
         #TODO: only the host can start the game -> button enabled else disabled
 
         if lobbyHost['isReady']:
-            self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
+            self.player_list.item(self.player_list.count()-1).setBackground(QColor(lobbyHost['color']))
             
         
         for player in lobbyInfo.get('players'):
             self.player_list.addItem(player['playerName'])
             if player['isReady']:
-                self.player_list.item(self.player_list.count()-1).setBackground(QColor(0, 255, 0))
+                self.player_list.item(self.player_list.count()-1).setBackground(QColor(player['color']))
 
         self.__lobby_layout.addWidget(self.player_list, 0, 0)
         

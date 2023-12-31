@@ -1,4 +1,5 @@
 from __future__ import annotations
+import random
 from typing import Dict
 import uuid
 
@@ -19,6 +20,7 @@ class Lobby:
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
         self.__game:GameAdapter = None
+        self.__colors = ['red', 'blue', 'green', 'yellow']
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
@@ -67,6 +69,9 @@ class Lobby:
             lobbyInfo = self.get_lobby_info()
             lobbyInfo['messages'].append(f'{player.playerName} left')
 
+        if player.isReady:
+            self.__colors.append(player.colorName)
+
         #Notify all players in lobby about the change
         p: ClientApi
         for p in self.__players:
@@ -75,6 +80,17 @@ class Lobby:
         pass
 
     def toggleReady(self, player:ClientApi):
+        # on ready assign random color from list of available colors
+        # else add color to list of available colors
+        if player.isReady:
+            playerColor = random.choice(self.__colors)
+            self.__colors.remove(playerColor)
+
+            player.colorName = playerColor
+        else:
+            self.__colors.append(player.colorName)
+            player.colorName = None
+
         lobbyInfo = self.get_lobby_info()
         p: ClientApi
         for p in self.__players:
