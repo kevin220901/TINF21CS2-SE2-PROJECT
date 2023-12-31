@@ -4,7 +4,7 @@ import json
 import threading
 from typing import Dict
 from PyQt6 import QtGui
-from PyQt6.QtGui import QPainter, QPainterPath
+from PyQt6.QtGui import QKeyEvent, QPainter, QPainterPath
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
@@ -218,7 +218,9 @@ class PieceClickedEvent:
     def mouseEvent(self):
         return self._mouseEvent
 
-class BlokusGame:
+
+
+class BlokusGame():
     '''
     This is the Main class of this module, it manages the whole game ui and contains all its ui elements.
     - the game field
@@ -277,6 +279,22 @@ class BlokusGame:
                                          operations=piece.operations + 'r'*times)
             rotatedGhost.setVisible(True)
             self.ghostPiece = rotatedGhost
+        return
+    
+
+    def flipPieceY(self, piece:GamePiece):
+        if piece:
+            flipedGhost = GhostPiece(piece.player_id, 
+                                          piece.piece_id, 
+                                          piece.base_shape, 
+                                          piece.x(), 
+                                          piece.y(), 
+                                          piece.width, 
+                                          piece.height, 
+                                          color=piece.color, 
+                                          operations=piece.operations + 'y')
+            flipedGhost.setVisible(True)
+            self.ghostPiece = flipedGhost
         return
 
     def to_dict(self):
@@ -389,9 +407,10 @@ class BlokusGame:
     # @log_method_call(logAttributes=False)
     def __init_ui(self):
         # main widget
-        self.blokus_widget = QWidget()
+        self.blokus_widget = BlokusWidget(self)
         self.blokus_widget.layout = QHBoxLayout(self.blokus_widget)
         self.blokus_widget.setStyleSheet("background-color: #E0E0E0; border: 2px solid black;")
+        
 
         # main layouts
         self.left_layout = QVBoxLayout()
@@ -696,6 +715,30 @@ class BlokusGame:
                                           field_y, 
                                           event.operations)         # since the ghost piece is used to visualize the placement, its rotation and flip value are used to place the piece 
         return
+
+
+
+
+class BlokusWidget(QWidget):
+
+    def __init__(self, game:BlokusGame, parent=None):
+        super().__init__(parent)
+        self.__game = game
+        return
+
+    def keyReleaseEvent(self, event: QKeyEvent | None) -> None:
+        if event.key() == Qt.Key.Key_Space:
+            piece: GhostPiece = None
+            # Get the selected item
+            if self.__game.ghostPiece:
+                if self.__game.ghostPiece in self.__game.field_scene.items():
+                    if self.__game.ghostPiece.isVisible():
+                        piece = self.__game.ghostPiece
+            if piece:
+                self.__game.flipPieceY(piece)
+            else:
+                return super().keyPressEvent(event)
+        return 
 
 
 class GameFieldElement(QGraphicsRectItem):
@@ -1042,8 +1085,10 @@ class GameScene(QGraphicsScene):
         '''
         return {
             'game': self._game.to_dict()
-        }
+        }   
     
+    
+
     # @log_method_call(logAttributes=True)
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         '''
@@ -1185,6 +1230,11 @@ class GameView(QGraphicsView):
             
             ghost.setVisible(True)
         return
+
+    
+
+
+
 
 class GhostPiece(GamePiece):
     '''
