@@ -657,9 +657,9 @@ class BlokusGame:
         for y in range(GAME_FIELD_SIZE):
             row = []
             for x in range(GAME_FIELD_SIZE):
-                item = GameFieldElement(self, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, QColor(255, 255, 255))
-                self.field_scene.addItem(item)
-                row.append(item)
+                tile = GameFieldElement(self, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, QColor(255, 255, 255))
+                self.field_scene.addItem(tile)
+                row.append(tile)
             self.game_grid.append(row)
 
         
@@ -1369,6 +1369,10 @@ class PlayerAreaWidget(QWidget):
     @playerNameLabelText.setter
     # @log_method_call(logAttributes=False)
     def playerNameLabelText(self, text:str):
-        self.__nameLabel.setText(text)
+        new_text = text
+        if self.__isSelf:
+            new_text += ' (YOU)'
+
+        self.__nameLabel.setText(new_text)
 
 
