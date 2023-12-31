@@ -29,15 +29,9 @@ class UserProfile:
         
         self.mainWindow.username_label = QLabel("Username                   :")
         self.mainWindow.email_label = QLabel("E-Mail                         :")
-        self.mainWindow.color_choice_label = QLabel("Preffered Color           :")
         self.mainWindow.username_input = QLineEdit()
         self.mainWindow.email_input = QLineEdit()
-        self.mainWindow.color_choice = QComboBox()
-        self.mainWindow.color_choice.addItem("Blue")
-        self.mainWindow.color_choice.addItem("Green")
-        self.mainWindow.color_choice.addItem("Orange")
-        self.mainWindow.color_choice.addItem("Red")
-        self.mainWindow.color_choice.addItem("Yellow")
+        
         
         # Add Button for Save Function
         self.mainWindow.save_button = QPushButton("Save")
@@ -76,10 +70,6 @@ class UserProfile:
         label_input_layout2.addWidget(self.mainWindow.email_label)
         label_input_layout2.addWidget(self.mainWindow.email_input)
         
-        select_box_layout = QHBoxLayout()
-        select_box_layout.addWidget(self.mainWindow.color_choice_label)
-        select_box_layout.addWidget(self.mainWindow.color_choice)
-        self.mainWindow.color_choice.setMinimumWidth(455)
         
         spacer_layout = QHBoxLayout()
         spacer = QSpacerItem(QSpacerItem(40, 60, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
@@ -98,7 +88,6 @@ class UserProfile:
         # Set Layout
         grid_layout.addLayout(label_input_layout, 0, 0, 1, 1)
         grid_layout.addLayout(label_input_layout2, 1, 0, 1, 1)
-        grid_layout.addLayout(select_box_layout, 2, 0, 1, 1)
         grid_layout.addLayout(spacer_layout, 3, 0, 1, 1)
         grid_layout.addLayout(button_layout, 4, 0, 1, 1)
         
