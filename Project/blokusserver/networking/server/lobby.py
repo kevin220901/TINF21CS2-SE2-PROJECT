@@ -20,7 +20,7 @@ class Lobby:
         self.__isPrivate: bool = False #not yet needed 
         self.__host: ClientApi = None
         self.__game:GameAdapter = None
-        self.__colors = ['red', 'blue', 'green', 'yellow']
+        self.__colors = ['red', 'skyblue', 'palegreen', 'gold']
 
         #WARNING: currently no checks are performed to ensure uniqueness of a lobbyId -> lobbies might get overwritten
         self.__lobbies[self.__lobbyId] = self
